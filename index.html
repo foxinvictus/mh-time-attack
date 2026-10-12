@@ -1,0 +1,2520 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MH Speedrun Leaderboards</title>
+<link rel="icon" href="icons/UI/favicon.png">
+<meta name="description" content="Monster Hunter endgame speedrun leaderboards by weapon, collected by Fox Invictus.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     SETTINGS — the only part you normally need to touch
+     ========================================================= */
+  :root {
+    --ink:      #102f37;   /* page background, deep teal */
+    --ink-2:    #163e48;   /* panels */
+    --ink-3:    #1e4f5b;   /* lines, inactive bars */
+    --gold:     #edbc60;   /* accent from the original sheet header */
+    --gold-dim: #b98e3e;
+    --paper:    #f3ece0;   /* main text */
+    --muted:    #9fb7bc;   /* secondary text */
+    --hero:     #ef7b5f;   /* heroics marker */
+    --on-gold:  #102f37;   /* text on gold buttons */
+    --radius: 6px;
+  }
+  :root[data-theme="light"] {
+    /* papyrus: warm parchment instead of white */
+    --ink: #e6d7b5; --ink-2: #f0e4c8; --ink-3: #cdb88c;
+    --gold: #8a5a12; --gold-dim: #b07d34; --paper: #3a2a14; --muted: #6e5634; --hero: #a8381c; --on-gold: #fbf3df;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--ink); color: var(--paper);
+    font: 400 16px/1.5 "Barlow", system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  /* ---------- header + game tabs ---------- */
+  header {
+    padding: 28px 24px 0; max-width: 1180px; margin: 0 auto;
+  }
+  .brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  h1 {
+    font: 700 clamp(30px, 5vw, 46px)/1 "Barlow Condensed", sans-serif;
+    letter-spacing: .01em; margin: 0;
+  }
+  .by { color: var(--muted); font-size: 15px; }
+  .by a { color: var(--gold); text-decoration: none; }
+  .by a:hover { text-decoration: underline; }
+  /* one-line description of the page under the title */
+  .brand { row-gap: 2px; }
+  .tagline { flex-basis: 100%; margin: 6px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.4; }
+  @media (max-width: 820px) { .tagline { font-size: 13px; margin-top: 8px; } }
+  /* Japanese headers: keep short column titles on one line */
+  html[lang="ja"] .newest th:not(.n-ch), html[lang="ja"] .medals th { white-space: nowrap; }
+  .tagline b { color: var(--gold); font-weight: 500; }
+  /* Japanese interface: Japanese glyphs come from Noto Sans JP */
+  html[lang="ja"] body, html[lang="ja"] button, html[lang="ja"] select { font-family: "Barlow", "Noto Sans JP", sans-serif; }
+  html[lang="ja"] h1, html[lang="ja"] h2, html[lang="ja"] h3, html[lang="ja"] strong, html[lang="ja"] .w-en,
+  html[lang="ja"] .about-card strong { font-family: "Barlow Condensed", "Noto Sans JP", sans-serif; }
+  .lang-btn { font-family: "Noto Sans JP", "Barlow", sans-serif; }
+
+  .games {
+    display: flex; gap: 4px; margin-top: 22px; overflow-x: auto;
+    border-bottom: 1px solid var(--ink-3); scrollbar-width: none;
+  }
+  .games::-webkit-scrollbar { display: none; }
+  .game-tab {
+    background: none; border: 0; cursor: pointer; white-space: nowrap;
+    padding: 10px 16px 12px; color: var(--muted);
+    font: 600 18px/1 "Barlow Condensed", sans-serif; letter-spacing: .02em;
+    border-bottom: 3px solid transparent; margin-bottom: -1px;
+  }
+  .game-tab:hover { color: var(--paper); }
+  .game-tab small { margin-left: 8px; font: 500 14px/1 "Barlow", sans-serif; opacity: .85; }
+  .game-tab[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+  /* game logos (icons/game/); the text stays visible until a logo has loaded */
+  .game-tab { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+  /* side info under each game: number of quests and runs */
+  .gstat { font: 500 11px/1 "Barlow", sans-serif; color: var(--muted); letter-spacing: .02em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .game-tab[aria-selected="true"] .gstat { color: var(--paper); opacity: .75; }
+  @media (max-width: 820px) { .gstat { font-size: 10px; } }
+  .glogo { position: relative; display: none; height: 54px; flex: none; }
+  .glogo img { height: 100%; width: auto; display: block; }
+  .game-tab.has-logo .glogo { display: block; }
+  .game-tab.has-logo .gtxt { display: none; }
+  .game-tab.has-logo { padding: 6px 10px 8px; opacity: .55; transition: opacity .15s; }
+  .game-tab.has-logo:hover, .game-tab.has-logo[aria-selected="true"] { opacity: 1; }
+  .gbadge {
+    position: absolute; right: -6px; bottom: -3px; z-index: 1;
+    font: 700 13px/1 "Barlow Condensed", sans-serif; letter-spacing: .03em;
+    padding: 2px 3px; border-radius: 3px;
+    background: var(--gold); color: var(--on-gold); box-shadow: 0 0 0 1px var(--ink); pointer-events: none;
+  }
+  @media (max-width: 820px) { .glogo { height: 38px; } }
+
+  /* ---------- layout ---------- */
+  main {
+    max-width: 1180px; margin: 0 auto; padding: 24px;
+    display: grid; grid-template-columns: 290px 1fr; gap: 28px; align-items: start;
+  }
+
+  /* quest list */
+  .side { position: sticky; top: 16px; }
+  .side-group h2 {
+    font: 500 14px/1 "Barlow", sans-serif; color: var(--muted);
+    margin: 0 0 8px 10px;
+  }
+  .side-group + .side-group { margin-top: 22px; }
+  .side-list { list-style: none; margin: 0; padding: 0; }
+  .side-btn {
+    width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+    padding: 9px 10px; border-radius: var(--radius);
+    display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: baseline;
+    border-left: 3px solid transparent;
+  }
+  .side-btn:hover { background: var(--ink-2); }
+  .side-btn[aria-current="true"] { background: var(--ink-2); border-left-color: var(--gold); }
+  .s-name { font: 600 18px/1.15 "Barlow Condensed", sans-serif; }
+  .s-count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .s-sub { grid-column: 1 / -1; font-size: 13px; color: var(--muted); line-height: 1.3; }
+  .side-select { display: none; }
+
+  /* By quest: square monster tiles – stars bottom left, number of runs top right, name only as tooltip */
+  .qgrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 6px; }
+  .qtile {
+    position: relative; width: 100%; aspect-ratio: 1; display: grid; place-items: center; padding: 0;
+    background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: var(--radius);
+    color: var(--paper); cursor: pointer; container-type: inline-size; overflow: hidden;
+  }
+  .qtile:hover { border-color: var(--muted); }
+  .qtile[aria-current="true"] { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+  .qtile .micons.qt { --s: 72cqw; margin: 0; }
+  .qtile .micons .ubadge { font-size: max(8px, 14cqw); right: -3px; bottom: -2px; }
+  .qtile .qst, .qtile .qn {
+    position: absolute; font: 600 max(9px, 15cqw)/1 "Barlow Condensed", sans-serif; letter-spacing: .02em;
+    color: var(--muted); font-variant-numeric: tabular-nums; pointer-events: none;
+  }
+  .qtile .qst { left: 4px; bottom: 3px; }
+  .qtile .qn { right: 4px; top: 3px; font-weight: 500; opacity: .8; }
+  .qtile[aria-current="true"] .qst { color: var(--gold); }
+  .qtile .qfb { display: none; padding: 0 4px 10cqw; font: 600 max(9px, 15cqw)/1.05 "Barlow Condensed", sans-serif; text-align: center; overflow-wrap: break-word; hyphens: auto; }
+  .qtile:not(:has(.micons img)) .qfb { display: block; }
+
+  /* board */
+  .board-head { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: end; justify-content: space-between; }
+  .board-title h2 {
+    font: 700 clamp(28px, 4vw, 40px)/1.05 "Barlow Condensed", sans-serif; margin: 0;
+  }
+  .board-title p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+  .board-title .jp { font-family: "Noto Sans JP", sans-serif; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; }
+  .seg {
+    display: inline-flex; background: var(--ink-2); border-radius: 999px; padding: 3px;
+    border: 1px solid var(--ink-3);
+  }
+  .seg button {
+    background: none; border: 0; cursor: pointer; border-radius: 999px;
+    padding: 6px 14px; font-size: 14px; font-weight: 500; color: var(--muted); white-space: nowrap;
+  }
+  .seg button[aria-pressed="true"] { background: var(--gold); color: var(--on-gold); }
+  .seg[hidden] { display: none; }
+  .hero-na { margin: 0; align-self: center; font-size: 13px; color: var(--muted); max-width: 46ch; }
+  .hero-na.warn { color: var(--hero); font-weight: 600; max-width: 60ch; }
+  .seg-label { align-self: center; padding: 0 6px 0 10px; font-size: 13px; color: var(--muted); }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--paper); }
+
+  .note {
+    margin-top: 14px; font-size: 14px; color: var(--muted);
+  }
+
+  .rows { list-style: none; margin: 22px 0 0; padding: 0; }
+  .row {
+    display: grid; grid-template-columns: 34px 170px 1fr; gap: 0 16px; align-items: center;
+    padding: 10px 0; border-top: 1px solid var(--ink-3);
+  }
+  .rank {
+    font: 700 22px/1 "Barlow Condensed", sans-serif; color: var(--muted);
+    text-align: center; font-variant-numeric: tabular-nums;
+  }
+  .row.top .rank { color: var(--gold); }
+  /* UI icons (icons/UI/): medals for places 1–3, Heroics skill icon */
+  .uimedal { width: 24px; height: 24px; object-fit: contain; vertical-align: middle; display: inline-block; }
+  .rank .uimedal { width: 26px; height: 26px; }
+  .medals th .uimedal { width: 22px; height: 22px; }
+  .newest .n-rank .uimedal { width: 24px; height: 24px; }
+  .hbadge .hicon { width: 22px; height: 22px; }
+  .hicon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; display: inline-block; }
+  .hmark.himg { background: none; padding: 0; }
+  .hmark.himg .hicon { width: 14px; height: 14px; display: block; }
+  .weapon { line-height: 1.15; }
+  .w-en { font: 600 19px/1.1 "Barlow Condensed", sans-serif; display: block; }
+  .w-jp { font: 400 12px/1.3 "Noto Sans JP", sans-serif; color: var(--muted); }
+
+  .runs { display: grid; gap: 6px; min-width: 0; }
+  .run { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: center; }
+  .bar-wrap { position: relative; height: 30px; min-width: 0; }
+  .bar {
+    position: absolute; inset: 0 auto 0 0; border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    transform-origin: left center; animation: grow .6s cubic-bezier(.2,.7,.2,1) both;
+    min-width: 66px;
+  }
+  .run.minor .bar { min-width: 52px; }
+
+  .run.minor .bar-wrap { height: 20px; }
+  @keyframes grow { from { transform: scaleX(0); } }
+  @media (prefers-reduced-motion: reduce) { .bar { animation: none; } }
+
+  .time {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    font: 700 21px/1 "Barlow Condensed", sans-serif; color: var(--fg, #102f37); z-index: 1;
+    font-variant-numeric: tabular-nums; text-decoration: none; white-space: nowrap;
+  }
+  .run.minor .time { font-size: 16px; }
+  .time:hover { text-decoration: underline; }
+  .time.outside { left: auto; right: auto; }
+
+  /* right-hand info: fixed slots with fixed widths, so every value sits in the same column on every row */
+  .meta {
+    font-size: 13px; color: var(--muted); white-space: nowrap;
+    display: flex; gap: 10px; align-items: center; justify-content: flex-end;
+  }
+  .meta > * { flex: none; }
+  .meta .p { width: 22px; text-align: right; font-variant-numeric: tabular-nums; }
+  .meta .hb { width: 62px; display: flex; justify-content: flex-end; }
+  .alt { color: var(--paper); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+  .alt a { text-decoration: none; }
+  .alt.u-dps { width: 70px; }
+  .alt.u-time { width: 40px; }
+  .alt.u-ratio { width: 42px; color: var(--muted); font-weight: 500; }
+  .meta .d { width: 72px; text-align: right; font-variant-numeric: tabular-nums; }
+  .d.unk, .n-date .unk { opacity: .4; letter-spacing: .04em; }
+  /* YouTube channel: small, muted, cut with … */
+  .ch {
+    display: inline-block; max-width: 8.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    vertical-align: bottom; color: var(--muted); font-style: italic; opacity: .9;
+  }
+  .meta .ch { width: 8.5em; text-align: left; }
+  .newest td.n-ch { font-size: 13px; }
+  .newest td.n-ch .ch { max-width: 9em; }
+  .alt a:hover { text-decoration: underline; }
+  /* monster icons in front of quest names */
+  .micons {
+    --s: 26px; display: inline-grid; grid-template-columns: repeat(var(--c, 1), 1fr);
+    width: var(--s); height: var(--s); align-content: center; justify-items: center;
+    vertical-align: middle; margin-right: 6px; flex: none;
+  }
+  .micons:empty { display: none; }
+  .micons img { width: calc(var(--s) / var(--c, 1)); height: calc(var(--s) / var(--c, 1)); object-fit: contain; display: block; }
+  .micons.c2 img:last-child:nth-of-type(odd) { grid-column: 1 / -1; }
+  /* title update badge on the bottom right of the monster icon (no badge for base game quests) */
+  .micons { position: relative; }
+  .micons .ubadge {
+    position: absolute; right: -5px; bottom: -4px; z-index: 1;
+    font: 700 max(8px, calc(var(--s) * .3))/1 "Barlow Condensed", sans-serif; letter-spacing: .02em;
+    padding: 1px 2px 1px; border-radius: 3px;
+    background: var(--gold); color: var(--on-gold); box-shadow: 0 0 0 1px var(--ink);
+    pointer-events: none; white-space: nowrap;
+  }
+  .micons.side { --s: 24px; }
+  .micons.wrow { --s: 28px; }
+  .micons.title { --s: 40px; }
+  .micons.ov { --s: 28px; }
+  .board-title h2.with-micons { display: flex; align-items: center; gap: 4px; }
+  .s-name .micons { margin-right: 6px; vertical-align: middle; position: relative; top: -2px; }
+  .qbtn { display: inline-flex; align-items: center; }
+  .mtags { display: inline-flex; flex-wrap: wrap; gap: 4px; vertical-align: middle; margin-right: 10px; }
+  .mtag {
+    display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+    font: 500 13px/1 "Barlow", sans-serif; color: var(--paper);
+    background: var(--ink-3); border-radius: 999px; padding: 4px 9px;
+  }
+  .mtag i { font-style: normal; font-weight: 700; font-size: 10px; color: var(--on-gold); background: var(--gold); border-radius: 3px; padding: 1px 3px; }
+  .mtags.small .mtag { font-size: 11px; padding: 2px 7px; }
+  .mtags.small .mtag i { font-size: 9px; padding: 0 2px; }
+  .board-title .jp { margin-left: 2px; }
+  .hpv { white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .hpv b { font-weight: 700; color: var(--gold); margin-right: 3px; }
+  .hpv + .hpv { margin-left: 10px; }
+  .board-title p.hpline { margin-top: 3px; font-size: 15px; color: var(--paper); }
+  .board-title p.hpline .hpv { font-weight: 600; }
+  .hpx { margin-left: 14px; font-size: 13px; color: var(--muted); }
+  .w-jp.latin .hpv { font-size: 11px; }
+  .w-jp.latin .hpv b { font-weight: 600; }
+  .qhp { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; }
+  .qhp:empty { display: none; }
+  .badge {
+    font-size: 12px; font-weight: 600; color: var(--hero);
+    border: 1px solid currentColor; border-radius: 999px; padding: 0 7px; line-height: 18px;
+  }
+  .row.empty .w-en { color: var(--muted); }
+  .row.empty .runs { color: var(--muted); font-size: 14px; }
+
+  .status { padding: 40px 0; color: var(--muted); }
+  .status strong { color: var(--paper); }
+
+  footer {
+    max-width: 1180px; margin: 0 auto; padding: 8px 24px 40px; color: var(--muted); font-size: 13px;
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between;
+  }
+  header { position: relative; }
+  header .top-actions { position: absolute; top: 22px; right: 16px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  .theme-btn { background: none; border: 1px solid var(--ink-3); border-radius: 999px; padding: 3px 12px; cursor: pointer; color: var(--muted); font-size: 13px; }
+
+  /* ---------- view switcher ---------- */
+  .viewbar { max-width: 1280px; margin: 0 auto; padding: 16px 24px 0; }
+  /* three categories: Leaderboards (4 tabs) · Analysis · Community, each its own box with a caption */
+  .views { display: grid; grid-template-columns: 4fr 1.2fr 1.2fr; gap: 18px; }
+  .vcat { display: grid; gap: 5px; min-width: 0; }
+  .vcap { font: 600 12px/1 "Barlow", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding-left: 2px; }
+  .vgroup {
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+    border: 1px solid var(--ink-3); border-radius: 10px; overflow: hidden; background: var(--ink-2); height: 100%;
+  }
+  .views button {
+    background: none; border: 0; cursor: pointer; text-align: left;
+    padding: 12px 14px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 0; align-items: center;
+    color: var(--muted); border-right: 1px solid var(--ink-3); position: relative;
+  }
+  /* tab icons: icons/UI/<name>.png, a missing file simply leaves no icon */
+  .views .vicon { grid-row: 1 / span 2; width: 32px; height: 32px; object-fit: contain; margin-right: 8px; }
+  .views button strong, .views button span { grid-column: 2; min-width: 0; }
+  .views button:last-child { border-right: 0; }
+  .views button strong { font: 700 22px/1.05 "Barlow Condensed", sans-serif; color: var(--paper); letter-spacing: .01em; text-wrap: balance; }
+  .views button span { font-size: 13px; line-height: 1.25; }
+  /* Hall of Fame: medal table + most active runners side by side */
+  body[data-view="hof"] .table-wrap { border: 0; overflow: visible; max-height: none; }
+  .hof { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  .hof-card { background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: 10px; padding: 14px 16px 10px; min-width: 0; }
+  .hof-card h3 { margin: 0; font: 700 24px/1.1 "Barlow Condensed", sans-serif; }
+  .hof-card .hsub { margin: 4px 0 10px; font-size: 13px; color: var(--muted); }
+  .hof-card .seg { margin: 0 0 10px; }
+  .medals { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .medals th { font: 600 14px/1 "Barlow Condensed", sans-serif; color: var(--muted); text-align: center; padding: 6px 4px; border-bottom: 1px solid var(--ink-3); }
+  .medals th.l { text-align: left; }
+  .medals td { padding: 7px 4px; border-bottom: 1px solid var(--ink-3); text-align: center; font: 600 18px/1 "Barlow Condensed", sans-serif; }
+  .medals td.pos { width: 34px; color: var(--muted); text-align: right; padding-right: 10px; }
+  .medals tr.p1 td.pos { color: var(--gold); }
+  .medals td.nm { text-align: left; font: 600 16px/1.2 "Barlow", sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 0; width: 100%; }
+  .medals td.m { width: 54px; }
+  .medals td.m.zero { color: var(--ink-3); }
+  .medals td.tot { width: 54px; color: var(--gold); font-size: 20px; }
+  .medals .medal { display: inline; font-size: 17px; }
+  .act { display: grid; grid-template-columns: 28px minmax(0, 1fr) 2fr 38px; gap: 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--ink-3); }
+  .act .pos { font: 700 17px/1 "Barlow Condensed", sans-serif; color: var(--muted); text-align: right; }
+  .act .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .act .track { height: 14px; background: var(--ink); border-radius: 3px; overflow: hidden; }
+  .act .fill { display: block; height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 3px; }
+  .act .n { font: 700 18px/1 "Barlow Condensed", sans-serif; text-align: right; }
+  .hof-none { color: var(--muted); padding: 16px 0; }
+  @media (max-width: 820px) {
+    .hof { grid-template-columns: 1fr; }
+    .medals td.m, .medals td.tot { width: 40px; }
+    .act { grid-template-columns: 24px minmax(0, 1fr) 1fr 32px; }
+  }
+  .views button:hover { background: var(--ink-3); }
+  .views button[aria-selected="true"] { background: var(--gold); color: var(--on-gold); }
+  .views button[aria-selected="true"] strong { color: var(--on-gold); }
+
+  main > section { min-width: 0; }
+  .controls { min-width: 0; }
+
+  /* by weapon: quest names in the name column */
+  .w-en.jump { cursor: pointer; }
+  .w-en.jump:hover { text-decoration: underline; }
+  .w-jp.latin { font-family: "Barlow", sans-serif; }
+  .s-sub.jp { font-family: "Noto Sans JP", sans-serif; }
+  body[data-view="weapon"] .row { grid-template-columns: 46px 320px 1fr; }
+  /* quest rows in the weapon view: never squeeze below their content */
+  body[data-view="weapon"] .rows.fit .row { height: auto; min-height: var(--row-h); padding-block: 4px; }
+  body[data-view="weapon"] .w-en { display: flex; align-items: center; }
+  /* weapon view: medals and #ranks share one centred column */
+  body[data-view="weapon"] .rank {
+    font-size: 20px; text-align: center;
+    display: flex; align-items: center; justify-content: center; height: 100%;
+  }
+  .medal {
+    display: block; font-size: 24px; line-height: 1;
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  }
+
+  /* overview table */
+  body[data-view="table"] main { grid-template-columns: 1fr; max-width: 1600px; }
+  body[data-view="table"] .side { display: none; }
+  body[data-view="table"] .viewbar, body[data-view="table"] header, body[data-view="table"] footer { max-width: 1600px; }
+  .table-wrap { margin-top: 14px; overflow: auto; border: 1px solid var(--ink-3); border-radius: 8px; max-height: calc(100vh - 250px); }
+  .matrix { border-collapse: separate; border-spacing: 0; width: 100%; font-variant-numeric: tabular-nums; }
+  .matrix th, .matrix td { border-bottom: 1px solid var(--ink-3); border-right: 1px solid var(--ink-3); padding: 0; }
+  .matrix thead th {
+    position: sticky; top: 0; z-index: 2; background: var(--ink-2);
+    font: 700 16px/1 "Barlow Condensed", sans-serif; text-align: center;
+  }
+  .matrix thead th.qcol { z-index: 3; text-align: left; padding: 10px 12px; color: var(--muted); font-weight: 600; }
+  .wbtn { background: none; border: 0; cursor: pointer; width: 100%; padding: 10px 4px; font: inherit; color: var(--paper); }
+  .wbtn:hover { color: var(--gold); }
+  .matrix th.qcol {
+    position: sticky; left: 0; z-index: 1; background: var(--ink-2); text-align: left;
+    min-width: 230px; padding: 6px 12px; white-space: nowrap;
+  }
+  .qbtn { background: none; border: 0; cursor: pointer; padding: 0; text-align: left; font: 600 17px/1.15 "Barlow Condensed", sans-serif; color: var(--paper); }
+  .qbtn:hover { color: var(--gold); text-decoration: underline; }
+  .qn { margin-left: 8px; font-size: 12px; color: var(--muted); }
+  .matrix tr.grp th {
+    position: sticky; left: 0; text-align: left; padding: 8px 12px 4px; background: var(--ink);
+    font: 500 13px/1 "Barlow", sans-serif; color: var(--muted); border-right: 0;
+  }
+  .matrix td { text-align: center; min-width: 72px; position: relative; padding: 5px 12px; }
+  .matrix td.none { color: var(--ink-3); }
+  .cell { display: block; font: 600 18px/1.1 "Barlow Condensed", sans-serif; text-decoration: none; }
+  a.cell:hover { text-decoration: underline; }
+  .matrix .sec { display: block; font-size: 11px; color: var(--muted); line-height: 1.2; }
+  .matrix td .sec { color: inherit; opacity: .78; }
+  .rk {
+    position: absolute; top: 3px; left: 4px; font-size: 10px; font-weight: 700; line-height: 14px;
+    min-width: 14px; height: 14px; border-radius: 7px; text-align: center; color: #102f37;
+  }
+  .rk1 { background: #edbc60; } .rk2 { background: #d6dfe2; } .rk3 { background: #d39565; }
+  .hmark {
+    position: absolute; top: 3px; right: 4px; font-size: 9px; font-weight: 700; color: var(--hero); line-height: 1;
+  }
+  .hmark { background: rgba(255,255,255,.85); color: #b0331a; border-radius: 3px; padding: 1px 2px; }
+  /* Top 3 table */
+  .top3 { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+  .top3 th, .top3 td { border-bottom: 1px solid var(--ink-3); border-right: 1px solid var(--ink-3); }
+  .top3 thead th { position: sticky; top: 0; z-index: 2; background: var(--ink-2); padding: 8px 6px; text-align: center; font: 600 15px/1 "Barlow Condensed", sans-serif; color: var(--muted); }
+  .top3 thead th.t3-lab { text-align: left; padding-left: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top3 .medal { display: inline; font-size: 20px; }
+  .top3 th.t3-lab { background: var(--ink-2); text-align: left; padding: 4px 10px; font-weight: 400; }
+  .t3-weapons th.t3-lab { width: 86px; }
+  .t3-quests th.t3-lab { width: 250px; }
+  .t3-w { display: flex; align-items: center; gap: 8px; }
+  .t3-rank { width: 18px; text-align: right; font: 700 17px/1 "Barlow Condensed", sans-serif; color: var(--muted); }
+  .top3 .qbtn { width: 100%; min-width: 0; }
+  .top3 td { position: relative; text-align: left; padding: 6px 12px; height: 46px; vertical-align: middle; }
+  .top3 td.none { color: var(--ink-3); text-align: center; }
+  .top3 td .cell { font: 700 19px/1.1 "Barlow Condensed", sans-serif; }
+  .t3-ch { display: block; font-size: 12px; line-height: 1.25; opacity: .8; font-style: italic;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top3 .hmark { top: 4px; right: 5px; }
+  /* watch buttons: icons/watch/youtube.png, icons/watch/bilibili.png */
+  .watch { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; flex: none;
+    border-radius: 5px; text-decoration: none; transition: transform .12s; }
+  .watch img { width: 20px; height: 20px; object-fit: contain; display: block; }
+  .watch .wtxt { font-size: 13px; line-height: 1; color: var(--paper); }
+  .watch:hover { transform: scale(1.15); }
+  @media (prefers-reduced-motion: reduce) { .watch { transition: none; } }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .meta .wl { width: 22px; display: flex; justify-content: center; }
+  .rows.fit .meta .watch, .rows.fit .meta .watch img { width: 18px; height: 18px; }
+  .run.minor .meta .watch, .run.minor .meta .watch img { width: 16px; height: 16px; }
+  .top3 td .watch { position: absolute; right: 5px; bottom: 5px; width: 18px; height: 18px; }
+  .top3 td .watch img { width: 18px; height: 18px; }
+  .top3 td { padding-right: 28px; }
+  .newest td.n-watch { width: 44px; text-align: center; }
+  .newest td.n-watch .watch { vertical-align: middle; }
+  /* Weapon Strength */
+  body[data-view="strength"] main { grid-template-columns: 1fr; }
+  body[data-view="strength"] .side { display: none; }
+  body[data-view="strength"] .table-wrap { max-height: none; }
+  .trim-ctl { display: flex; align-items: center; gap: 8px; padding: 2px 12px; border: 1px solid var(--ink-3); border-radius: 999px; font-size: 13px; color: var(--muted); }
+  .trim-ctl[hidden] { display: none; }
+  .ws-warn { color: var(--hero); font-weight: 600; }
+  .ws td.few { opacity: .55; }
+  .ws td.few .v::after { content: "*"; }
+  .trim-ctl input { width: 120px; accent-color: var(--gold); }
+  .trim-ctl output { min-width: 34px; font-weight: 700; color: var(--paper); font-variant-numeric: tabular-nums; }
+  .ws { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+  .ws th, .ws td { border-bottom: 1px solid var(--ink-3); border-right: 1px solid var(--ink-3); }
+  .ws thead th { position: sticky; top: 0; z-index: 2; background: var(--ink-2); padding: 0; text-align: center; vertical-align: bottom; }
+  .ws thead th.ws-lab { text-align: left; padding: 8px 12px; font: 600 15px/1 "Barlow Condensed", sans-serif; color: var(--muted); width: 170px; }
+  .colbtn { width: 100%; background: none; border: 0; cursor: pointer; padding: 8px 4px 6px; color: var(--paper);
+    font: 700 17px/1.05 "Barlow Condensed", sans-serif; border-bottom: 3px solid transparent; }
+  .colbtn small { display: block; font: 400 11px/1.3 "Barlow", sans-serif; color: var(--muted); }
+  .colbtn:hover { color: var(--gold); }
+  .colbtn[aria-pressed="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+  .ws th.ws-lab { background: var(--ink-2); text-align: left; padding: 4px 10px; font-weight: 400; }
+  .ws-w { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; }
+  .ws td { text-align: center; padding: 5px 4px; height: 44px; position: relative; }
+  .ws td.none { color: var(--ink-3); }
+  .ws td.sel { box-shadow: inset 2px 0 0 var(--gold), inset -2px 0 0 var(--gold); }
+  .ws .vr { display: flex; justify-content: center; align-items: baseline; gap: 8px; }
+  .ws .wsrk, .ws .v { font: 700 20px/1.05 "Barlow Condensed", sans-serif; }
+  .ws .wsrk { min-width: 2.1em; text-align: right; }
+  .ws .v { min-width: 2.1em; text-align: left; font-weight: 600; }
+  .ws .sub { display: block; font-size: 11px; line-height: 1.2; opacity: .8; }
+  .ws .up, .ws .down { font-weight: 700; }
+  .ws tr.cnt td, .ws tr.cnt th { height: auto; padding: 5px 4px; font-size: 12px; color: var(--muted); background: var(--ink-2); }
+  .ws-chart { margin-top: 18px; }
+  .ws-chart h3 { margin: 0 0 8px; font: 700 22px/1.1 "Barlow Condensed", sans-serif; }
+  .ws-chart h3 small { font: 400 14px/1 "Barlow", sans-serif; color: var(--muted); margin-left: 8px; }
+  .wsb { display: grid; grid-template-columns: 34px 150px 1fr 54px 56px; align-items: center; gap: 10px; padding: 3px 0; }
+  .wsb .pos { font: 700 19px/1 "Barlow Condensed", sans-serif; color: var(--paper); text-align: right; }
+  .wsb .nm { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; }
+  .wsb .track { height: 22px; background: var(--ink-2); border-radius: 4px; overflow: hidden; }
+  .wsb .fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
+  .wsb .val { font: 700 19px/1 "Barlow Condensed", sans-serif; text-align: right; }
+  .wsb .dl { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .ws .up, .wsb .up { color: #3fbf6a; } .ws .down, .wsb .down { color: #ef6a55; }
+  :root[data-theme="light"] .wsb .up { color: #2d7a3e; } :root[data-theme="light"] .wsb .down { color: #a8381c; }
+  .ws td .up, .ws td .down { color: inherit; }
+  /* info + changelog */
+  .theme-btn:hover { color: var(--paper); border-color: var(--muted); }
+  .top-actions .theme-btn { display: inline-flex; align-items: center; gap: 6px; }
+  .bicon { width: 18px; height: 18px; object-fit: contain; flex: none; margin-left: -4px; }
+  .about-icon { width: 36px; height: 36px; object-fit: contain; flex: none; border-radius: 6px; }
+  .about-card > div { flex: 1; min-width: 0; }
+  dialog.info {
+    width: min(720px, calc(100vw - 32px)); max-height: calc(100vh - 64px); padding: 20px 24px 8px;
+    background: var(--ink-2); color: var(--paper); border: 1px solid var(--ink-3); border-radius: 10px;
+  }
+  dialog.info::backdrop { background: rgba(0,0,0,.55); }
+  .info-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .info-head h2 { margin: 0; font: 700 28px/1 "Barlow Condensed", sans-serif; }
+  .info-lead { color: var(--muted); font-size: 14px; margin: 8px 0 14px; }
+  .changelog { list-style: none; margin: 0; padding: 0; }
+  .changelog li { border-top: 1px solid var(--ink-3); padding: 10px 0; display: grid; grid-template-columns: 54px 1fr; column-gap: 12px; }
+  .changelog .v { font: 700 20px/1.1 "Barlow Condensed", sans-serif; color: var(--gold); }
+  .changelog .when { font-size: 12px; color: var(--muted); }
+  .changelog ul { margin: 4px 0 0; padding-left: 18px; font-size: 14px; }
+  .changelog ul li { display: list-item; border: 0; padding: 1px 0; }
+  /* about: small round ⓘ button + "Made by" dialog with link cards */
+  .about-btn { width: 28px; height: 28px; padding: 0; border-radius: 50%; display: inline-grid; place-items: center; font-size: 16px; line-height: 1; }
+  dialog.about {
+    width: min(400px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 20px 20px 16px;
+    background: var(--ink-2); color: var(--paper); border: 1px solid var(--ink-3); border-radius: 10px;
+  }
+  dialog.about::backdrop { background: rgba(0,0,0,.55); }
+  .about-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .about-head h2 { margin: 0; font: 700 26px/1.05 "Barlow Condensed", sans-serif; }
+  .about-x { width: 36px; height: 36px; padding: 0; border-radius: 50%; display: grid; place-items: center; font-size: 16px; flex: none; }
+  .about-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .about-card {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 10px 14px;
+    background: var(--ink); border: 1px solid var(--ink-3); border-radius: var(--radius);
+    color: var(--paper); text-decoration: none;
+  }
+  .about-card:hover, .about-card:focus-visible { border-color: var(--gold); }
+  .about-card strong { display: block; font: 700 19px/1.1 "Barlow Condensed", sans-serif; }
+  .about-card span { display: block; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .about-card .arrow { color: var(--gold); font-size: 18px; flex: none; }
+  .about-note { margin: 14px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+  /* newest runs */
+  body[data-view="newest"] main { grid-template-columns: 1fr; }
+  .newest .micons.ov { --s: 30px; }
+  body[data-view="newest"] .side { display: none; }
+  .newest { border-collapse: separate; border-spacing: 0; width: 100%; font-variant-numeric: tabular-nums; }
+  .newest th { position: sticky; top: 0; z-index: 2; background: var(--ink-2); text-align: left; padding: 10px 12px; font: 600 15px/1 "Barlow Condensed", sans-serif; color: var(--muted); }
+  .newest td { border-top: 1px solid var(--ink-3); padding: 6px 12px; vertical-align: middle; }
+  .newest .n-date { color: var(--muted); white-space: nowrap; width: 110px; }
+  /* Newest Runs: multi-select weapon filter */
+  .wfilter { margin-top: 12px; max-width: 560px; }
+  .wfilter summary {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
+    padding: 7px 14px; border: 1px solid var(--ink-3); border-radius: 999px; background: var(--ink-2);
+    font: 600 15px/1 "Barlow Condensed", sans-serif; letter-spacing: .02em; color: var(--paper);
+  }
+  .wfilter summary::-webkit-details-marker { display: none; }
+  .wfilter summary::after { content: "▾"; color: var(--muted); }
+  .wfilter[open] summary::after { content: "▴"; }
+  .wf-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
+  .wf-btn {
+    display: grid; justify-items: center; gap: 3px; padding: 7px 2px; cursor: pointer;
+    background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: var(--radius); color: var(--muted);
+    font: 600 12px/1 "Barlow Condensed", sans-serif; opacity: .65;
+  }
+  .wf-btn[aria-pressed="true"] { opacity: 1; color: var(--paper); border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+  .wf-all { margin-top: 8px; background: none; border: 0; padding: 4px 0; color: var(--gold); cursor: pointer; font-size: 13px; }
+  .wf-all:disabled { color: var(--muted); cursor: default; opacity: .6; }
+  @media (max-width: 560px) { .wf-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .newest .qbtn { display: inline-flex; align-items: center; gap: 8px; }
+  .newest .wbtn { display: inline-flex; align-items: center; gap: 8px; width: auto; padding: 0; font: 600 17px/1.1 "Barlow Condensed", sans-serif; text-align: left; }
+  .newest .n-time { position: relative; text-align: center; width: 110px; }
+  .newest .n-rank { text-align: center; width: 70px; font: 600 18px/1 "Barlow Condensed", sans-serif; color: var(--muted); }
+  /* overview: compact, no horizontal scroll */
+  .matrix { table-layout: fixed; }
+  .matrix th.qcol { min-width: 0; width: 210px; padding: 2px 8px; }
+  .matrix thead th.qcol { width: 210px; padding: 10px 8px; }
+  .matrix td { min-width: 0; padding: 6px 2px; height: 38px; }
+  .matrix .wbtn { padding: 5px 0; }
+  .matrix .wbtn img { max-width: 100%; }
+  .qbtn { display: inline-flex; align-items: center; gap: 4px; }
+  .qstar { font: 700 17px/1 "Barlow Condensed", sans-serif; white-space: nowrap; }
+  .matrix .qbtn { width: 100%; min-width: 0; }
+  .qlabel { display: flex; align-items: baseline; gap: 5px; min-width: 0; }
+  .qstar { flex: none; }
+  .qname { font: 600 15px/1.1 "Barlow Condensed", sans-serif; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .qbtn:hover .qname { color: var(--gold); }
+  .cell.na { opacity: .6; }
+  .table-wrap { overflow-x: hidden; overflow-y: auto; }
+
+  /* weapon icons (PNG or coloured fallback badge) */
+  .wi {
+    position: relative; display: inline-grid; place-items: center; flex: none;
+    width: 34px; height: 34px; border-radius: 8px; vertical-align: middle;
+  }
+  .wi img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .wi b { display: none; }
+  .wi.noimg { background: var(--wc); }
+  .wi.noimg b { display: block; font: 700 14px/1 "Barlow Condensed", sans-serif; color: var(--wfg); letter-spacing: .02em; }
+  .wi.small { width: 26px; height: 26px; border-radius: 6px; }
+  .wi.small.noimg b { font-size: 12px; }
+  .wi.th { width: 30px; height: 30px; border-radius: 7px; }
+  .wi.th.noimg b { font-size: 13px; }
+  .wi.big { width: 44px; height: 44px; border-radius: 10px; }
+  .wi.big.noimg b { font-size: 18px; }
+  .s-wname { display: flex; align-items: center; gap: 10px; }
+  .board-title h2.with-icon { display: flex; align-items: center; gap: 14px; }
+  .row.has-icon { grid-template-columns: 34px 48px 1fr; }
+  .weapon.icon-only { display: flex; align-items: center; }
+  .rows.fit .row.has-icon .wi { width: min(36px, calc(var(--row-h) - 6px)); height: min(36px, calc(var(--row-h) - 6px)); }
+  .wbtn { display: grid; place-items: center; padding: 8px 4px; }
+
+  /* weapon colour swatches */
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 7px; vertical-align: 1px; flex: none; }
+  .sw.big { width: 18px; height: 18px; border-radius: 5px; margin-right: 12px; vertical-align: 2px; }
+  .weapon { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 0; }
+  .weapon .sw { grid-row: 1 / span 2; width: 4px; height: 100%; min-height: 26px; border-radius: 2px; margin-right: 10px; }
+  .weapon .w-en, .weapon .w-jp { grid-column: 2; }
+  .side-btn[aria-current="true"][style*="--wc"] { border-left-color: var(--wc); }
+
+  /* ---------- desktop: everything on one screen ---------- */
+  @media (min-width: 821px) {
+    header {
+      display: flex; align-items: flex-end; gap: 12px 32px; flex-wrap: wrap;
+      padding: 14px 24px 0; border-bottom: 1px solid var(--ink-3);
+    }
+    header .top-actions { top: 16px; right: 24px; }
+    header, main, footer { max-width: 1280px; }
+    h1 { font-size: 34px; }
+    .brand { padding-bottom: 10px; }
+    .games { margin-top: 0; border-bottom: 0; flex: 0 1 auto; max-width: 100%; }
+    header { padding-right: 130px; }
+    main { padding: 16px 24px 8px; gap: 24px; }
+    .viewbar { padding-top: 14px; }
+    .side-btn { padding: 6px 10px; }
+    .side-group + .side-group { margin-top: 14px; }
+    .board-head { gap: 10px 20px; }
+    .board-title h2 { font-size: 32px; }
+    .board-title p { margin-top: 2px; font-size: 14px; }
+    .note { margin-top: 6px; }
+    .rows { margin-top: 12px; }
+
+    /* JS sets --row-h / --bar-h / --bar-h2 so all 14 weapons fit the window */
+    .rows.fit .row { height: auto; min-height: var(--row-h); padding: 0; }
+    .rows.fit .row.multi { padding-block: 3px; }
+    .rows.fit .runs { gap: 3px; }
+    .rows.fit .bar-wrap { height: var(--bar-h); }
+    .rows.fit .row:not(.multi) .bar-wrap { height: var(--bar-h1); }
+    .rows.fit .row:not(.multi) .time { font-size: clamp(13px, calc(var(--bar-h1) * .72), 21px); }
+    .rows.fit .run.minor .bar-wrap { height: var(--bar-h2); }
+    .rows.fit .time { font-size: clamp(13px, calc(var(--bar-h) * .72), 21px); }
+    .rows.fit .run.minor .time { font-size: clamp(11px, calc(var(--bar-h2) * .8), 16px); }
+    .rows.fit .meta { font-size: 12px; line-height: 1; }
+    .rows.fit .run.minor .meta { font-size: 11px; }
+    .rows.fit .run.minor .badge { line-height: 13px; font-size: 11px; }
+    .rows.fit.tight .w-jp { display: none; }
+    .rows.fit .rank { font-size: clamp(16px, calc(var(--row-h) * .42), 22px); }
+    .rows.fit .w-en { font-size: clamp(15px, calc(var(--row-h) * .36), 19px); }
+    footer { padding-top: 4px; }
+  }
+
+  /* short desktop screens: slimmer view switcher */
+  @media (min-width: 821px) and (max-height: 820px) {
+    .views button { padding: 8px 12px; }
+    .views button strong { font-size: 21px; }
+    .vcap { font-size: 11px; }
+    .views .vicon { width: 28px; height: 28px; margin-right: 8px; }
+    .views button span { display: none; }
+    .viewbar { padding-top: 10px; }
+    main { padding-top: 12px; }
+  }
+
+  /* ---------- mobile ---------- */
+  @media (max-width: 820px) {
+    header .top-actions { position: static; margin-top: 10px; justify-content: flex-start; }
+    .viewbar { padding: 14px 16px 0; }
+    .views button { padding: 10px 10px; }
+    .views button strong { font-size: 18px; white-space: normal; }
+    .views button span { display: none; }
+    body[data-view="weapon"] .row { grid-template-columns: 38px 1fr; }
+    .views { grid-template-columns: 1fr 1fr; gap: 12px 10px; }
+    .vcat:first-child { grid-column: 1 / -1; }
+    .vcat:first-child .vgroup { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vcat:first-child button:nth-child(even) { border-right: 0; }
+    .vcat:first-child button:nth-child(-n+2) { border-bottom: 1px solid var(--ink-3); }
+    .views .vicon { width: 26px; height: 26px; margin-right: 8px; }
+    .newest td { padding: 6px 6px; }
+    .ws thead th.ws-lab { width: 44px; padding: 6px 4px; font-size: 0; }
+    .ws th.ws-lab { padding: 4px 4px; }
+    .ws-w .wn { display: none; }
+    .colbtn { font-size: 14px; padding: 6px 1px 4px; }
+    .colbtn small { display: none; }
+    .ws td { padding: 4px 1px; height: 40px; }
+    .ws .vr { flex-direction: column; align-items: center; gap: 0; }
+    .ws .wsrk, .ws .v { font-size: 15px; min-width: 0; text-align: center; }
+    .ws .sub { display: none; }
+    .trim-ctl input { width: 90px; }
+    .wsb { grid-template-columns: 28px 30px 1fr 44px 44px; gap: 6px; }
+    .wsb .nm .wn { display: none; }
+    .t3-weapons th.t3-lab { width: 64px; padding: 4px 6px; }
+    .t3-weapons .t3-rank { width: 12px; font-size: 14px; }
+    .t3-quests th.t3-lab { width: 78px; padding: 4px 6px; }
+    .t3-quests .qname { display: none; }
+    .top3 td { padding: 5px 6px; height: 42px; }
+    .top3 td .cell { font-size: 16px; }
+    .t3-ch { font-size: 11px; }
+    .top3 .medal { font-size: 17px; }
+    .newest th { padding: 8px 6px; }
+    .newest .n-date { width: auto; font-size: 13px; }
+    .newest .wname, .newest .qname-full { display: none; }
+    .newest td.n-ch { font-size: 12px; }
+    .newest td.n-ch .ch { max-width: 5.5em; }
+    .meta { gap: 6px; }
+    .alt.u-dps { width: 60px; }
+    .alt.u-time { width: 34px; }
+    .alt.u-ratio { width: 36px; }
+    .meta .ch { width: auto; max-width: none; flex: 1 1 0; min-width: 0; }   /* takes the rest, so the date always ends flush right */
+    .meta .d { width: 68px; }
+    .meta .hb { width: 58px; }
+    .meta .badge { font-size: 11px; padding: 0 6px; line-height: 16px; }
+    .newest .qbtn::after { content: attr(data-short); font: 600 16px/1 "Barlow Condensed", sans-serif; }
+    .newest .n-time, .newest .n-rank { width: auto; }
+    .table-wrap { max-height: none; }
+    .matrix th.qcol, .matrix thead th.qcol { width: 150px; }
+    .micons.ov { --s: 26px; }
+    .table-wrap { overflow-x: auto; }
+    .matrix { min-width: 760px; }
+    .qbtn { font-size: 15px; }
+    header { padding: 20px 16px 0; }
+    main { grid-template-columns: 1fr; padding: 16px; gap: 18px; }
+    .side { position: static; }
+    .side-group { display: none; }
+    body[data-view="quest"] .side-group { display: block; }
+    body[data-view="quest"] .side-group h2 { display: none; }
+    body[data-view="quest"] .side-select { display: none !important; }
+    .qgrid { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 5px; }
+    .side-select {
+      display: block; width: 100%; padding: 12px; border-radius: var(--radius);
+      background: var(--ink-2); color: var(--paper); border: 1px solid var(--ink-3);
+      font: 600 18px "Barlow Condensed", sans-serif;
+    }
+    .row { grid-template-columns: 26px 1fr; gap: 6px 12px; }
+    .row.has-icon { grid-template-columns: 26px 40px 1fr; align-items: center; }
+    .row.has-icon .runs { grid-column: 3; }
+    .runs { grid-column: 2; }
+    .run { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    .meta { min-width: 0; overflow: hidden; }
+    .meta { font-size: 12px; justify-content: flex-start; }
+    footer { padding: 8px 16px 32px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>MH Speedrun Leaderboards</h1>
+    <span class="by">collected by <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">Fox Invictus</a></span>
+    <p class="tagline" id="tagline"></p>
+  </div>
+  <nav class="games" role="tablist" aria-label="Game" id="games"></nav>
+  <div class="top-actions">
+    <button class="theme-btn lang-btn" id="langBtn" type="button"></button>
+    <button class="theme-btn" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.remove()"><span>Changelog</span></button>
+    <button class="theme-btn" id="themeBtn" type="button"><img class="bicon" src="icons/UI/light-mode.png" alt="" onerror="this.remove()"><span>Light mode</span></button>
+    <button class="theme-btn" id="aboutBtn" type="button" aria-haspopup="dialog"><img class="bicon" src="icons/UI/support.png" alt="" onerror="this.remove()"><span>Contact / Support the project</span></button>
+  </div>
+</header>
+
+<div class="viewbar">
+  <div class="views" role="tablist" aria-label="View" id="viewSeg">
+   <div class="vcat"><span class="vcap" aria-hidden="true">Leaderboards</span><div class="vgroup">
+    <button role="tab" data-view="table" aria-selected="true"><img class="vicon" src="icons/UI/overview.png" alt="" onerror="this.remove()"><strong>Overview</strong><span>Every quest and weapon in one table</span></button>
+    <button role="tab" data-view="quest" aria-selected="false"><img class="vicon" src="icons/UI/quest.png" alt="" onerror="this.remove()"><strong>By quest</strong><span>Pick a quest, compare all 14 weapons</span></button>
+    <button role="tab" data-view="weapon" aria-selected="false"><img class="vicon" src="icons/UI/weapon.png" alt="" onerror="this.remove()"><strong>By weapon</strong><span>Pick a weapon, see it in every quest</span></button>
+    <button role="tab" data-view="newest" aria-selected="false"><img class="vicon" src="icons/UI/newest-runs.png" alt="" onerror="this.remove()"><strong>Newest Runs</strong><span>The latest recorded runs</span></button>
+   </div></div>
+   <div class="vcat"><span class="vcap" aria-hidden="true">Analysis</span><div class="vgroup">
+    <button role="tab" data-view="strength" aria-selected="false"><img class="vicon" src="icons/UI/weapon-strength.png" alt="" onerror="this.remove()"><strong>Weapon Strength</strong><span>Average ratio per title update</span></button>
+   </div></div>
+   <div class="vcat"><span class="vcap" aria-hidden="true">Community</span><div class="vgroup">
+    <button role="tab" data-view="hof" aria-selected="false"><img class="vicon" src="icons/UI/hall-of-fame.png" alt="" onerror="this.remove()"><strong>Hall of Fame</strong><span>Medal table and most active runners</span></button>
+   </div></div>
+  </div>
+</div>
+
+<main>
+  <aside class="side" aria-label="List">
+    <select class="side-select" id="sideSelect" aria-label="Select"></select>
+    <div id="sideList"></div>
+  </aside>
+
+  <section aria-live="polite">
+    <div class="board-head">
+      <div class="board-title" id="boardTitle"></div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Quest order" id="sortSeg">
+          <span class="seg-label">Quests</span>
+          <button data-sort="release" aria-pressed="true" title="Newest quests first; quests released on the same day: most recorded runs first">Release</button>
+          <button data-sort="pop" aria-pressed="false" title="Quests with the most recorded runs first">Popularity</button>
+        </div>
+        <div class="seg" role="group" aria-label="Ranking depth" id="depthSeg">
+          <button data-depth="1" aria-pressed="true">Best time</button>
+          <button data-depth="3" aria-pressed="false">Top 3</button>
+        </div>
+        <div class="seg" role="group" aria-label="Bar length" id="metricSeg">
+          <span class="seg-label" id="metricLabel">Bars</span>
+          <button data-metric="time" aria-pressed="true" title="Shorter bar = faster clear">Time</button>
+          <button data-metric="dps" aria-pressed="false" title="Longer bar = more damage per second">DPS</button>
+          <button data-metric="ratio" aria-pressed="false" title="Average best time of all weapons ÷ this time. 1.00 = average, higher = faster">Ratio</button>
+        </div>
+        <div class="seg" role="group" aria-label="Compare" id="wsModeSeg" hidden>
+          <button data-wsmode="updates" aria-pressed="true" title="Title updates of the selected game">By update</button>
+          <button data-wsmode="titles" aria-pressed="false" title="All full games side by side">By title</button>
+          <button data-wsmode="obt" aria-pressed="false" title="All open beta tests side by side">By OBT</button>
+        </div>
+        <div class="seg" role="group" aria-label="Runs per quest" id="wsRunsSeg" hidden>
+          <span class="seg-label">Runs</span>
+          <button data-wsruns="best" aria-pressed="true" title="Only the fastest run per quest and weapon">Best</button>
+          <button data-wsruns="top3" aria-pressed="false" title="The 3 fastest runs (different channels) per quest and weapon">Top 3</button>
+        </div>
+        <label class="trim-ctl" id="trimCtl" hidden title="Share of runs ignored at the top and at the bottom of every weapon">
+          Ignore extremes <input type="range" id="trimRange" min="0" max="25" step="1" value="15"> <output id="trimOut">15 %</output>
+        </label>
+        <div class="seg" role="group" aria-label="Heroics" id="heroSeg">
+          <button data-hero="all" aria-pressed="true">All runs</button>
+          <button data-hero="no" aria-pressed="false">No Heroics</button>
+          <button data-hero="only" aria-pressed="false">Heroics only</button>
+        </div>
+        <p class="hero-na" id="heroNa" hidden></p>
+      </div>
+    </div>
+    <p class="note" id="note" hidden></p>
+    <p class="note ws-warn" id="wsWarn" hidden></p>
+    <ol class="rows" id="rows"><li class="status">Loading runs…</li></ol>
+    <div class="table-wrap" id="table" hidden></div>
+    <div class="ws-chart" id="wsChart" hidden></div>
+  </section>
+</main>
+
+<dialog class="about" id="aboutDlg" aria-labelledby="aboutTitle">
+  <div class="about-head">
+    <h2 id="aboutTitle">Made by Fox Invictus</h2>
+    <button class="theme-btn about-x" id="aboutClose" type="button" aria-label="Close">✕</button>
+  </div>
+  <ul class="about-links">
+    <li><a class="about-card" href="https://x.com/fox_invictus" target="_blank" rel="noopener"><img class="about-icon" src="icons/UI/x.png" alt="" onerror="this.remove()"><div><strong>X / Twitter</strong><span>@fox_invictus</span></div><span class="arrow" aria-hidden="true">↗</span></a></li>
+    <li><a class="about-card" href="https://www.youtube.com/@FoxInvictus" target="_blank" rel="noopener"><img class="about-icon" src="icons/UI/youtube.png" alt="" onerror="this.remove()"><div><strong>YouTube</strong><span>@FoxInvictus</span></div><span class="arrow" aria-hidden="true">↗</span></a></li>
+    <li><a class="about-card" href="https://www.paypal.com/donate?hosted_button_id=7C863EJY5KN2N" target="_blank" rel="noopener"><img class="about-icon" src="icons/UI/paypal.png" alt="" onerror="this.remove()"><div><strong>Support on PayPal</strong><span>Donate via PayPal</span></div><span class="arrow" aria-hidden="true">↗</span></a></li>
+  </ul>
+  <p class="about-note">Unofficial fan project.</p>
+</dialog>
+<dialog class="info" id="infoDlg" aria-labelledby="infoTitle">
+  <div class="info-head">
+    <h2 id="infoTitle">Info &amp; changelog</h2>
+    <button class="theme-btn" id="infoClose" type="button" aria-label="Close">Close</button>
+  </div>
+  <p class="info-lead">Speedrun world records per weapon, collected by Fox Invictus. Data comes live from a Google Sheet. Current version: <strong id="infoVer"></strong></p>
+  <ol class="changelog" id="changelog"></ol>
+</dialog>
+
+<footer>
+  <span>The YouTube / Bilibili icons open the run videos (in the Overview, click the time). DPS = quest HP ÷ clear time in seconds. Ratio = average best time of all weapons in the quest ÷ clear time.</span>
+</footer>
+
+<script>
+/* =========================================================
+   DATA SOURCE
+   The page reads two tabs of the Google Sheet:
+   "Runs"   – one row per run
+   "Quests" – one row per quest (order, status, titles)
+   "Spiele" – game codes and names, "Updates" – title update release dates (Weapon Strength)
+   The sheet must be shared as "Anyone with the link: Viewer".
+   ========================================================= */
+const SHEET_ID = "17PRtB7pln0lmChh22niPJ3a2mdScQGdj44B4X75wmo8";
+const sheetUrl = name =>
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(name)}`;
+
+const WEAPONS = [
+  ["GS",  "Great Sword",    "大剣"],
+  ["LS",  "Long Sword",     "太刀"],
+  ["SnS", "Sword & Shield", "片手剣"],
+  ["DB",  "Dual Blades",    "双剣"],
+  ["LA",  "Lance",          "ランス"],
+  ["GL",  "Gunlance",       "ガンランス"],
+  ["HA",  "Hammer",         "ハンマー"],
+  ["HH",  "Hunting Horn",   "狩猟笛"],
+  ["SA",  "Switch Axe",     "スラッシュアックス"],
+  ["CB",  "Charge Blade",   "チャージアックス"],
+  ["IG",  "Insect Glaive",  "操虫棍"],
+  ["LBG", "Light Bowgun",   "ライトボウガン"],
+  ["HBG", "Heavy Bowgun",   "ヘビィボウガン"],
+  ["Bow", "Bow",            "弓"],
+];
+const W = Object.fromEntries(WEAPONS.map(([k, en, jp], i) => [k, { k, en, jp, i }]));
+
+/* =========================================================
+   LANGUAGE
+   English is the default; the 日本語 button switches the whole interface to Japanese
+   (remembered in the browser, and "lang=ja" in the link). Quest names come from the
+   "Japanisch" column, weapon names from the list above. Monster names, runner names
+   and the changelog stay in English.
+   Every UI text goes through tr("English text", { vars }); JA maps the English text
+   (with {placeholders}) to Japanese. Missing entries simply stay English.
+   ========================================================= */
+const JA = {
+  // header, view switcher, controls, dialogs, footer (static HTML)
+  "collected by": "収集：",
+  "Changelog": "更新履歴", "Info & changelog": "情報と更新履歴",
+  "Contact / Support the project": "連絡・プロジェクト支援",
+  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる",
+  "Leaderboards": "ランキング", "Analysis": "分析", "Community": "コミュニティ",
+  "Overview": "一覧", "Every quest and weapon in one table": "全クエスト・全武器をひとつの表で",
+  "By quest": "クエスト別", "Pick a quest, compare all 14 weapons": "クエストを選び、14武器を比較",
+  "By weapon": "武器別", "Pick a weapon, see it in every quest": "武器を選び、全クエストで確認",
+  "Newest Runs": "新着記録", "The latest recorded runs": "最近登録された記録",
+  "Weapon Strength": "武器の強さ", "Average ratio per title update": "アップデートごとの平均レシオ",
+  "Hall of Fame": "殿堂入り", "Medal table and most active runners": "メダル表と活発なランナー",
+  "Game": "ゲーム", "View": "表示", "List": "リスト", "Select": "選択",
+  "Quests": "クエスト", "Release": "配信順", "Popularity": "人気順",
+  "Quest order": "クエストの並び順",
+  "Newest quests first; quests released on the same day: most recorded runs first": "新しいクエスト順（同じ日に配信されたクエストは記録数の多い順）",
+  "Quests with the most recorded runs first": "記録数の多いクエスト順",
+  "Ranking depth": "表示件数", "Best time": "最速タイム", "Top 3": "トップ3",
+  "Bar length": "バーの長さ", "Bars": "バー", "Show": "表示", "Time": "タイム", "Ratio": "レシオ",
+  "Shorter bar = faster clear": "バーが短いほど速いクリア",
+  "Longer bar = more damage per second": "バーが長いほど秒間ダメージが高い",
+  "Average best time of all weapons ÷ this time. 1.00 = average, higher = faster": "全武器の最速タイムの平均 ÷ このタイム。1.00 = 平均、高いほど速い",
+  "Compare": "比較", "By update": "アップデート別", "By title": "タイトル別", "By OBT": "OBT別",
+  "Title updates of the selected game": "選択中のゲームのアップデート",
+  "All full games side by side": "製品版タイトルを並べて比較",
+  "All open beta tests side by side": "オープンベータテストを並べて比較",
+  "Runs per quest": "クエストごとの記録", "Runs": "記録", "Best": "最速",
+  "Only the fastest run per quest and weapon": "クエスト・武器ごとの最速記録のみ",
+  "The 3 fastest runs (different channels) per quest and weapon": "クエスト・武器ごとの上位3記録（別チャンネル）",
+  "Ignore extremes": "極端な値を除外",
+  "Share of runs ignored at the top and at the bottom of every weapon": "各武器の上位と下位から除外する記録の割合",
+  "Heroics": "火事場", "All runs": "全記録", "No Heroics": "火事場なし", "Heroics only": "火事場のみ",
+  "Made by Fox Invictus": "制作：Fox Invictus", "Support on PayPal": "PayPalで支援", "Donate via PayPal": "PayPalで寄付する",
+  "Unofficial fan project.": "非公式のファンプロジェクトです。",
+  "Speedrun world records per weapon, collected by Fox Invictus. Data comes live from a Google Sheet. Current version:":
+    "武器ごとのスピードラン世界記録。Fox Invictusが収集しています。データはGoogleスプレッドシートから直接読み込まれます（更新履歴は英語のみ）。現在のバージョン：",
+  "The YouTube / Bilibili icons open the run videos (in the Overview, click the time). DPS = quest HP ÷ clear time in seconds. Ratio = average best time of all weapons in the quest ÷ clear time.":
+    "YouTube／Bilibiliのアイコンで記録動画が開きます（一覧ではタイムをクリック）。DPS = クエストの体力 ÷ クリアタイム（秒）。レシオ = クエスト内の全武器の最速タイムの平均 ÷ クリアタイム。",
+  // tagline
+  "TAGLINE": "スマホ対応・複数のモンハン作品のスピードラン記録集。<b>DPS自動計算</b>、<b>アップデート別集計</b>、<b>火事場あり・なし別ランキング</b>。カスタマイズ自由。",
+  // dates
+  "Upload date unknown": "投稿日不明", "today": "今日", "yesterday": "昨日",
+  "{n} day ago": "{n}日前", "{n} days ago": "{n}日前", "{n} week ago": "{n}週間前", "{n} weeks ago": "{n}週間前",
+  "{n} month ago": "{n}か月前", "{n} months ago": "{n}か月前", "{n} year ago": "{n}年前", "{n} years ago": "{n}年前",
+  // loading
+  "The runs could not be loaded.": "記録を読み込めませんでした。",
+  "Check your internet connection and reload the page. If it keeps failing, the Google Sheet may no longer be shared as “Anyone with the link: Viewer”.":
+    "インターネット接続を確認して、ページを再読み込みしてください。それでも失敗する場合、Googleスプレッドシートの共有設定が「リンクを知っている全員：閲覧者」になっていない可能性があります。",
+  // HP, DPS, ratio
+  "ΣHP: total HP of all monsters in the quest": "ΣHP：クエスト内の全モンスターの体力の合計",
+  "ΔHP: HP removed by the weapon alone (capture threshold and other damage sources excluded). DPS uses this value.":
+    "ΔHP：武器だけで削った体力（捕獲ラインやその他のダメージ源を除く）。DPSはこの値で計算します。",
+  "DPS is a rough value: besides the weapon, damage also comes from artillery, the environment and other passive sources. Ratio is the fairer comparison between weapons.":
+    "DPSは目安です。武器以外にも、設置兵器・環境・その他の受動的なダメージがあります。武器同士の比較にはレシオの方が公平です。",
+  "Ratio = average best time of all weapons in this quest ÷ this time. 1.00 is the quest average, 2.00 is twice as fast, 0.50 takes twice as long.":
+    "レシオ = このクエストの全武器の最速タイムの平均 ÷ このタイム。1.00がクエスト平均、2.00は2倍速く、0.50は2倍かかっています。",
+  "ΣHP = total monster HP, ΔHP = HP removed by the weapon alone": "ΣHP = モンスターの体力の合計、ΔHP = 武器だけで削った体力",
+  "ΣHP / ΔHP not entered yet": "ΣHP／ΔHPは未入力です",
+  "Clear time": "クリアタイム", "{x} ratio": "レシオ {x}", "Quest average best time ÷ this time": "クエストの平均最速タイム ÷ このタイム",
+  "No HP value for this quest": "このクエストには体力の値がありません",
+  // videos
+  "Watch the {what} run on {site}": "{what}の記録を{site}で見る", "Watch the {what} run": "{what}の記録を見る",
+  // game tabs, sidebar
+  "{n} quest": "{n}クエスト", "{n} quests": "{n}クエスト", "{n} run": "{n}記録", "{n} runs": "{n}記録",
+  " (open beta test)": "（オープンベータテスト）",
+  "{n} recorded run": "{n}件の記録", "{n} recorded runs": "{n}件の記録", "Weapons": "武器",
+  // heroics note
+  "No Heroics in this beta – the skill does not exist here.": "このベータ版には火事場スキルがありません。",
+  "⚠️ Important: for games released before Monster Hunter Rise, Heroics runs are detected automatically from the YouTube video title (YouTube API). Some runs may be marked incorrectly.":
+    "⚠️ 注意：モンスターハンターライズより前の作品では、火事場の記録をYouTube動画のタイトルから自動判定しています（YouTube API）。一部の記録は誤って判定されている可能性があります。",
+  // rows
+  "Rank {n} in this quest": "このクエストで{n}位", "Rank {n}": "{n}位",
+  "Heroics run": "火事場の記録", "No run recorded": "記録なし",
+  "No quests for this game yet.": "このゲームのクエストはまだありません。",
+  "This quest has no Heroics runs.": "このクエストには火事場の記録がありません。",
+  "Every run on this quest uses Heroics.": "このクエストの記録はすべて火事場を使用しています。",
+  "Weapon": "武器", "Quest": "クエスト", "{q} – open this quest": "{q} – このクエストを開く", "Open this quest": "このクエストを開く",
+  "Newest quests come first.": "新しいクエストが先に表示されます。",
+  "Quests with the most recorded runs come first.": "記録数の多いクエストが先に表示されます。",
+  "Top 3 runs of this weapon in every quest. {order} Stronger colour = higher ratio, H = Heroics.":
+    "全クエストにおけるこの武器の上位3記録。{order}色が濃いほどレシオが高く、H = 火事場です。",
+  "#4 = this weapon's rank in that quest, 🥇🥈🥉 = places 1 to 3. {order} Stronger colour = higher ratio. ΣHP = total monster HP, ΔHP = HP removed by the weapon alone.":
+    "#4 = そのクエストでのこの武器の順位、🥇🥈🥉 = 1〜3位。{order}色が濃いほどレシオが高い。ΣHP = モンスターの体力の合計、ΔHP = 武器だけで削った体力。",
+  // overview
+  "All quests": "全クエスト",
+  "Best run per weapon. Stronger colour = higher ratio. Hover a quest for its full name, click to open it.":
+    "武器ごとの最速記録。色が濃いほどレシオが高い。クエストにカーソルを合わせると正式名、クリックで詳細を表示します。",
+  "{w}: all quests": "{w}：全クエスト",
+  // hall of fame
+  "30 days": "30日", "90 days": "90日", "1 year": "1年", "All time": "全期間",
+  "{g}: every quest awards {m} to the 3 fastest runners with this weapon.": "{g}：各クエストで、この武器の最速ランナー3人に{m}を授与します。",
+  "Heroics and non-Heroics runs count together. Each runner counts once per quest (best run); equal times share a place. Runners are taken from the YouTube channel.":
+    "火事場あり・なしの記録をまとめて集計します。各ランナーはクエストごとに1回（最速記録）だけ数え、同タイムは同順位です。ランナー名はYouTubeチャンネルから取得しています。",
+  "{n} medal went to a run without a known channel and is not listed.": "チャンネル不明の記録に渡った{n}個のメダルは表示されていません。",
+  "{n} medals went to runs without a known channel and are not listed.": "チャンネル不明の記録に渡った{n}個のメダルは表示されていません。",
+  "Runner": "ランナー", "Total": "合計", "Medal table": "メダル表", "Most active runners": "活発なランナー",
+  "No medals yet for {w} in {g}.": "{g}の{w}にはまだメダルがありません。",
+  "last upload {d}": "最終投稿 {d}", "{n} video": "{n}本の動画", "{n} videos": "{n}本の動画",
+  "No uploads in the last {p}.": "過去{p}の投稿はありません。", "No uploads with a known date.": "日付の分かる投稿はありません。",
+  "{qs} · up to {n} medal of each colour per runner · most medals first": "{qs} · ランナーごとに各色最大{n}個 · メダルの多い順",
+  "{qs} · up to {n} medals of each colour per runner · most medals first": "{qs} · ランナーごとに各色最大{n}個 · メダルの多い順",
+  "in the last {p}": "過去{p}", "in total": "これまで",
+  "Videos uploaded {when}, placings ignored, {scope}.": "{when}に投稿された動画の数（順位は問わない・{scope}）。",
+  "all weapons": "全武器", "{w} only": "{w}のみ", "Period": "期間", "All weapons": "全武器",
+  // newest runs
+  "Newest runs": "新着記録", " of the selected weapons": "（選択した武器のみ）",
+  "The {n} most recently recorded runs{sel}. Rank = place of the run among all runs of that weapon in the quest. Stronger colour = higher ratio.":
+    "最近登録された{n}件の記録{sel}。順位 = そのクエストにおける同じ武器の全記録の中での順位。色が濃いほどレシオが高い。",
+  "Weapons: {list}": "武器：{list}", "Show only certain weapons": "特定の武器だけを表示", "Show all weapons": "全武器を表示",
+  "No runs for the selected weapons yet.": "選択した武器の記録はまだありません。", "No runs recorded yet.": "記録はまだありません。",
+  "Date": "日付", "Video": "動画", "Channel": "チャンネル", "Rank": "順位",
+  // weapon strength
+  "{u} – released {d}": "{u} – 配信日 {d}",
+  " Runs without Heroics only.": " 火事場なしの記録のみ。", " Heroics runs only.": " 火事場の記録のみ。",
+  "Weapon Strength · {g}": "武器の強さ · {g}", "Weapon Strength · open betas": "武器の強さ · オープンベータ", "Weapon Strength · all titles": "武器の強さ · 全タイトル",
+  "Average ratio of every weapon after each title update. Click a column for its ranking below.": "各アップデート後の全武器の平均レシオ。列をクリックすると下にランキングを表示します。",
+  "Average ratio of every weapon per open beta test (OBT). Click a column for its ranking below.": "オープンベータテスト（OBT）ごとの全武器の平均レシオ。列をクリックすると下にランキングを表示します。",
+  "Average ratio of every weapon per game (without open betas). Click a column for its ranking below.": "作品ごとの全武器の平均レシオ（オープンベータを除く）。列をクリックすると下にランキングを表示します。",
+  "Best: only the fastest run per quest and weapon counts.": "最速：クエスト・武器ごとの最速記録のみを集計します。",
+  "Top 3: the 3 fastest runs per quest and weapon count.": "トップ3：クエスト・武器ごとの上位3記録を集計します。",
+  "The top and bottom {p} % of each weapon's runs are ignored (slider) – anyone can have a bad run.": "各武器の記録の上位と下位{p}%は除外されます（スライダー）。誰にでも失敗はあるためです。",
+  "Ratio = average best time of all weapons in the quest ÷ clear time; 1.00 = quest average, higher = faster.": "レシオ = クエスト内の全武器の最速タイムの平均 ÷ クリアタイム。1.00 = クエスト平均、高いほど速い。",
+  "Runs are assigned to a title update by their YouTube upload date.": "記録はYouTubeの投稿日によってアップデートに割り当てられます。",
+  "{n} run without upload date is not counted here (but in “By title”).": "投稿日のない{n}件の記録はここでは集計されません（「タイトル別」では集計されます）。",
+  "{n} runs without upload date are not counted here (but in “By title”).": "投稿日のない{n}件の記録はここでは集計されません（「タイトル別」では集計されます）。",
+  "No runs yet for: {list}.": "まだ記録がないもの：{list}。",
+  "Faded cells marked * are based on fewer than {n} runs.": "* 付きの薄いセルは{n}件未満の記録に基づいています。",
+  "⚠️ Top 3 is active: the 3 fastest runs (different channels) per quest and weapon count. These values can be very misleading – often a weapon has only one run in a quest, and if that single run is very good or very bad, the result becomes unrealistic. Use Top 3 for a rough look only, not as an exact ranking.":
+    "⚠️ トップ3が有効です：クエスト・武器ごとの上位3記録（別チャンネル）を集計します。この値は大きく偏ることがあります。1つのクエストに記録が1件しかない武器も多く、その記録が極端に良い・悪いと結果が非現実的になります。正確なランキングではなく、おおまかな目安としてお使いください。",
+  "No title updates for {g} in the “Updates” tab yet.": "「Updates」タブに{g}のアップデートはまだありません。",
+  "No open beta with runs yet.": "記録のあるオープンベータはまだありません。", "No game with runs yet.": "記録のある作品はまだありません。",
+  "rank {r}, {runs}": "{r}位、{runs}", "vs. {p}": "（{p}との差）",
+  "Ranking · {x}": "ランキング · {x}", " · arrows: change vs. {p}": " · 矢印：{p}からの変化",
+  "No runs in {x} yet.": "{x}にはまだ記録がありません。",
+};
+let LANG = "en";
+/* "English text" (with {placeholders}) -> text in the active language */
+function tr(s, vars) {
+  let out = LANG === "ja" && JA[s] != null ? JA[s] : s;
+  if (vars) out = out.replace(/\{(\w+)\}/g, (m, k) => vars[k] != null ? vars[k] : m);
+  return out;
+}
+/* singular / plural: trn(3, "{n} run", "{n} runs") -> "3 runs" / "3記録" */
+const trn = (n, one, many, vars = {}) => tr(n === 1 ? one : many, { n, ...vars });
+/* weapon name in the active language */
+const wn = k => LANG === "ja" ? W[k].jp : W[k].en;
+/* narrow places (Weapon Strength): the common short forms of the long Japanese names */
+const JA_SHORT = { SA: "スラアク", CB: "チャアク", LBG: "ライト", HBG: "ヘビィ" };
+const wnShort = k => LANG === "ja" ? JA_SHORT[k] || W[k].jp : W[k].en;
+/* game names: English from the "Spiele" tab, Japanese from this list */
+const GAME_JA = {
+  "MHWs": "モンスターハンターワイルズ", "MHWsβ": "モンスターハンターワイルズ ベータテスト",
+  "MHRS": "モンスターハンターライズ：サンブレイク", "MHRSβ": "モンスターハンターライズ：サンブレイク 体験版",
+  "MHR": "モンスターハンターライズ", "MHRβ": "モンスターハンターライズ 体験版",
+  "MHWI": "モンスターハンターワールド：アイスボーン", "MHWIβ": "モンスターハンターワールド：アイスボーン ベータテスト",
+  "MHW": "モンスターハンター：ワールド", "MHWβ": "モンスターハンター：ワールド ベータテスト",
+};
+const gameName = g => (LANG === "ja" && GAME_JA[g]) || state.gameNames[g] || g;
+/* quest name in the active language: stars + title. Japanese uses the "Japanisch" column;
+   if that has no stars, the stars of the English name are kept. */
+function qparts(q) {
+  const split = s => { const m = String(s || "").match(/^\s*(\d+)\s*★\s*(.*)$/); return m ? { stars: m[1] + "★", name: m[2] } : null; };
+  const en = split(q.quest) || { stars: "", name: q.quest };
+  if (LANG !== "ja" || !q.jp) return en;
+  return split(q.jp) || { stars: en.stars, name: q.jp };
+}
+const qn = q => { const p = qparts(q); return p.stars ? p.stars + " " + p.name : p.name; };
+/* tooltip: Japanese name plus the English original */
+const qTitle = q => LANG === "ja" && q.jp ? `${qn(q)}\n${q.quest}` : q.quest;
+
+/* static texts in the HTML (header, view switcher, controls, dialogs, footer): translated in place,
+   the English original is kept so switching back works */
+const I18N_STATIC = "header .brand, header .top-actions, .viewbar, .board-head .controls, #aboutDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
+const i18nOrig = new WeakMap();
+function translateStatic() {
+  document.querySelectorAll(I18N_STATIC).forEach(root => {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let n; (n = walker.nextNode());) {
+      if (!i18nOrig.has(n)) { if (!n.nodeValue.trim()) continue; i18nOrig.set(n, n.nodeValue); }
+      const orig = i18nOrig.get(n), key = orig.trim();
+      if (JA[key] == null) continue;
+      n.nodeValue = LANG === "ja" ? orig.replace(key, JA[key]) : orig;
+    }
+    root.querySelectorAll("[title], [aria-label]").forEach(el => {
+      for (const [a, d] of [["title", "i18nTitle"], ["aria-label", "i18nAria"]]) {
+        if (!el.hasAttribute(a)) continue;
+        if (!(d in el.dataset)) el.dataset[d] = el.getAttribute(a);
+        const o = el.dataset[d];
+        if (JA[o] != null) el.setAttribute(a, LANG === "ja" ? JA[o] : o);
+      }
+    });
+  });
+}
+const TAGLINE_EN = "Mobile-friendly speedrun records for several Monster Hunter games – with <b>calculated DPS</b>, <b>title-update split</b> and <b>separate Heroics rankings</b>. Fully customisable.";
+function setLang(l, rerender = true) {
+  LANG = l === "ja" ? "ja" : "en";
+  try { localStorage.setItem("mhlb-lang", LANG); } catch (e) {}
+  document.documentElement.lang = LANG;
+  const b = document.getElementById("langBtn");
+  b.textContent = LANG === "ja" ? "English" : "日本語";
+  b.lang = LANG === "ja" ? "en" : "ja";
+  b.title = LANG === "ja" ? "Switch to English" : "日本語に切り替え";
+  document.getElementById("tagline").innerHTML = LANG === "ja" ? JA.TAGLINE : TAGLINE_EN;
+  translateStatic();
+  if (typeof themeLabel === "function") themeLabel();
+  if (rerender && state.games && state.games.length) selectGame(state.game, state.quest);
+}
+
+/* weapon colours */
+const WEAPON_COLORS = {
+  GS: "#ff000a", LS: "#ffa100", SnS: "#fff302", DB: "#cdc001", LA: "#ff7a00", GL: "#b20092", HA: "#c82848",
+  HH: "#008c8b", SA: "#00a855", CB: "#3a9b1a", IG: "#01b0ae", LBG: "#0065b8", HBG: "#004d91", Bow: "#5188cb",
+};
+const hexRgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function pageRgb() {
+  const v = getComputedStyle(document.body).backgroundColor.match(/\d+/g);
+  return v ? v.slice(0, 3).map(Number) : [16, 47, 55];
+}
+/* colour at a given strength (0..1) on top of the page background, plus a readable text colour */
+function tint(k, alpha) {
+  const c = hexRgb(WEAPON_COLORS[k]), bg = pageRgb();
+  const mix = c.map((v, i) => Math.round(v * alpha + bg[i] * (1 - alpha)));
+  const lum = (0.2126 * mix[0] + 0.7152 * mix[1] + 0.0722 * mix[2]) / 255;
+  return { bg: `rgb(${mix.join(",")})`, fg: lum > 0.55 ? "#102f37" : "#ffffff", raw: `rgba(${c.join(",")},${alpha})` };
+}
+/* Weapon icons: icons/weapon/GS.png, icons/weapon/LS.png, … (.webp works too; same keys as the "Waffe" column).
+   Until a file exists, a coloured badge with the short name is shown instead. */
+const ICON_DIR = "icons/weapon/";
+const ICON_EXTS = [".png", ".webp", ".png.webp"];
+function weaponIcon(k, cls = "") {
+  const w = W[k], c = WEAPON_COLORS[k], fg = tint(k, 1).fg;
+  return `<span class="wi ${cls}" style="--wc:${c};--wfg:${fg}" title="${w.en} / ${w.jp}">` +
+    `<img src="${ICON_DIR}${k}${ICON_EXTS[0]}" data-next="${ICON_EXTS.slice(1).map(e => ICON_DIR + k + e).join("|")}" data-fail="noimg" alt="${w.en}" loading="lazy" onerror="monsterIconError(this)">` +
+    `<b aria-hidden="true">${k}</b></span>`;
+}
+
+/* Ratio -> colour strength. Ratio 0.6 or lower is very transparent, 1.6 or higher is full colour. */
+const strength = ratio => ratio ? 0.12 + 0.88 * Math.min(1, Math.max(0, (ratio - 0.6) / 1.0)) : 0.12;
+
+/* ---------- tiny CSV parser (handles quotes) ---------- */
+function parseCSV(text) {
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell); rows.push(row); row = []; cell = "";
+    } else cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  const head = rows.shift().map(h => h.trim());
+  return rows.filter(r => r.some(v => v.trim() !== ""))
+             .map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] ?? "").trim()])));
+}
+
+/* "18:35" -> 1115 seconds; also accepts "1:02:03" and "18:35.12" */
+function toSeconds(t) {
+  if (!t) return NaN;
+  const parts = t.split(":").map(Number);
+  if (parts.some(isNaN)) return NaN;
+  return parts.reduce((acc, p) => acc * 60 + p, 0);
+}
+/* "69.533", "69,533" or "69533" -> 69533 */
+function toInt(v) {
+  const n = parseInt(String(v ?? "").replace(/[^0-9]/g, ""), 10);
+  return n > 0 ? n : 0;
+}
+const fmtNum = n => n.toLocaleString("en-US");
+/* "2026-02-18", "18.02.2026" or "18/02/2026" -> "2026-02-18" ("" if unreadable) */
+function toISO(v) {
+  const t = String(v ?? "").trim();
+  let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+  m = t.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})/);
+  if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  return "";
+}
+function fmtDate(iso) {
+  if (!iso) return "??.??.20??";
+  const [y, m, d] = iso.split("-");
+  return d && m && y ? (LANG === "ja" ? `${y}/${m}/${d}` : `${d}.${m}.${y}`) : iso;
+}
+/* date cell; an unknown date is shown as a faint ??.??.20?? */
+/* "today", "yesterday", "3 days ago", "1 week ago", "2 months ago" … (exact date as tooltip) */
+function relDate(iso) {
+  const m = String(iso || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return `<span class="unk" title="${esc(tr("Upload date unknown"))}">–</span>`;
+  const then = new Date(+m[1], +m[2] - 1, +m[3]), now = new Date();
+  const days = Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - then) / 864e5);
+  const plural = (n, unit) => trn(n, `{n} ${unit} ago`, `{n} ${unit}s ago`);
+  const txt = days <= 0 ? tr("today") : days === 1 ? tr("yesterday") : days < 7 ? plural(days, "day")
+    : days < 30 ? plural(Math.floor(days / 7), "week") : days < 365 ? plural(Math.max(1, Math.floor(days / 30.44)), "month")
+    : plural(Math.floor(days / 365.25), "year");
+  return `<span title="${esc(fmtDate(iso))}">${txt}</span>`;
+}
+const dateTag = (iso, cls = "d") =>
+  `<span class="${cls}${iso ? "" : " unk"}"${iso ? "" : ` title="${esc(tr("Upload date unknown"))}"`}>${esc(fmtDate(iso))}</span>`;
+
+/* YouTube channel ("Kanal" column, filled by the Apps Script) as a short, uniform label:
+   "ピエタ【モンハンワイルズ】" -> "ピエタ", "Orca / オルカ" -> "Orca", "⭐︎TKO⭐︎" -> "TKO",
+   "Bubul™️" -> "Bubul", "旅人兄弟ch" -> "旅人兄弟". Placeholders ("archive", "Kein YouTube-Link") -> "". */
+const CHANNEL_PLACEHOLDER = /^(archive|kein youtube-link|no youtube link|\?+)$/i;
+function shortChannel(raw) {
+  let s = String(raw ?? "").replace(/[™®©]/g, "").normalize("NFKC").trim();   // NFKC also turns 𝒉𝒊𝒃𝒂𝑹𝒆 into hibaRe
+  if (!s || CHANNEL_PLACEHOLDER.test(s)) return "";
+  s = s.replace(/[(（\[【「『〔“"][^)）\]】」』〕”"]*[)）\]】」』〕”"]/g, "");    // bracketed additions
+  s = s.split(/\s+\/\s+|\/|\||＠|@|〜|~/)[0];                    // keep the first of several names
+  s = s.replace(/[\u{13000}-\u{1342F}]/gu, "")                    // hieroglyph decorations
+       .replace(/[^\p{L}\p{N}\s'._-]/gu, "")                      // stars, emoji, ™, symbols
+       .replace(/\s+/g, " ").replace(/^[\s._-]+|[\s._-]+$/g, "");
+  // "ch"/"channel" at the end only after a space or non-Latin text, so "MATCH" stays intact
+  const noSuffix = s.replace(/(?:\s+|(?<=[^\p{Script=Latin}\s]))(?:ch\.?|[Cc]hannel)$|チャンネル$/u, "").trim();
+  if (noSuffix) s = noSuffix;
+  return s.length > 18 ? s.slice(0, 17).trimEnd() + "…" : s;
+}
+function channelTag(r, cls = "ch") {
+  if (!r.channel) return "";
+  const full = r.channelFull && r.channelFull !== r.channel ? ` (${r.channelFull})` : "";
+  return `<span class="${cls}" title="${esc("YouTube: " + r.channel + full)}">${esc(r.channel)}</span>`;
+}
+
+/* ---------- state ---------- */
+const state = { gameNames: {}, runs: [], quests: [], games: [], updates: [], game: null, view: "table", quest: null, weapon: "GS", depth: 1, hero: "all", metric: "time", sort: "release",
+  wsMode: "updates", trim: 15, wsCol: null, wsRuns: "best", hofDays: 90, hofScope: "weapon", newestW: [], wfOpen: false };
+const VIEWS = ["table", "quest", "weapon", "newest", "strength", "hof"];
+const TRIM_DEFAULT = 15;
+
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  return { game: p.get("game"), view: p.get("view"), quest: p.get("quest"), weapon: p.get("weapon"), depth: p.get("top"), hero: p.get("heroics"), metric: p.get("bars"), sort: p.get("order"),
+    wsMode: p.get("compare"), trim: p.get("trim"), wsCol: p.get("col"), wsRuns: p.get("runs"), hofDays: p.get("days"), hofScope: p.get("active"), nw: p.get("w"), lang: p.get("lang") };
+}
+function writeHash() {
+  const p = new URLSearchParams();
+  if (state.game) p.set("game", state.game);
+  p.set("view", state.view);   // always in the link, so a shared view opens the same on every device
+  if (state.view === "quest" && state.quest) p.set("quest", state.quest);
+  if (state.view === "weapon" || state.view === "hof") p.set("weapon", state.weapon);
+  if (state.view === "newest" && state.newestW.length) p.set("w", state.newestW.join(","));
+  if (state.view === "hof") {
+    if (state.hofDays !== 90) p.set("days", state.hofDays);
+    if (state.hofScope !== "weapon") p.set("active", state.hofScope);
+  }
+  if (state.depth !== 1) p.set("top", state.depth);
+  if (state.hero !== "all") p.set("heroics", state.hero);
+  if (state.metric !== "time") p.set("bars", state.metric);
+  if (state.sort !== "release") p.set("order", state.sort);
+  if (state.view === "strength") {
+    if (state.wsMode !== "updates") p.set("compare", state.wsMode);
+    if (state.trim !== TRIM_DEFAULT) p.set("trim", state.trim);
+    if (state.wsCol) p.set("col", state.wsCol);
+    if (state.wsRuns !== "best") p.set("runs", state.wsRuns);
+  }
+  if (LANG === "ja") p.set("lang", "ja");
+  history.replaceState(null, "", "#" + p.toString());
+}
+
+/* ---------- loading ---------- */
+/* Route 2: JSONP via a <script> tag. Works where fetch() is blocked
+   (page opened as a local file, strict browser settings). */
+let jsonpCounter = 0;
+function loadJsonp(name) {
+  return new Promise((resolve, reject) => {
+    const cb = "__sheetCb" + (++jsonpCounter);
+    const s = document.createElement("script");
+    const timer = setTimeout(() => { cleanup(); reject(new Error("timeout")); }, 15000);
+    function cleanup() { clearTimeout(timer); delete window[cb]; s.remove(); }
+    window[cb] = res => {
+      cleanup();
+      if (!res || res.status === "error" || !res.table) return reject(new Error("sheet error"));
+      const labels = res.table.cols.map(c => (c.label || "").trim());
+      resolve(res.table.rows.map(r => Object.fromEntries(labels.map((h, i) => {
+        const c = r.c[i];
+        return [h, c == null ? "" : String(typeof c.v === "number" ? c.v : (c.f ?? c.v ?? "")).trim()];
+      }))).filter(o => Object.values(o).some(v => v !== "")));
+    };
+    s.onerror = () => { cleanup(); reject(new Error("script blocked")); };
+    s.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?headers=1&sheet=${encodeURIComponent(name)}&tqx=out:json;responseHandler:${cb}`;
+    document.head.append(s);
+  });
+}
+
+/* Route 1: plain CSV fetch, then fall back to JSONP */
+async function loadTable(name) {
+  try {
+    const r = await fetch(sheetUrl(name));
+    if (!r.ok) throw new Error(r.status);
+    return parseCSV(await r.text());
+  } catch (e) {
+    return loadJsonp(name);
+  }
+}
+
+async function load() {
+  const rowsEl = document.getElementById("rows");
+  try {
+    const [runRows, qRows, gRows, uRows] = await Promise.all([
+      loadTable("Runs"),
+      loadTable("Quests").catch(() => []),
+      loadTable("Spiele").catch(() => []),
+      loadTable("Updates").catch(() => []),
+    ]);
+    // "Updates" tab: release date of every title update; only rows with Zählt = Ja become their own column
+    state.updates = uRows
+      .map(u => ({ game: (u["Spiel"] || "").trim(), label: (u["Update"] || "").trim(), date: toISO(u["Datum"]),
+                   version: (u["Version"] || "").trim(), counts: /^(ja|yes|y|true|x)$/i.test(u["Zählt"] || "") }))
+      .filter(u => u.game && u.label && u.date && u.counts)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    // numbered title updates (console dates, PC rows ignored) for the quest badge when the Quests tab has no "Update"
+    state.titleUpdates = uRows
+      .map(u => ({ game: (u["Spiel"] || "").trim(), label: (u["Update"] || "").trim(), date: toISO(u["Datum"]),
+                   pc: /^pc$/i.test((u["Plattform"] || "").trim()) }))
+      .filter(u => u.game && u.date && !u.pc && /^(base|tu\s*\d+|bonus update)$/i.test(u.label))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    // "Spiele" tab: short code -> full name; its row order is the tab order (newest first)
+    const gameOrder = {};
+    gRows.forEach((g, i) => {
+      const k = (g["Kürzel"] || "").trim();
+      if (!k) return;
+      state.gameNames[k] = (g["Name"] || "").trim() || k;
+      gameOrder[k] = i;
+    });
+    state.runs = runRows
+      .map(r => ({
+        game: r["Spiel"], quest: r["Quest"], weapon: r["Waffe"], time: r["Zeit"],
+        sec: toSeconds(r["Zeit"]), date: toISO(r["Datum"]) || r["Datum"],
+        heroics: /^(ja|yes|y|true|x)$/i.test(r["Heroics"]), video: r["Video"], note: r["Notiz"],
+        channel: shortChannel(r["Kanal"]), channelFull: String(r["Kanal"] || "").trim(),
+      }))
+      .filter(r => r.game && r.quest && W[r.weapon] && !isNaN(r.sec));
+
+    const known = new Set();
+    state.quests = qRows.map(q => {
+      known.add(q["Spiel"] + "|" + q["Quest"]);
+      return {
+        game: q["Spiel"], quest: q["Quest"], jp: q["Japanisch"],
+        // "Monster" column: comma-separated list, entered once per quest
+        monsters: String(q["Monster"] || "").split(/[,;\n]/).map(m => m.trim()).filter(Boolean),
+        order: Number(q["Reihenfolge"]) || 999, hint: q["Hinweis"],
+        release: toISO(q["Release"]),
+        upd: String(q["Update"] || "").trim(),
+        hp: toInt(q["Effektive HP"]) || toInt(q["HP"]),          // ΔHP: what the weapon has to remove
+        hpTotal: toInt(q["HP"]) || toInt(q["Effektive HP"]),     // ΣHP: total monster HP
+      };
+    }).filter(q => q.game && q.quest);
+    // archived quests live in the sheet tabs "Archiv Quests" / "Archiv Runs", which the page never reads
+    // update badge: "Update" column first, otherwise the newest title update released on or before the quest; Base = no badge
+    for (const q of state.quests) {
+      let u = q.upd;
+      if (!u && q.release) {
+        const g = String(q.game).replace(/β/g, "");
+        const hit = state.titleUpdates.filter(t => t.game === g && t.date <= q.release).pop();
+        u = hit ? hit.label : "";
+      }
+      q.updBadge = /^base$/i.test(u) ? "" : u.replace(/\s+/g, "");
+    }
+    // quests that only exist in "Runs" still show up
+    for (const r of state.runs) {
+      const key = r.game + "|" + r.quest;
+      if (!known.has(key)) { known.add(key); state.quests.push({ game: r.game, quest: r.quest, order: 999 }); }
+    }
+    // only games that have quests or runs get a tab, newest first
+    state.games = [...new Set(state.quests.map(q => q.game))]
+      .sort((a, b) => (gameOrder[a] ?? 999) - (gameOrder[b] ?? 999));
+    init();
+  } catch (e) {
+    rowsEl.innerHTML = `<li class="status"><strong>${tr("The runs could not be loaded.")}</strong><br>
+      ${tr("Check your internet connection and reload the page. If it keeps failing, the Google Sheet may no longer be shared as “Anyone with the link: Viewer”.")}</li>`;
+    console.error(e);
+  }
+}
+
+/* start view without a view in the link: Overview on wide screens, Newest Runs on phones (the big table is too much there) */
+const defaultView = () => window.matchMedia("(max-width: 820px)").matches ? "newest" : "table";
+function init() {
+  const h = readHash();
+  state.view = VIEWS.includes(h.view) ? h.view : defaultView();
+  state.sort = h.sort === "pop" ? "pop" : "release";
+  state.weapon = W[h.weapon] ? h.weapon : "GS";
+  state.depth = h.depth === "3" ? 3 : 1;
+  state.hero = ["no", "only"].includes(h.hero) ? h.hero : "all";
+  state.metric = ["dps", "ratio"].includes(h.metric) ? h.metric : "time";
+  state.quest = h.quest;
+  state.wsMode = ["titles", "obt"].includes(h.wsMode) ? h.wsMode : "updates";
+  state.trim = h.trim != null && !isNaN(+h.trim) ? Math.min(25, Math.max(0, Math.round(+h.trim))) : TRIM_DEFAULT;
+  state.wsCol = h.wsCol || null;
+  state.wsRuns = h.wsRuns === "top3" ? "top3" : "best";
+  state.hofDays = HOF_PERIODS.some(x => String(x[0]) === h.hofDays) ? Number(h.hofDays) : 90;
+  state.hofScope = h.hofScope === "all" ? "all" : "weapon";
+  state.newestW = String(h.nw || "").split(",").filter(k => W[k]);
+  selectGame(state.games.includes(h.game) ? h.game : state.games[0], h.quest);
+}
+
+/* ---------- helpers ---------- */
+/* Quest order for every view: "release" (default) = newest quest first, quests of the same day by most recorded runs;
+   "pop" = most recorded runs first. Remaining ties fall back to the "Reihenfolge" column. */
+function questsOf(game) {
+  const qs = state.quests.filter(q => q.game === game);
+  const n = new Map(qs.map(q => [q, countRuns(q.game, q.quest)]));
+  if (state.sort === "release")
+    return qs.sort((a, b) => (b.release || "").localeCompare(a.release || "") || n.get(b) - n.get(a) || a.order - b.order);
+  return qs.sort((a, b) => n.get(b) - n.get(a) || a.order - b.order);
+}
+/* Heroics is only recorded from Monster Hunter Rise on; older games and betas (no Heroics skill) have no filter */
+const HERO_SINCE_DEFAULT = "2021-03-26";
+function heroUntracked(game) {
+  const g = String(game || "");
+  if (/β/.test(g)) return "beta";
+  const tu = state.titleUpdates || [];
+  const since = (tu.find(t => t.game === "MHR" && /^base$/i.test(t.label)) || {}).date || HERO_SINCE_DEFAULT;
+  const base = tu.find(t => t.game === g && /^base$/i.test(t.label));
+  return base && base.date < since ? "old" : "";
+}
+function heroOk(r) {
+  return state.hero === "all" || heroUntracked(r.game) === "beta" || (state.hero === "only" ? r.heroics : !r.heroics);
+}
+function runsOf(q, all = false) {
+  return state.runs.filter(r => r.game === q.game && r.quest === q.quest && (all || heroOk(r)));
+}
+function countRuns(game, quest) {
+  return state.runs.filter(r => r.game === game && r.quest === quest).length;
+}
+const bySpeed = (a, b) => a.sec - b.sec || (a.date || "9999").localeCompare(b.date || "9999");
+
+/* best runs per weapon for one quest; also the rank of every weapon (equal times share a rank) */
+function weaponBoard(q) {
+  const runs = runsOf(q);
+  const lists = Object.fromEntries(WEAPONS.map(([k]) => [k, runs.filter(r => r.weapon === k).sort(bySpeed)]));
+  const order = WEAPONS.map(([k]) => k).filter(k => lists[k].length)
+    .sort((a, b) => lists[a][0].sec - lists[b][0].sec || W[a].i - W[b].i);
+  const rank = {};
+  order.forEach((k, i) => {
+    rank[k] = i && lists[k][0].sec === lists[order[i - 1]][0].sec ? rank[order[i - 1]] : i + 1;
+  });
+  // Ratio reference: mean of every weapon's best time in this quest (only weapons with a time)
+  const avg = order.length ? order.reduce((t, k) => t + lists[k][0].sec, 0) / order.length : 0;
+  return { lists, order, rank, total: runs.length, avg };
+}
+const dpsOf = (q, r) => q && q.hp ? Math.round(q.hp / r.sec) : null;
+const ratioOf = (avg, r) => avg ? avg / r.sec : null;
+
+/* ΣHP / ΔHP */
+const HP_TIP_SUM = "ΣHP: total HP of all monsters in the quest";
+const HP_TIP_DELTA = "ΔHP: HP removed by the weapon alone (capture threshold and other damage sources excluded). DPS uses this value.";
+const fmtK = n => n >= 10000 ? (n / 1000).toFixed(1).replace(/\.0$/, "") + "k" : fmtNum(n);
+/* monster tags; "AT " prefix is shown as a small marker */
+/* Monster icons: one folder per game, icons/monsters/<game>/<name>.webp.
+   <name> = monster as written in the "Monster" column, lower case, spaces as hyphens:
+   "AT Nu Udra" in MHWs -> icons/monsters/MHWS/at-nu-udra.webp.
+   Folder lookup, first file that exists wins: the game code as written (MHWs), in capitals (MHWS),
+   the same without \u03b2 for betas (MHWs\u03b2 -> MHWs/MHWS), finally icons/monsters/ itself.
+   A missing file simply shows no icon.
+   Several monsters share the space of one icon: 2-4 icons in a 2x2 grid, 5-9 in 3x3. */
+const MONSTER_DIR = "icons/monsters/";
+const monsterSlug = m => m.trim().toLowerCase().normalize("NFKD")
+  .replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".webp";
+/* wiki download name as it comes: "Violet Mizutsune" in MHRS -> 120px-MHRS-Violet_Mizutsune_Icon.png */
+const monsterWikiName = (tag, m, size = "120px-") => `${size}${tag}-${m.trim().replace(/\s+/g, "_")}_Icon.png`;
+/* wiki thumbnails come in several sizes (120px-, 64px-) or as the original without prefix */
+const WIKI_SIZES = ["120px-", "64px-", ""];
+/* the wiki has no own Rise icons, Rise monsters use the Sunbreak files (MHRS-\u2026) */
+const WIKI_TAGS = { MHR: ["MHR", "MHRS"], MHWS: ["MHWS", "MHWA", "MHWilds"] };
+/* the wiki has one icon per monster, "Tempered" / "Arch-Tempered" are not part of the file name */
+const wikiMonster = m => m.trim().replace(/^(arch[- ]tempered|tempered)\s+/i, "");
+function monsterSrcs(game, m) {
+  const g = String(game || "").trim(), base = g.replace(/\u03b2/g, "");
+  const dirs = [...new Set([g, g.toUpperCase(), base, base.toUpperCase()].filter(Boolean))];
+  const names = [...new Set([m.trim(), wikiMonster(m)])];
+  const srcs = [];
+  for (const d of dirs) {
+    for (const n of names) srcs.push(MONSTER_DIR + d + "/" + monsterSlug(n));
+    const tag = d.replace(/\u03b2/g, "").toUpperCase();
+    for (const t of WIKI_TAGS[tag] || [tag]) for (const n of names) {
+      for (const size of WIKI_SIZES) {
+        const wiki = MONSTER_DIR + d + "/" + monsterWikiName(t, n, size);
+        srcs.push(wiki, wiki + ".webp", wiki.replace(/\.png$/, ".webp"));
+      }
+    }
+  }
+  srcs.push(MONSTER_DIR + monsterSlug(m));
+  return [...new Set(srcs)];
+}
+/* Game logos: icons/game/120px-<TAG>-Logo.png.webp (TAG = game code in capitals, without β),
+   also .png / .webp and without the 120px- prefix. Open betas (β) use the main game's logo plus an OBT badge. */
+const GAME_DIR = "icons/game/";
+function gameLogoSrcs(g) {
+  const base = String(g || "").replace(/\u03b2/g, "");
+  const srcs = [];
+  for (const t of [...new Set([base.toUpperCase(), base])]) {
+    const f = GAME_DIR + "120px-" + t + "-Logo.png";
+    srcs.push(f + ".webp", f, f.replace(/\.png$/, ".webp"));
+    const full = f.replace("/120px-", "/");
+    srcs.push(full + ".webp", full, full.replace(/\.png$/, ".webp"));
+  }
+  return [...new Set(srcs)];
+}
+function gameLogo(g) {
+  const [first, ...next] = gameLogoSrcs(g);
+  const obt = /\u03b2/.test(g);
+  return `<span class="glogo" aria-hidden="true"><img src="${esc(first)}" data-next="${esc(next.join("|"))}" alt="" ` +
+    `onload="this.closest('.game-tab').classList.add('has-logo')" onerror="monsterIconError(this)">` +
+    (obt ? `<span class="gbadge">OBT</span>` : "") + `</span>`;
+}
+/* on a missing file try the next folder, after the last one remove the image */
+function monsterIconError(img) {
+  const rest = (img.dataset.next || "").split("|").filter(Boolean);
+  if (!rest.length) { if (img.dataset.fail) img.parentNode.classList.add(img.dataset.fail); img.remove(); return; }
+  img.dataset.next = rest.slice(1).join("|");
+  img.src = rest[0];
+}
+function updBadge(q) {
+  if (!q || !q.updBadge) return "";
+  const t = /^bonus/i.test(q.updBadge) ? "BU" : q.updBadge;
+  return `<span class="ubadge">${esc(t)}</span>`;
+}
+function monsterIcons(q, cls = "") {
+  if (!q || !q.monsters || !q.monsters.length) return "";
+  const n = q.monsters.length, c = Math.ceil(Math.sqrt(n));
+  return `<span class="micons ${cls}${n > 1 ? " multi c" + c : ""}" style="--c:${c}" aria-hidden="true">` + updBadge(q) + q.monsters.map(m => {
+    const [first, ...next] = monsterSrcs(q.game, m);
+    return `<img src="${esc(first)}" data-next="${esc(next.join("|"))}" alt="" title="${esc(m)}" loading="lazy" onerror="monsterIconError(this)">`;
+  }).join("") + `</span>`;
+}
+function monsterTags(q, cls = "") {
+  if (!q || !q.monsters || !q.monsters.length) return "";
+  return `<span class="mtags ${cls}">` + q.monsters.map(m => {
+    const at = /^AT\s+/i.test(m);
+    const name = at ? m.replace(/^AT\s+/i, "") : m;
+    return `<span class="mtag${at ? " at" : ""}" title="${esc(at ? "Arch-Tempered " + name : name)}">${at ? "<i>AT</i>" : ""}${esc(name)}</span>`;
+  }).join("") + `</span>`;
+}
+function hpPair(q, compact = false) {
+  if (!q || !q.hp) return "";
+  const f = compact ? fmtK : fmtNum;
+  return `<span class="hpv" title="${esc(tr(HP_TIP_SUM))}"><b>ΣHP</b> ${f(q.hpTotal || q.hp)}</span>` +
+         `<span class="hpv" title="${esc(tr(HP_TIP_DELTA))}"><b>ΔHP</b> ${f(q.hp)}</span>`;
+}
+const fmtRatio = x => x.toFixed(2);
+
+/* explanation shown under the title for the active unit */
+function metricHints() {
+  if (state.metric === "dps") return [tr("DPS is a rough value: besides the weapon, damage also comes from artillery, the environment and other passive sources. Ratio is the fairer comparison between weapons.")];
+  if (state.metric === "ratio") return [tr("Ratio = average best time of all weapons in this quest ÷ this time. 1.00 is the quest average, 2.00 is twice as fast, 0.50 takes twice as long.")];
+  return [];
+}
+
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+/* small platform icon that opens the run video (YouTube or Bilibili) */
+function watchLink(r, what) {
+  if (!r.video) return "";
+  const bili = /bilibili\.com|b23\.tv/i.test(r.video), yt = /youtu/i.test(r.video);
+  const name = bili ? "Bilibili" : yt ? "YouTube" : "video";
+  const img = bili ? "bilibili" : yt ? "youtube" : "";
+  return `<a class="watch" href="${esc(r.video)}" target="_blank" rel="noopener" title="${esc(tr("Watch the {what} run on {site}", { what, site: name }))}">` +
+    (img ? `<img src="icons/watch/${img}.png" alt="${name}" onerror="this.outerHTML='<span class=wtxt>▶</span>'">` : `<span class="wtxt">▶</span>`) + `</a>`;
+}
+function videoLink(r, cls, txt, what) {
+  return r.video
+    ? `<a class="${cls}" href="${esc(r.video)}" target="_blank" rel="noopener" title="${esc(tr("Watch the {what} run", { what }))}">${esc(txt)}</a>`
+    : `<span class="${cls}">${esc(txt)}</span>`;
+}
+
+/* ---------- game + sidebar ---------- */
+function selectGame(game, wantedQuest) {
+  state.game = game;
+  const nav = document.getElementById("games");
+  nav.innerHTML = "";
+  for (const g of state.games) {
+    const b = document.createElement("button");
+    b.className = "game-tab"; b.role = "tab";
+    // short code in the tab; the active tab also shows the full name, every tab has it as tooltip
+    const full = gameName(g) !== g ? gameName(g) : "";
+    // logo from icons/game/ (betas: main game logo + OBT badge); until it loads, or if it is missing, the code is shown
+    const nq = state.quests.filter(q => q.game === g).length, nr = state.runs.filter(r => r.game === g).length;
+    b.innerHTML = gameLogo(g) + `<span class="gtxt">${esc(g)}${full && g === game ? `<small>${esc(full)}</small>` : ""}</span>` +
+      `<span class="gstat">${trn(nq, "{n} quest", "{n} quests")} · ${trn(nr, "{n} run", "{n} runs", { n: fmtNum(nr) })}</span>`;
+    b.title = (full || g) + (/\u03b2/.test(g) ? tr(" (open beta test)") : "");
+    b.setAttribute("aria-label", b.title);
+    b.setAttribute("aria-selected", g === game);
+    b.onclick = () => selectGame(g);
+    nav.append(b);
+  }
+  const qs = questsOf(game);
+  const pick = qs.find(q => q.quest === wantedQuest) || qs.find(q => countRuns(game, q.quest) > 0) || qs[0];
+  state.quest = pick ? pick.quest : null;
+  render();
+}
+
+function renderSidebar() {
+  const wrap = document.getElementById("sideList");
+  const sel = document.getElementById("sideSelect");
+  wrap.innerHTML = ""; sel.innerHTML = "";
+  if (state.view === "quest") {
+    const qs = questsOf(state.game);
+    // one list, in the order of the "Reihenfolge" column
+    for (const [label, list] of [[tr("Quests"), qs]]) {
+      if (!list.length) continue;
+      const g = document.createElement("div"); g.className = "side-group";
+      g.innerHTML = `<h2>${label}</h2>`;
+      const ul = document.createElement("ul"); ul.className = "qgrid";
+      const og = sel;
+      for (const q of list) {
+        const n = countRuns(q.game, q.quest);
+        const { stars, name: title } = qparts(q);
+        const b = document.createElement("button");
+        b.className = "qtile"; b.dataset.key = q.quest;
+        b.setAttribute("aria-current", q.quest === state.quest);
+        b.innerHTML = monsterIcons(q, "qt") +
+          `<span class="qfb">${esc(String((q.monsters || [])[0] || title).replace(/^(arch[- ]tempered|tempered)\s+/i, ""))}</span>` +
+          `<span class="qst">${esc(stars)}</span><span class="qn">[${n}]</span>`;
+        b.title = `${qTitle(q)} – ${trn(n, "{n} recorded run", "{n} recorded runs")}`;
+        b.setAttribute("aria-label", b.title);
+        b.onclick = () => { state.quest = q.quest; render(); };
+        const li = document.createElement("li"); li.append(b); ul.append(li);
+        const o = document.createElement("option"); o.value = q.quest; o.textContent = qn(q); og.append(o);
+      }
+      g.append(ul); wrap.append(g);
+    }
+    sel.value = state.quest || "";
+    sel.onchange = () => { state.quest = sel.value; render(); };
+  } else if (state.view === "weapon" || state.view === "hof") {
+    const g = document.createElement("div"); g.className = "side-group";
+    g.innerHTML = `<h2>${tr("Weapons")}</h2>`;
+    const ul = document.createElement("ul"); ul.className = "side-list weapons";
+    const gameRuns = state.runs.filter(r => r.game === state.game);
+    for (const [k, en, jp] of WEAPONS) {
+      const n = gameRuns.filter(r => r.weapon === k).length;
+      const b = document.createElement("button");
+      b.className = "side-btn"; b.dataset.key = k;
+      b.setAttribute("aria-current", k === state.weapon);
+      b.innerHTML = `<span class="s-name s-wname">${weaponIcon(k, "small")}<span>${wn(k)}</span></span><span class="s-count">${n || "–"}</span>`;
+      b.style.setProperty("--wc", WEAPON_COLORS[k]);
+      b.title = trn(n, "{n} recorded run", "{n} recorded runs");
+      b.onclick = () => { state.weapon = k; render(); };
+      const li = document.createElement("li"); li.append(b); ul.append(li);
+      const o = document.createElement("option"); o.value = k; o.textContent = wn(k); sel.append(o);
+    }
+    g.append(ul); wrap.append(g);
+    sel.value = state.weapon;
+    sel.onchange = () => { state.weapon = sel.value; render(); };
+  }
+}
+
+/* ---------- controls ---------- */
+function syncControls() {
+  document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-selected", b.dataset.view === state.view));
+  document.querySelectorAll("#depthSeg button").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.depth) === state.depth));
+  document.querySelectorAll("#heroSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.hero === state.hero));
+  // betas: no Heroics switcher (no skill). Games before Rise: switcher plus a note that Heroics is detected automatically.
+  // Weapon Strength "By title" keeps the switcher without note, "By OBT" counts as beta.
+  const heroNa = state.view === "strength" && state.wsMode === "titles" ? ""
+    : state.view === "strength" && state.wsMode === "obt" ? "beta" : heroUntracked(state.game);
+  document.getElementById("heroSeg").hidden = heroNa === "beta" || state.view === "hof";
+  const na = document.getElementById("heroNa");
+  na.hidden = !heroNa || state.view === "hof";
+  na.classList.toggle("warn", heroNa === "old");
+  na.textContent = heroNa === "beta"
+    ? tr("No Heroics in this beta – the skill does not exist here.")
+    : tr("⚠️ Important: for games released before Monster Hunter Rise, Heroics runs are detected automatically from the YouTube video title (YouTube API). Some runs may be marked incorrectly.");
+  document.querySelectorAll("#metricSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.metric === state.metric));
+  document.querySelectorAll("#sortSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.sort === state.sort));
+  const ws = state.view === "strength";
+  document.querySelectorAll("#wsModeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.wsmode === state.wsMode));
+  document.getElementById("wsModeSeg").hidden = !ws;
+  document.getElementById("wsRunsSeg").hidden = !ws;
+  document.querySelectorAll("#wsRunsSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.wsruns === state.wsRuns));
+  if (!ws) document.getElementById("wsWarn").hidden = true;
+  document.getElementById("trimCtl").hidden = !ws;
+  document.getElementById("trimRange").value = state.trim;
+  document.getElementById("trimOut").textContent = state.trim + " %";
+  const hof = state.view === "hof";
+  document.getElementById("sortSeg").hidden = state.view === "newest" || ws || hof;
+  document.getElementById("depthSeg").hidden = state.view === "table" || state.view === "newest" || ws || hof;
+  document.getElementById("metricSeg").hidden = state.view === "newest" || ws || hof;
+  document.getElementById("metricLabel").textContent =
+    tr(state.view === "table" || (state.depth === 3 && state.view !== "newest") ? "Show" : "Bars");
+  document.body.dataset.view = state.view;
+}
+const onSeg = (id, fn) => document.getElementById(id).addEventListener("click", e => {
+  const b = e.target.closest("button"); if (b) { fn(b.dataset); render(); }
+});
+onSeg("viewSeg",   d => { state.view = d.view; window.scrollTo({ top: 0 }); });
+onSeg("depthSeg",  d => { state.depth = Number(d.depth); });
+onSeg("heroSeg",   d => { state.hero = d.hero; });
+onSeg("metricSeg", d => { state.metric = d.metric; });
+onSeg("sortSeg",   d => { state.sort = d.sort; });
+onSeg("wsModeSeg", d => { state.wsMode = d.wsmode; state.wsCol = null; });
+onSeg("wsRunsSeg", d => { state.wsRuns = d.wsruns; });
+document.getElementById("trimRange").addEventListener("input", e => { state.trim = Number(e.target.value); render(); });
+
+/* ---------- main render ---------- */
+function render() {
+  syncControls();
+  renderSidebar();
+  writeHash();
+  const rowsEl = document.getElementById("rows");
+  const tableEl = document.getElementById("table");
+  const top3 = state.depth === 3 && (state.view === "quest" || state.view === "weapon");
+  const inTable = state.view === "table" || state.view === "newest" || state.view === "strength" || state.view === "hof" || top3;
+  rowsEl.hidden = inTable;
+  tableEl.hidden = !inTable;
+  document.getElementById("wsChart").hidden = state.view !== "strength";
+  if (state.view === "hof") renderHallOfFame();
+  else if (state.view === "strength") renderStrengthView();
+  else if (state.view === "quest") renderQuestView();
+  else if (state.view === "weapon") renderWeaponView();
+  else if (state.view === "newest") renderNewestView();
+  else renderTableView();
+  fitRows();
+}
+
+function setNote(hints) {
+  const note = document.getElementById("note");
+  const txt = hints.join(" ");
+  note.hidden = !hints.length; note.textContent = LANG === "ja" ? txt.replace(/([。）]) +/g, "$1") : txt;
+}
+
+/* one weapon/quest row: rank, name block, up to 3 bars */
+/* the three units of a run; the active one goes on the bar, the others beside it */
+function unitsOf(q, avg, r) {
+  const dps = dpsOf(q, r), ratio = ratioOf(avg, r);
+  return {
+    time:  { txt: r.time, title: tr("Clear time") },
+    dps:   dps ? { txt: `${fmtNum(dps)} DPS`, title: `${fmtNum(q.hp)} HP ÷ ${r.sec} s` } : null,
+    ratio: ratio ? { txt: tr("{x} ratio", { x: fmtRatio(ratio) }), short: fmtRatio(ratio), title: tr("Quest average best time ÷ this time") } : null,
+    dpsVal: dps, ratioVal: ratio,
+  };
+}
+const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+/* UI icons from icons/UI/ – if a file is missing, the emoji / text fallback is shown instead */
+const UI_DIR = "icons/UI/";
+const uiFallback = "this.replaceWith(document.createTextNode(this.alt))";
+const medalImg = (n, title = "") => MEDALS[n]
+  ? `<img class="uimedal" src="${UI_DIR}rank${n}-medal.png" alt="${MEDALS[n]}"${title ? ` title="${esc(title)}"` : ""} onerror="${uiFallback}">` : "";
+const heroIcon = (cls = "hicon") => `<img class="${cls}" src="${UI_DIR}heroics.png" alt="H" onerror="${uiFallback}">`;
+/* weapon view: "#4" or a medal for places 1–3 */
+function rankLabel(rank) {
+  if (!rank) return "";
+  const tt = esc(tr("Rank {n} in this quest", { n: rank }));
+  return MEDALS[rank] ? `<span class="medal" title="${tt}">${medalImg(rank)}</span>` : `<span title="${tt}">#${rank}</span>`;
+}
+function rowHtml({ rank, rankHtml, top, name, sub, subJp, list, q, avg, scale, delay, what, color, swatch, icon }) {
+  const runsHtml = list.map((r, j) => {
+    const u = unitsOf(q, avg, r);
+    // color(run, ratio, index) -> { k, a } : weapon key and colour strength
+    const c = color(r, u.ratioVal, j), t = tint(c.k, c.a);
+    const active = u[state.metric] ? state.metric : "time";
+    const pct = Math.max(12, scale(r, u.dpsVal, u.ratioVal) * 100);
+    const onBar = active === "ratio" ? tr("{x} ratio", { x: u.ratio.short }) : u[active].txt;
+    // fixed slots in a fixed order, empty when there is no value, so every column lines up across rows
+    const beside = ["time", "dps", "ratio"].filter(k => k !== state.metric)
+      .map(k => u[k] && k !== active
+        ? `<span class="alt u-${k}" title="${esc(u[k].title)}">${esc(k === "ratio" ? u.ratio.short + "×" : u[k].txt)}</span>`
+        : `<span class="alt u-${k}"></span>`).join("");
+    return `<div class="run${j ? " minor" : ""}">
+      <div class="bar-wrap" style="--fg:${t.fg}"><div class="bar" style="width:${pct}%;background:${t.bg};animation-delay:${delay}ms"></div>${videoLink(r, "time", onBar, what)}</div>
+      <div class="meta">${state.depth > 1 ? `<span class="p">#${j + 1}</span>` : ""}<span class="hb">${r.heroics ? `<span class="hbadge" title="${esc(tr("Heroics run"))}"><img class="hicon" src="${UI_DIR}heroics.png" alt="Heroics" onerror="this.parentNode.classList.add('badge');this.replaceWith(document.createTextNode('${tr("Heroics")}'))"></span>` : ""}</span><span class="wl">${watchLink(r, what)}</span>${beside}${channelTag(r) || `<span class="ch"></span>`}${dateTag(r.date)}</div>
+    </div>`;
+  }).join("");
+  const nameBlock = icon ? `<div class="weapon icon-only">${weaponIcon(icon)}</div>` : `<div class="weapon">`;
+  return `<li class="row${top ? " top" : ""}${list.length > 1 ? " multi" : ""}${list.length ? "" : " empty"}${icon ? " has-icon" : ""}">
+    <span class="rank">${rankHtml ?? rank ?? ""}</span>
+    ${icon ? nameBlock : `<div class="weapon">`}${swatch ? `<i class="sw" style="background:${swatch}"></i>` : ""}${icon ? "" : `<span class="w-en">${name}</span>${sub ? `<span class="w-jp${subJp ? "" : " latin"}">${sub}</span>` : ""}</div>`}
+    <div class="runs">${runsHtml || tr("No run recorded")}</div></li>`;
+}
+
+/* ---------- view 1: by quest ---------- */
+function renderQuestView() {
+  const q = state.quests.find(x => x.game === state.game && x.quest === state.quest);
+  const title = document.getElementById("boardTitle");
+  const rowsEl = document.getElementById("rows");
+  if (!q) { title.innerHTML = ""; setNote([]); rowsEl.innerHTML = `<li class="status">${tr("No quests for this game yet.")}</li>`; return; }
+
+  // second name under the title: Japanese in the English interface, the English original in the Japanese one
+  const other = LANG === "ja" ? (q.jp ? q.quest : "") : q.jp;
+  const sub = [monsterTags(q), other ? `<span class="jp">${esc(other)}</span>` : ""].filter(Boolean).join("");
+  const hp = q.hp
+    ? `<p class="hpline">${hpPair(q)}<span class="hpx">${tr("ΣHP = total monster HP, ΔHP = HP removed by the weapon alone")}</span></p>`
+    : `<p class="hpline"><span class="hpx">${tr("ΣHP / ΔHP not entered yet")}</span></p>`;
+  title.innerHTML = `<h2 class="with-micons">${monsterIcons(q, "title")}<span>${esc(qn(q))}</span></h2>${sub ? `<p>${sub}</p>` : ""}${hp}`;
+
+  const board = weaponBoard(q);
+  const hints = [];
+  if (q.hint) hints.push(q.hint);
+  if (runsOf(q, true).length && !board.total) hints.push(tr(state.hero === "only" ? "This quest has no Heroics runs." : "Every run on this quest uses Heroics."));
+  setNote(hints.concat(metricHints()));
+
+  if (state.depth === 3) {
+    const rows = board.order.map(k => ({ k, q, avg: board.avg, list: board.lists[k].slice(0, 3),
+      label: `<span class="t3-rank">${board.rank[k]}</span>${weaponIcon(k, "small")}`, title: wn(k), what: wn(k) }));
+    for (const [k] of WEAPONS) if (!board.lists[k].length)
+      rows.push({ k, q, avg: board.avg, list: [], label: `<span class="t3-rank"></span>${weaponIcon(k, "small")}`, title: wn(k), what: wn(k) });
+    renderTop3Table(rows, tr("Weapon"), "t3-weapons");
+    return;
+  }
+
+  const shown = board.order.flatMap(k => board.lists[k].slice(0, state.depth).map(r => r.sec));
+  const maxSec = Math.max(...shown, 1), minSec = Math.min(...shown, maxSec);
+  // Time: longer bar = slower. DPS and Ratio: longer bar = faster (both are proportional to 1 / time here).
+  const scale = state.metric === "time" ? r => r.sec / maxSec : r => minSec / r.sec;
+
+  const html = board.order.map((k, i) => rowHtml({
+    rank: board.rank[k], rankHtml: MEDALS[board.rank[k]] ? medalImg(board.rank[k], tr("Rank {n}", { n: board.rank[k] })) : board.rank[k] ? "#" + board.rank[k] : "",
+    top: board.rank[k] === 1, name: wn(k), sub: LANG === "ja" ? W[k].en : W[k].jp, subJp: LANG !== "ja",
+    list: board.lists[k].slice(0, state.depth), q, avg: board.avg, scale, delay: i * 35, what: wn(k),
+    color: (r, ratio, j) => ({ k, a: j ? 0.5 : 1 }), icon: k,
+  }));
+  for (const [k] of WEAPONS) if (!board.lists[k].length) html.push(rowHtml({ list: [], q, icon: k }));
+  rowsEl.innerHTML = html.join("");
+}
+
+/* ---------- view 2: by weapon ---------- */
+function renderWeaponView() {
+  const w = W[state.weapon];
+  const title = document.getElementById("boardTitle");
+  const rowsEl = document.getElementById("rows");
+  title.innerHTML = `<h2 class="with-icon">${weaponIcon(w.k, "big")}<span>${wn(w.k)}</span></h2>`;
+  const order = tr(state.sort === "release" ? "Newest quests come first." : "Quests with the most recorded runs come first.");
+  setNote([state.depth === 3
+    ? tr("Top 3 runs of this weapon in every quest. {order} Stronger colour = higher ratio, H = Heroics.", { order })
+    : tr("#4 = this weapon's rank in that quest, 🥇🥈🥉 = places 1 to 3. {order} Stronger colour = higher ratio. ΣHP = total monster HP, ΔHP = HP removed by the weapon alone.", { order })].concat(metricHints()));
+
+  const entries = questsOf(state.game).map(q => {
+    const board = weaponBoard(q);
+    return { q, board, list: board.lists[w.k].slice(0, state.depth), rank: board.rank[w.k] };
+  });
+  const withRuns = entries.filter(e => e.list.length);
+  const without = entries.filter(e => !e.list.length);
+
+  if (state.depth === 3) {
+    const rows = withRuns.concat(without).map(e => {
+      const { stars, name: qname } = qparts(e.q);
+      return { k: w.k, q: e.q, avg: e.board.avg, list: e.list, quest: e.q.quest, title: qTitle(e.q), what: `${wn(w.k)} ${qn(e.q)}`,
+        label: `${monsterIcons(e.q, "ov")}<span class="qlabel">${stars ? `<span class="qstar">${esc(stars)}</span>` : ""}<span class="qname">${esc(qname)}</span></span>` };
+    });
+    renderTop3Table(rows, tr("Quest"), "t3-quests");
+    return;
+  }
+
+  // Time: bar length = clear time (relative to the slowest shown).
+  // DPS: bar length = damage per second (relative to the highest shown); quests without HP get a short bar.
+  const shown = withRuns.flatMap(e => e.list);
+  const maxSec = Math.max(...shown.map(r => r.sec), 1);
+  const maxDps = Math.max(...withRuns.flatMap(e => e.list.map(r => dpsOf(e.q, r) || 0)), 1);
+  const maxRatio = Math.max(...withRuns.flatMap(e => e.list.map(r => ratioOf(e.board.avg, r) || 0)), 0.01);
+
+  const html = withRuns.map((e, i) => rowHtml({
+    rank: e.rank, rankHtml: rankLabel(e.rank), top: e.rank === 1, name: monsterIcons(e.q, "wrow") + esc(qn(e.q)),
+    sub: `${monsterTags(e.q, "small")}${hpPair(e.q, true)}<span class="hpv">${trn(e.board.total, "{n} run", "{n} runs")}</span>`,
+    list: e.list, q: e.q, avg: e.board.avg, delay: i * 35, what: `${wn(w.k)} ${qn(e.q)}`,
+    scale: state.metric === "dps" ? (r, dps) => (dps ? dps / maxDps : 0)
+         : state.metric === "ratio" ? (r, dps, ratio) => ratio / maxRatio
+         : r => r.sec / maxSec,
+    color: (r, ratio, j) => ({ k: w.k, a: strength(ratio) * (j ? 0.7 : 1) }),
+  }));
+  for (const e of without) html.push(rowHtml({ name: monsterIcons(e.q, "wrow") + esc(qn(e.q)), sub: "", list: [], q: e.q }));
+  rowsEl.innerHTML = html.join("");
+  rowsEl.querySelectorAll(".row .w-en").forEach((el, i) => {
+    const q = (i < withRuns.length ? withRuns[i] : without[i - withRuns.length]).q;
+    el.classList.add("jump"); el.title = tr("Open this quest");
+    el.onclick = () => { state.view = "quest"; state.quest = q.quest; render(); };
+  });
+}
+
+/* ---------- Top 3 table (By quest / By weapon with "Top 3") ----------
+   One row per weapon (or quest), three fixed columns for places 1-3: the selected value
+   (time, DPS or ratio) linking to the video, the channel underneath, H for Heroics.
+   Fixed column widths, so nothing ever needs horizontal scrolling. */
+function renderTop3Table(rows, firstHead, cls) {
+  const tableEl = document.getElementById("table");
+  const head = `<thead><tr><th class="t3-lab" scope="col">${firstHead}</th>` +
+    [1, 2, 3].map(n => `<th scope="col"><span class="medal">${medalImg(n)}</span></th>`).join("") + `</tr></thead>`;
+  const body = rows.map(row => {
+    const lab = row.quest
+      ? `<button class="qbtn" data-q="${esc(row.quest)}" title="${esc(tr("{q} – open this quest", { q: row.title }))}">${row.label}</button>`
+      : `<span class="t3-w" title="${esc(row.title)}">${row.label}</span>`;
+    const cells = [0, 1, 2].map(j => {
+      const r = row.list[j];
+      if (!r) return `<td class="none">–</td>`;
+      const u = unitsOf(row.q, row.avg, r);
+      const main = state.metric === "dps" && u.dps ? fmtNum(u.dpsVal) + " DPS"
+                 : state.metric === "ratio" && u.ratio ? u.ratio.short + "×" : r.time;
+      const t = tint(row.k, strength(u.ratioVal) * (j ? 0.75 : 1));
+      return `<td style="background:${t.bg};color:${t.fg};--fg:${t.fg}">` +
+        videoLink(r, "cell", main, row.what) + watchLink(r, row.what) +
+        (r.channel ? `<span class="t3-ch" title="${esc("YouTube: " + (r.channelFull || r.channel))}">${esc(r.channel)}</span>` : "") +
+        (r.heroics ? `<span class="hmark himg" title="${esc(tr("Heroics run"))}">${heroIcon()}</span>` : "") + `</td>`;
+    }).join("");
+    return `<tr><th scope="row" class="t3-lab">${lab}</th>${cells}</tr>`;
+  }).join("");
+  tableEl.innerHTML = `<table class="top3 ${cls}">${head}<tbody>${body}</tbody></table>`;
+  tableEl.querySelectorAll(".qbtn").forEach(b => b.onclick = () => { state.view = "quest"; state.quest = b.dataset.q; state.depth = 3; render(); });
+}
+
+/* ---------- view 3: overview table ---------- */
+function renderTableView() {
+  const title = document.getElementById("boardTitle");
+  const tableEl = document.getElementById("table");
+  title.innerHTML = `<h2>${tr("All quests")}</h2><p>${tr("Best run per weapon. Stronger colour = higher ratio. Hover a quest for its full name, click to open it.")}</p>`;
+  setNote(metricHints());
+  const qs = questsOf(state.game);
+  const groups = [["", qs]];
+
+  let html = `<table class="matrix"><thead><tr><th class="qcol" scope="col">${tr("Quest")}</th>` +
+    WEAPONS.map(([k]) => `<th scope="col" style="box-shadow: inset 0 -4px 0 ${WEAPON_COLORS[k]}"><button class="wbtn" data-w="${k}" title="${esc(tr("{w}: all quests", { w: wn(k) }))}">${weaponIcon(k, "th")}</button></th>`).join("") +
+    `</tr></thead>`;
+  for (const [label, list] of groups) {
+    if (!list.length) continue;
+    html += `<tbody>${label ? `<tr class="grp"><th colspan="15" scope="rowgroup">${label}</th></tr>` : ""}`;
+    for (const q of list) {
+      const board = weaponBoard(q);
+      const { stars, name: qname } = qparts(q);
+      html += `<tr><th class="qcol" scope="row"><button class="qbtn" data-q="${esc(q.quest)}" title="${esc(qTitle(q))}">${monsterIcons(q, "ov")}<span class="qlabel">${stars ? `<span class="qstar">${esc(stars)}</span>` : ""}<span class="qname">${esc(qname)}</span></span></button></th>`;
+      for (const [k, en] of WEAPONS) {
+        const r = board.lists[k][0];
+        if (!r) { html += `<td class="none">–</td>`; continue; }
+        const u = unitsOf(q, board.avg, r);
+        const main = state.metric === "time" ? r.time
+                   : state.metric === "dps" ? (u.dps ? fmtNum(u.dpsVal) : null)
+                   : (u.ratio ? u.ratio.short : null);
+        const t = tint(k, strength(u.ratioVal));
+        html += `<td class="${r.heroics ? "hero" : ""}" style="background:${t.bg};color:${t.fg};--fg:${t.fg}">` +
+          (main == null ? `<span class="cell na" title="${esc(tr("No HP value for this quest"))}">–</span>` : videoLink(r, "cell", main, `${wn(k)} ${qn(q)}`)) +
+          (r.heroics ? `<span class="hmark" title="${esc(tr("Heroics run"))}">H</span>` : "") + `</td>`;
+      }
+      html += `</tr>`;
+    }
+    html += `</tbody>`;
+  }
+  html += `</table>`;
+  tableEl.innerHTML = html;
+  tableEl.querySelectorAll(".qbtn").forEach(b => b.onclick = () => { state.view = "quest"; state.quest = b.dataset.q; render(); });
+  tableEl.querySelectorAll(".wbtn").forEach(b => b.onclick = () => { state.view = "weapon"; state.weapon = b.dataset.w; render(); });
+}
+
+/* ---------- view 6: Hall of Fame ----------
+   Medal table: for the selected game and weapon, every quest awards 🥇🥈🥉 to the 3 fastest runners
+   (YouTube channel, column H). Heroics and non-Heroics runs count together. Each runner counts once
+   per quest with their best run; equal times share a place. Runs without channel take their place
+   but are not listed. Sorted by total medals, then gold, silver, bronze.
+   Most active runners: number of videos uploaded in the chosen period (placings ignored). */
+const HOF_PERIODS = [[30, "30 days"], [90, "90 days"], [365, "1 year"], [0, "All time"]];
+const runnerKey = r => r.channel ? (r.channelFull || r.channel).toLowerCase() : "";
+function hofMedals(game, weapon) {
+  const table = new Map();   // key -> { name, full, m: [g, s, b], quests: [[] , [], []] }
+  let unknown = 0;
+  const quests = questsOf(game);
+  for (const q of quests) {
+    const runs = state.runs.filter(r => r.game === game && r.quest === q.quest && r.weapon === weapon).sort(bySpeed);
+    // best run per runner; runs without channel stay as separate entries
+    const seen = new Set(), entries = [];
+    for (const r of runs) {
+      const k = runnerKey(r);
+      if (k && seen.has(k)) continue;
+      if (k) seen.add(k);
+      entries.push(r);
+    }
+    let place = 0;
+    entries.forEach((r, i) => {
+      place = i && r.sec === entries[i - 1].sec ? place : i + 1;
+      if (place > 3) return;
+      const k = runnerKey(r);
+      if (!k) { unknown++; return; }
+      if (!table.has(k)) table.set(k, { name: r.channel, full: r.channelFull, m: [0, 0, 0], quests: [[], [], []] });
+      const t = table.get(k);
+      t.m[place - 1]++; t.quests[place - 1].push(qn(q));
+    });
+  }
+  const list = [...table.values()].map(t => ({ ...t, total: t.m[0] + t.m[1] + t.m[2] }))
+    .sort((a, b) => b.total - a.total || b.m[0] - a.m[0] || b.m[1] - a.m[1] || b.m[2] - a.m[2] || a.name.localeCompare(b.name));
+  list.forEach((t, i) => {
+    const p = list[i - 1];
+    t.pos = p && p.total === t.total && p.m.join() === t.m.join() ? p.pos : i + 1;
+  });
+  return { list, unknown, quests: quests.length };
+}
+function hofActive(game, weapon, days) {
+  const since = days ? new Date(Date.now() - days * 864e5).toISOString().slice(0, 10) : "";
+  const map = new Map();
+  for (const r of state.runs) {
+    if (r.game !== game || (weapon && r.weapon !== weapon)) continue;
+    const k = runnerKey(r);
+    if (!k || !/^\d{4}-\d\d-\d\d$/.test(r.date || "") || (since && r.date < since)) continue;
+    if (!map.has(k)) map.set(k, { name: r.channel, full: r.channelFull, videos: new Set(), last: "" });
+    const t = map.get(k);
+    t.videos.add(r.video || r.quest + "|" + r.weapon + "|" + r.time);
+    if (r.date > t.last) t.last = r.date;
+  }
+  return [...map.values()].map(t => ({ ...t, n: t.videos.size }))
+    .sort((a, b) => b.n - a.n || b.last.localeCompare(a.last) || a.name.localeCompare(b.name));
+}
+function renderHallOfFame() {
+  const w = W[state.weapon], game = state.game;
+  const gname = gameName(game), wname = wn(w.k);
+  document.getElementById("boardTitle").innerHTML =
+    `<h2 class="with-icon">${weaponIcon(w.k, "big")}<span>${tr("Hall of Fame")} · ${esc(wname)}</span></h2>` +
+    `<p>${tr("{g}: every quest awards {m} to the 3 fastest runners with this weapon.", { g: esc(gname), m: medalImg(1) + medalImg(2) + medalImg(3) })}</p>`;
+  const med = hofMedals(game, w.k);
+  setNote([tr("Heroics and non-Heroics runs count together. Each runner counts once per quest (best run); equal times share a place. Runners are taken from the YouTube channel.") +
+    (med.unknown ? " " + trn(med.unknown, "{n} medal went to a run without a known channel and is not listed.", "{n} medals went to runs without a known channel and are not listed.") : "")]);
+
+  const medalCell = (n, i) => `<td class="m${n ? "" : " zero"}">${n || "–"}</td>`;
+  const tip = t => [0, 1, 2].filter(i => t.quests[i].length).map(i => MEDALS[i + 1] + " " + t.quests[i].join(", ")).join("\n");
+  const medalsHtml = med.list.length
+    ? `<table class="medals"><thead><tr><th></th><th class="l">${tr("Runner")}</th><th><span class="medal">${medalImg(1)}</span></th><th><span class="medal">${medalImg(2)}</span></th><th><span class="medal">${medalImg(3)}</span></th><th>${tr("Total")}</th></tr></thead><tbody>` +
+      med.list.map(t => `<tr class="p${t.pos}"><td class="pos">${t.pos}</td>` +
+        `<td class="nm" title="${esc((t.full && t.full !== t.name ? t.full + "\n" : "") + tip(t))}">${esc(t.name)}</td>` +
+        t.m.map(medalCell).join("") + `<td class="tot">${t.total}</td></tr>`).join("") + `</tbody></table>`
+    : `<p class="hof-none">${tr("No medals yet for {w} in {g}.", { w: esc(wname), g: esc(gname) })}</p>`;
+
+  const act = hofActive(game, state.hofScope === "all" ? null : w.k, state.hofDays);
+  const max = Math.max(1, ...act.map(t => t.n));
+  const period = tr((HOF_PERIODS.find(x => x[0] === state.hofDays) || HOF_PERIODS[1])[1]);
+  const actHtml = act.length
+    ? act.slice(0, 20).map((t, i) => `<div class="act"><span class="pos">${i + 1}</span>` +
+        `<span class="nm" title="${esc((t.full || t.name) + " – " + tr("last upload {d}", { d: fmtDate(t.last) }))}">${esc(t.name)}</span>` +
+        `<span class="track"><span class="fill" style="width:${(t.n / max * 100).toFixed(1)}%"></span></span>` +
+        `<span class="n" title="${esc(trn(t.n, "{n} video", "{n} videos"))}">${t.n}</span></div>`).join("")
+    : `<p class="hof-none">${state.hofDays ? tr("No uploads in the last {p}.", { p: esc(period) }) : tr("No uploads with a known date.")}</p>`;
+
+  document.getElementById("table").innerHTML = `<div class="hof">
+    <section class="hof-card"><h3>${tr("Medal table")}</h3>
+      <p class="hsub">${trn(med.quests, "{qs} · up to {n} medal of each colour per runner · most medals first", "{qs} · up to {n} medals of each colour per runner · most medals first", { qs: trn(med.quests, "{n} quest", "{n} quests") })}</p>
+      ${medalsHtml}</section>
+    <section class="hof-card"><h3>${tr("Most active runners")}</h3>
+      <p class="hsub">${tr("Videos uploaded {when}, placings ignored, {scope}.", { when: state.hofDays ? tr("in the last {p}", { p: esc(period) }) : tr("in total"), scope: state.hofScope === "all" ? tr("all weapons") : tr("{w} only", { w: esc(wname) }) })}</p>
+      <div class="seg" role="group" aria-label="${esc(tr("Period"))}" id="hofDaysSeg">${HOF_PERIODS.map(([d, l]) =>
+        `<button data-days="${d}" aria-pressed="${d === state.hofDays}">${tr(l)}</button>`).join("")}</div>
+      <div class="seg" role="group" aria-label="${esc(tr("Weapons"))}" id="hofScopeSeg">
+        <button data-scope="weapon" aria-pressed="${state.hofScope === "weapon"}">${esc(wname)}</button>
+        <button data-scope="all" aria-pressed="${state.hofScope === "all"}">${tr("All weapons")}</button></div>
+      ${actHtml}</section></div>`;
+  document.querySelectorAll("#hofDaysSeg button").forEach(b => b.onclick = () => { state.hofDays = Number(b.dataset.days); render(); });
+  document.querySelectorAll("#hofScopeSeg button").forEach(b => b.onclick = () => { state.hofScope = b.dataset.scope; render(); });
+}
+
+/* ---------- view 4: newest runs ---------- */
+const NEWEST_MAX = 60;
+function renderNewestView() {
+  const title = document.getElementById("boardTitle");
+  const tableEl = document.getElementById("table");
+  const sel = state.newestW;
+  title.innerHTML = `<h2>${tr("Newest runs")}</h2><p>${tr("The {n} most recently recorded runs{sel}. Rank = place of the run among all runs of that weapon in the quest. Stronger colour = higher ratio.", { n: NEWEST_MAX, sel: sel.length ? tr(" of the selected weapons") : "" })}</p>` +
+    `<details class="wfilter" id="wfilter"${state.wfOpen ? " open" : ""}><summary>${sel.length ? tr("Weapons: {list}", { list: sel.map(k => esc(k)).join(", ") }) : tr("Show only certain weapons")}</summary>` +
+    `<div class="wf-grid">${WEAPONS.map(([k]) => `<button type="button" class="wf-btn" data-w="${k}" aria-pressed="${sel.includes(k)}" title="${esc(wn(k))}">${weaponIcon(k, "small")}<span>${k}</span></button>`).join("")}</div>` +
+    `<button type="button" class="wf-all" id="wfAll"${sel.length ? "" : " disabled"}>${tr("Show all weapons")}</button></details>`;
+  const wf = document.getElementById("wfilter");
+  wf.addEventListener("toggle", () => { state.wfOpen = wf.open; });
+  wf.querySelectorAll(".wf-btn").forEach(b => b.onclick = () => {
+    const k = b.dataset.w;
+    state.newestW = sel.includes(k) ? sel.filter(x => x !== k) : WEAPONS.map(w => w[0]).filter(x => x === k || sel.includes(x));
+    render();
+  });
+  document.getElementById("wfAll").onclick = () => { state.newestW = []; render(); };
+  setNote([]);
+  const qByName = new Map(questsOf(state.game).map(q => [q.quest, q]));
+  const boards = new Map();
+  const boardOf = q => boards.get(q) || (boards.set(q, weaponBoard(q)), boards.get(q));
+  const runs = state.runs
+    .map((r, i) => ({ r, i }))
+    .filter(({ r }) => r.game === state.game && heroOk(r) && qByName.has(r.quest) && (!sel.length || sel.includes(r.weapon)))
+    // newest date first; same date: the row further down in the sheet counts as newer
+    .sort((a, b) => (b.r.date || "").localeCompare(a.r.date || "") || b.i - a.i)
+    .slice(0, NEWEST_MAX);
+  if (!runs.length) { tableEl.innerHTML = `<p class="status">${tr(sel.length ? "No runs for the selected weapons yet." : "No runs recorded yet.")}</p>`; return; }
+
+  let html = `<table class="newest"><thead><tr><th scope="col">${tr("Date")}</th><th scope="col">${tr("Quest")}</th><th scope="col">${tr("Weapon")}</th><th scope="col">${tr("Time")}</th><th scope="col" class="n-watch"><span class="sr-only">${tr("Video")}</span></th><th scope="col" class="n-ch">${tr("Channel")}</th><th scope="col">${tr("Rank")}</th></tr></thead><tbody>`;
+  for (const { r } of runs) {
+    const q = qByName.get(r.quest), board = boardOf(q);
+    const all = board.lists[r.weapon] || [];
+    const place = all.indexOf(r) + 1;
+    const ratio = board.avg && r.sec ? board.avg / r.sec : null;
+    const t = tint(r.weapon, strength(ratio));
+    const medal = MEDALS[place] ? medalImg(place, tr("Rank {n}", { n: place })) : place ? `#${place}` : "";
+    const qp = qparts(q), what = `${wn(r.weapon)} ${qn(q)}`;
+    html += `<tr>
+      <td class="n-date">${relDate(r.date)}</td>
+      <td class="n-quest"><button class="qbtn" data-q="${esc(q.quest)}" data-short="${esc(qp.stars || qn(q))}" title="${esc(qTitle(q))}">${monsterIcons(q, "ov")}<span class="qname-full">${esc(qn(q))}</span></button></td>
+      <td class="n-weapon"><button class="wbtn" data-w="${r.weapon}">${weaponIcon(r.weapon, "small")}<span class="wname">${wn(r.weapon)}</span></button></td>
+      <td class="n-time" style="background:${t.bg};color:${t.fg};--fg:${t.fg}">${videoLink(r, "cell", r.time, what)}${r.heroics ? `<span class="hmark himg" title="${esc(tr("Heroics run"))}">${heroIcon()}</span>` : ""}</td>
+      <td class="n-watch">${watchLink(r, what)}</td>
+      <td class="n-ch">${channelTag(r)}</td>
+      <td class="n-rank">${medal}</td>
+    </tr>`;
+  }
+  html += `</tbody></table>`;
+  tableEl.innerHTML = html;
+  tableEl.querySelectorAll(".qbtn").forEach(b => b.onclick = () => { state.view = "quest"; state.quest = b.dataset.q; render(); });
+  tableEl.querySelectorAll(".wbtn").forEach(b => b.onclick = () => { state.view = "weapon"; state.weapon = b.dataset.w; render(); });
+}
+
+/* Desktop: size the rows so the whole board fits the window without scrolling.
+   Below a minimum row height the page simply scrolls. */
+const desktop = window.matchMedia("(min-width: 821px)");
+/* ---------- view 5: Weapon Strength ----------
+   Average ratio per weapon, per title update of one game ("By update"), per full game ("By title")
+   or per open beta test ("By OBT", game codes with β).
+   Ratio of a run = average of every weapon's best time in that quest (all runs) ÷ the run's time.
+   Per weapon and column the top and bottom X % of the runs are dropped (like TRIMMEAN in the sheet:
+   floor(n·2X) runs are removed, rounded down to an even number, half at each end) – anyone can have a bad run.
+   A run belongs to the newest counted title update (Updates tab, Zählt = Ja) released on or before its upload date. */
+let wsCache = null;
+const WS_FEW = 3;   // cells with fewer runs are faded
+function wsBase() {
+  if (wsCache && wsCache.runs === state.runs && wsCache.updates === state.updates) return wsCache;
+  const best = new Map();
+  for (const r of state.runs) {
+    const k = r.game + "|" + r.quest + "|" + r.weapon;
+    if (!best.has(k) || r.sec < best.get(k)) best.set(k, r.sec);
+  }
+  const sum = new Map();
+  for (const [k, sec] of best) {
+    const q = k.slice(0, k.lastIndexOf("|"));
+    const s = sum.get(q) || { t: 0, n: 0 }; s.t += sec; s.n++; sum.set(q, s);
+  }
+  const byGame = {};
+  for (const u of state.updates) (byGame[u.game] ||= []).push(u);
+  const items = state.runs.map(r => {
+    const s = sum.get(r.game + "|" + r.quest);
+    const ratio = s && r.sec ? (s.t / s.n) / r.sec : null;
+    let upd = null;
+    if (/^\d{4}-\d\d-\d\d$/.test(r.date || "")) for (const u of byGame[r.game] || []) if (u.date <= r.date) upd = u.label;
+    return { r, ratio, upd };
+  }).filter(x => x.ratio);
+  return (wsCache = { runs: state.runs, updates: state.updates, items, byGame });
+}
+/* "Top 3" / "Best": per quest and weapon keep only the n fastest runs (one per YouTube channel; runs without channel count separately) */
+function limitRuns(list, n) {
+  if (!n) return list;
+  const groups = new Map();
+  for (const x of list) {
+    const k = x.r.quest + "|" + x.r.weapon;
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(x);
+  }
+  const out = [];
+  for (const g of groups.values()) {
+    g.sort((a, b) => a.r.sec - b.r.sec);
+    const seen = new Set();
+    let taken = 0;
+    for (const x of g) {
+      const ch = (x.r.channelFull || "").toLowerCase();
+      if (ch && seen.has(ch)) continue;
+      if (ch) seen.add(ch);
+      out.push(x);
+      if (++taken >= n) break;
+    }
+  }
+  return out;
+}
+function trimmedMean(vals, pct) {
+  const v = [...vals].sort((a, b) => a - b), n = v.length;
+  if (!n) return null;
+  const k = Math.floor(Math.floor(n * 2 * pct / 100) / 2);
+  const keep = v.slice(k, n - k);
+  return keep.reduce((a, b) => a + b, 0) / keep.length;
+}
+function renderStrengthView() {
+  const title = document.getElementById("boardTitle");
+  const tableEl = document.getElementById("table");
+  const chartEl = document.getElementById("wsChart");
+  const base = wsBase();
+  const items = base.items.filter(x => heroOk(x.r));
+  const byUpdate = state.wsMode === "updates";
+  const gname = gameName;
+
+  // columns: title updates of the selected game (oldest first) or every game with runs (oldest first)
+  let cols;
+  if (byUpdate) {
+    cols = (base.byGame[state.game] || []).map(u => ({ key: u.label, label: u.label, sub: fmtDate(u.date),
+      title: tr("{u} – released {d}", { u: u.label + (u.version ? " (" + u.version + ")" : ""), d: fmtDate(u.date) }),
+      pick: x => x.r.game === state.game && x.upd === u.label }));
+  } else {
+    const obt = state.wsMode === "obt";
+    cols = [...state.games].reverse().filter(g => /β/.test(g) === obt).map(g => ({ key: g, label: g, sub: gname(g) !== g ? gname(g).replace(/^Monster Hunter:? /, "").replace(/^モンスターハンター[：:]?\s*/, "") : "", title: gname(g), pick: x => x.r.game === g }));
+  }
+  const heroTxt = byUpdate && heroUntracked(state.game) === "beta" ? "" : state.hero === "no" ? tr(" Runs without Heroics only.") : state.hero === "only" ? tr(" Heroics runs only.") : "";
+  title.innerHTML = byUpdate
+    ? `<h2>${tr("Weapon Strength · {g}", { g: esc(gname(state.game)) })}</h2><p>${tr("Average ratio of every weapon after each title update. Click a column for its ranking below.")}</p>`
+    : state.wsMode === "obt"
+    ? `<h2>${tr("Weapon Strength · open betas")}</h2><p>${tr("Average ratio of every weapon per open beta test (OBT). Click a column for its ranking below.")}</p>`
+    : `<h2>${tr("Weapon Strength · all titles")}</h2><p>${tr("Average ratio of every weapon per game (without open betas). Click a column for its ranking below.")}</p>`;
+
+  // values
+  const cell = {};   // cell[colKey][weapon] = { v, n }
+  const colN = {};
+  for (const c of cols) {
+    const mine = limitRuns(items.filter(c.pick), state.wsRuns === "top3" ? 3 : 1);
+    colN[c.key] = mine.length;
+    cell[c.key] = {};
+    for (const [k] of WEAPONS) {
+      const vals = mine.filter(x => x.r.weapon === k).map(x => x.ratio);
+      cell[c.key][k] = vals.length ? { v: trimmedMean(vals, state.trim), n: vals.length } : null;
+    }
+    // rank inside the column (1 = strongest)
+    const order = WEAPONS.map(([k]) => k).filter(k => cell[c.key][k]).sort((a, b) => cell[c.key][b].v - cell[c.key][a].v);
+    order.forEach((k, i) => cell[c.key][k].rank = i + 1);
+  }
+  // updates without any run yet get no column; they are listed in the note instead
+  const empty = cols.filter(c => !colN[c.key]);
+  if (cols.some(c => colN[c.key])) cols = cols.filter(c => colN[c.key]);
+  const unassigned = byUpdate ? items.filter(x => x.r.game === state.game && !x.upd).length : 0;
+  const hints = [tr(state.wsRuns === "best" ? "Best: only the fastest run per quest and weapon counts." : "Top 3: the 3 fastest runs per quest and weapon count."),
+    tr("The top and bottom {p} % of each weapon's runs are ignored (slider) – anyone can have a bad run.", { p: state.trim }),
+    tr("Ratio = average best time of all weapons in the quest ÷ clear time; 1.00 = quest average, higher = faster.")];
+  if (byUpdate) hints.push(tr("Runs are assigned to a title update by their YouTube upload date.") +
+    (unassigned ? " " + trn(unassigned, "{n} run without upload date is not counted here (but in “By title”).", "{n} runs without upload date are not counted here (but in “By title”).") : "") +
+    (empty.length && cols.length < empty.length + cols.length ? " " + tr("No runs yet for: {list}.", { list: empty.map(c => c.label).join(", ") }) : ""));
+  hints.push(tr("Faded cells marked * are based on fewer than {n} runs.", { n: WS_FEW }));
+  setNote([hints.join(" ") + heroTxt]);   // setNote removes the spaces between Japanese sentences
+  const warn = document.getElementById("wsWarn");
+  warn.hidden = state.wsRuns !== "top3";
+  warn.textContent = state.wsRuns !== "top3" ? "" :
+    tr("⚠️ Top 3 is active: the 3 fastest runs (different channels) per quest and weapon count. These values can be very misleading – often a weapon has only one run in a quest, and if that single run is very good or very bad, the result becomes unrealistic. Use Top 3 for a rough look only, not as an exact ranking.");
+
+  if (!cols.length) {
+    tableEl.innerHTML = byUpdate ? `<p class="status">${tr("No title updates for {g} in the “Updates” tab yet.", { g: esc(gname(state.game)) })}</p>`
+      : `<p class="status">${tr(state.wsMode === "obt" ? "No open beta with runs yet." : "No game with runs yet.")}</p>`;
+    chartEl.innerHTML = ""; return;
+  }
+  const withData = cols.filter(c => colN[c.key]);
+  const sel = cols.find(c => c.key === state.wsCol && colN[c.key]) || withData[withData.length - 1] || cols[cols.length - 1];
+  const prevOf = c => { const i = withData.indexOf(c); return i > 0 ? withData[i - 1] : null; };
+  const delta = (c, k) => {
+    const p = prevOf(c), a = cell[c.key][k], b = p && cell[p.key][k];
+    return a && b ? a.v - b.v : null;
+  };
+  const arrow = d => d == null || Math.abs(d) < 0.005 ? "" :
+    `<span class="${d > 0 ? "up" : "down"}">${d > 0 ? "▲" : "▼"}${Math.abs(d).toFixed(2)}</span>`;
+
+  // table
+  const head = `<thead><tr><th class="ws-lab" scope="col">${tr("Weapon")}</th>` + cols.map(c =>
+    `<th scope="col"><button class="colbtn" data-col="${esc(c.key)}" aria-pressed="${c === sel}" title="${esc(c.title)}">${esc(c.label)}${c.sub ? `<small>${esc(c.sub)}</small>` : ""}</button></th>`).join("") + `</tr></thead>`;
+  const body = WEAPONS.map(([k]) => {
+    const en = wnShort(k);
+    const tds = cols.map(c => {
+      const x = cell[c.key][k];
+      if (!x) return `<td class="none${c === sel ? " sel" : ""}">–</td>`;
+      const t = tint(k, strength(x.v));
+      const d = delta(c, k);
+      return `<td class="${c === sel ? "sel" : ""}${x.n < WS_FEW ? " few" : ""}" style="background:${t.bg};color:${t.fg}" title="${esc(`${en} · ${c.label}: ${fmtRatio(x.v)} (${tr("rank {r}, {runs}", { r: x.rank, runs: trn(x.n, "{n} run", "{n} runs") })})` + (d != null ? ` · ${d >= 0 ? "+" : ""}${d.toFixed(2)} ${tr("vs. {p}", { p: prevOf(c).label })}` : ""))}">` +
+        `<span class="vr"><span class="wsrk">#${x.rank}</span><span class="v">${fmtRatio(x.v)}</span></span>` +
+        (d != null && Math.abs(d) >= 0.005 ? `<span class="sub">${arrow(d)}</span>` : "") + `</td>`;
+    }).join("");
+    return `<tr><th scope="row" class="ws-lab"><span class="ws-w">${weaponIcon(k, "small")}<span class="wn">${en}</span></span></th>${tds}</tr>`;
+  }).join("");
+  const cnt = `<tr class="cnt"><th scope="row" class="ws-lab">${tr("Runs")}</th>` + cols.map(c => `<td>${colN[c.key] || "–"}</td>`).join("") + `</tr>`;
+  tableEl.innerHTML = `<table class="ws">${head}<tbody>${body}${cnt}</tbody></table>`;
+  tableEl.querySelectorAll(".colbtn").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
+
+  // ranking of the selected column
+  const rows = WEAPONS.map(([k]) => ({ k, en: wnShort(k), x: cell[sel.key][k] })).filter(o => o.x).sort((a, b) => b.x.v - a.x.v);
+  const max = Math.max(...rows.map(o => o.x.v), 0.01);
+  const p = prevOf(sel);
+  chartEl.innerHTML = rows.length
+    ? `<h3>${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}<small>${trn(colN[sel.key], "{n} run", "{n} runs")}${p ? tr(" · arrows: change vs. {p}", { p: esc(p.label) }) : ""}</small></h3>` +
+      rows.map((o, i) => {
+        const t = tint(o.k, strength(o.x.v));
+        return `<div class="wsb"><span class="pos">#${i + 1}</span><span class="nm">${weaponIcon(o.k, "small")}<span class="wn">${o.en}</span></span>` +
+          `<span class="track"><span class="fill" style="display:block;width:${(o.x.v / max * 100).toFixed(1)}%;background:${t.bg}"></span></span>` +
+          `<span class="val">${fmtRatio(o.x.v)}</span><span class="dl">${arrow(delta(sel, o.k))}</span></div>`;
+      }).join("")
+    : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`;
+}
+
+function fitRows() {
+  const el = document.getElementById("rows");
+  const n = el.querySelectorAll(".row").length;
+  if (!desktop.matches || !n || el.hidden) { el.classList.remove("fit", "tight"); return; }
+  el.classList.add("fit");
+  const top = el.getBoundingClientRect().top + window.scrollY;
+  const avail = window.innerHeight - top - 10;
+  const minRow = state.depth > 1 ? 45 : 27;
+  const maxRow = state.depth > 1 ? 84 : 56;
+  const rowH = Math.max(minRow, Math.min(maxRow, Math.floor(avail / n)));
+  const inner = rowH - 8;
+  // top 3: two thin bars (#2, #3) under the main bar
+  const barH2 = Math.min(16, Math.max(10, Math.round(inner * .24)));
+  const barH  = state.depth > 1 ? Math.max(14, Math.min(26, inner - 2 * barH2 - 6)) : Math.min(30, Math.round(inner * .7));
+  el.style.setProperty("--row-h", rowH + "px");
+  el.style.setProperty("--bar-h", barH + "px");
+  el.style.setProperty("--bar-h2", barH2 + "px");
+  el.style.setProperty("--bar-h1", Math.min(30, Math.round(inner * .7)) + "px");
+  el.classList.toggle("tight", rowH < 42);
+}
+let fitTimer;
+window.addEventListener("resize", () => { clearTimeout(fitTimer); fitTimer = setTimeout(fitRows, 80); });
+desktop.addEventListener?.("change", fitRows);
+document.fonts?.ready.then(fitRows);
+
+/* ---------- info + changelog ----------
+   New version = new entry at the TOP of this list. Times are Europe/Berlin. */
+const CHANGELOG = [
+  { v: "V50", when: "12.10.2026 19:25", items: [
+    "Short description of the page under the title (calculated DPS, title-update split, separate Heroics rankings).",
+    "Japanese interface: the 日本語 button switches all texts, quest names (Japanese column), weapon and game names and dates; English stays the default.",
+    "The language is remembered in the browser and can be shared with \"lang=ja\" in the link." ] },
+  { v: "V49", when: "12.10.2026 18:25", items: [
+    "Icons for the Changelog, Light/Dark mode and Contact / Support buttons.",
+    "X, YouTube and PayPal icons in the contact dialog." ] },
+  { v: "V48", when: "12.10.2026 17:45", items: [
+    "Newest Runs: new filter \"Show only certain weapons\" (pick one or several weapons).",
+    "Newest Runs: dates shown as \"2 days ago\", \"1 week ago\" … (exact date on hover).",
+    "On phones the page now opens in Newest Runs." ] },
+  { v: "V47", when: "12.10.2026 17:30", items: [
+    "On phones the page opens in a simpler view instead of the large Overview table; computers still start with the Overview. Links with a view keep that view on every device." ] },
+  { v: "V46", when: "12.10.2026 16:10", items: [
+    "By quest: ranks centred, places from 4 on shown as #4, #5 …",
+    "Header buttons renamed: Changelog and Contact / Support the project.",
+    "Overview keeps the small H mark for Heroics runs." ] },
+  { v: "V45", when: "12.10.2026 16:00", items: [
+    "Monster Hunter UI icons (icons/UI/): medals for places 1–3 (By quest, By weapon, Top 3, Newest Runs, Hall of Fame), Heroics skill icon instead of the Heroics badge / H mark, favicon; tab icons now also come from icons/UI/.",
+    "About button (ⓘ, top right) with links to X, YouTube and PayPal." ] },
+  { v: "V44", when: "12.10.2026 15:20", items: [
+    "By quest: the quest list is now a grid of square monster tiles – star level small at the bottom left, number of runs [n] at the top right, update badge on the icon, full quest name as tooltip. Also on mobile instead of the dropdown." ] },
+  { v: "V43", when: "12.10.2026 15:05", items: [
+    "Monster icons: wiki files with the MHWA tag (Wilds), 64px- prefix and \"Tempered\" in the name are found too (e.g. 64px-MHWA-Tempered_Lagiacrus_Icon.png)." ] },
+  { v: "V42", when: "11.10.2026 21:05", items: [
+    "YouTube / Bilibili icons next to every run (By quest, By weapon, Top 3 tables, Newest Runs) that open the video, so it is clear where to click. In the Overview the time itself stays the link." ] },
+  { v: "V41", when: "11.10.2026 20:55", items: [
+    "Game bar: small line under each game logo with its number of quests and recorded runs." ] },
+  { v: "V40", when: "11.10.2026 20:50", items: [
+    "Main tabs split into three separate categories: Leaderboards (Overview, By quest, By weapon, Newest Runs), Analysis (Weapon Strength) and Community (Hall of Fame).",
+    "Larger game logos in the game bar." ] },
+  { v: "V39", when: "11.10.2026 13:50", items: [
+    "Quest archive: quests with too few runs are moved to the sheet tabs \"Archiv Quests\" and \"Archiv Runs\" and no longer count anywhere (all views, sheet formulas, run entry). They can be moved back at any time.",
+    "Archived for now: 10★ Frozen Knells of the East and 10★ Scion of the Dark Cradle." ] },
+  { v: "V38", when: "11.10.2026 12:30", items: [
+    "Hall of Fame: pick a weapon, then see a medal table for the selected game – every quest awards 🥇🥈🥉 to the 3 fastest runners (YouTube channel), Heroics and non-Heroics together, most medals first.",
+    "Most active runners next to it: videos uploaded in the last 30 days, 90 days, 1 year or all time, for this weapon or all weapons." ] },
+  { v: "V37", when: "11.10.2026 12:15", items: [
+    "New main tab Hall of Fame (far right).",
+    "Icons in front of every main tab name (icons/UI/)." ] },
+  { v: "V36", when: "11.10.2026 12:05", items: [
+    "New icon folders: icons/weapon/, icons/monsters/ and icons/game/.",
+    "Game logos in the game bar at the top (icons/game/120px-<GAME>-Logo.png.webp); open betas show the main game logo with an OBT badge. Without a logo file the short code is shown as before." ] },
+  { v: "V35", when: "11.10.2026 11:50", items: [
+    "Weapon Strength: the compare switch now has three options – By update, By title (full games only) and By OBT (open beta tests only).",
+    "By OBT has no Heroics switcher, as the skill does not exist in the betas." ] },
+  { v: "V34", when: "11.10.2026 11:45", items: [
+    "Heroics for games released before Monster Hunter Rise is now detected automatically from the YouTube video title (YouTube API); the Heroics switcher is back for these games.",
+    "Important note next to the switcher: automatic detection can mark some runs incorrectly." ] },
+  { v: "V33", when: "11.10.2026 10:40", items: [
+    "Quests are now sorted by release by default (newest first); quests released on the same day are ordered by number of recorded runs. Popularity is still available as the second option.",
+    "New wording of the Heroics note for games before Monster Hunter Rise: not documented on this website for now, can be added later if there is enough interest." ] },
+  { v: "V32", when: "10.10.2026 20:05", items: [
+    "Heroics switcher hidden for games released before Monster Hunter Rise (Heroics was never tracked there) and for betas (no Heroics skill); a short note explains why.",
+    "Weapon Strength \"All games\" keeps the switcher; the filter only affects games where Heroics is tracked." ] },
+  { v: "V31", when: "10.10.2026 19:45", items: [
+    "Release dates added for every MHR, MHRS and MHWI quest, so sorting by Release now works there (regular quests = game release, title update quests = update date, event quests = first event date).",
+    "The update badge now comes from the release date for all games; the Bonus Update (Sunbreak) is recognised as BU. The \"Update\" column in the Quests tab stays as an optional manual override." ] },
+  { v: "V30", when: "10.10.2026 19:10", items: [
+    "Small badge on the bottom right of the monster icon showing the title update a quest comes from (TU1, TU2 …, BU = Bonus Update). Base game quests get no badge.",
+    "Source: new column \"Update\" in the Quests tab; if it is empty, the update is taken from the quest's release date (Updates tab, console dates)." ] },
+  { v: "V29", when: "10.10.2026 18:40", items: [
+    "Monster icons for Rise (MHR) are also found under the Sunbreak wiki names (MHRS-…_Icon.png).",
+    "\"Tempered\" / \"Arch-Tempered\" in front of a monster name is ignored for the icon lookup, so the normal wiki icon is used.",
+    "Icons saved in original size without the 120px- prefix are found too." ] },
+  { v: "V28", when: "09.10.2026 22:35", items: [
+    "Weapon Strength: new switch Runs – Best (default, fastest run per quest and weapon) or Top 3 (3 fastest runs), so games with different amounts of data can be compared.",
+    "Switching to Top 3 shows a ⚠️ warning; cells based on fewer than 3 runs are faded and marked *." ] },
+  { v: "V27", when: "09.10.2026 21:35", items: [
+    "Weapon Strength: the rank (#1, #2 …) is shown as large as the ratio in every cell and in the ranking." ] },
+  { v: "V26", when: "09.10.2026 21:20", items: [
+    "New tab Weapon Strength: average ratio of every weapon after each title update (By update) or per game (All games).",
+    "The top and bottom 15 % of each weapon's runs are ignored; a slider changes this share from 0 to 25 %.",
+    "Runs are assigned to title updates by their YouTube upload date (new sheet tab “Updates”). Click a column for a ranking with changes vs. the previous update." ] },
+  { v: "V25", when: "09.10.2026 20:10", items: [
+    "Top 3 reworked as a compact table: one row per weapon (By quest) or quest (By weapon), columns 🥇🥈🥉.",
+    "Each cell shows the selected value (time, DPS or ratio) linking to the video, the channel underneath and H for Heroics; no horizontal scrolling, also on phones." ] },
+  { v: "V24", when: "09.10.2026 19:55", items: [
+    "By quest / By weapon: the info on the right sits in fixed columns (Heroics, values, channel, date), so everything lines up across rows.",
+    "Unknown dates are shown faintly as ??.??.20??.",
+    "Top 3: rows grow when needed instead of overlapping on short screens." ] },
+  { v: "V23", when: "09.10.2026 19:05", items: [
+    "YouTube channel shown next to each run in By quest, By weapon and Newest Runs (new Channel column there).",
+    "Channel names are shortened for a uniform look: brackets, stars, emoji and \"ch\"/\"channel\" suffixes removed, long names cut with …; the full name is in the tooltip.",
+    "Run entry tool: date field removed; upload date and channel come from the sheet's Apps Script." ] },
+  { v: "V22", when: "09.10.2026 17:50", items: [
+    "Sheet: new column H \"Kanal\" (YouTube channel) in the Runs tab, notes moved to column I.",
+    "Run entry tool writes columns A–I accordingly." ] },
+  { v: "V21", when: "09.10.2026 17:35", items: [
+    "Monster icons: wiki downloads saved as .png.webp (or .webp) are found too." ] },
+  { v: "V20", when: "09.10.2026 17:25", items: [
+    "Monster icons can keep their wiki download name (e.g. 120px-MHRS-Violet_Mizutsune_Icon.png) inside the game folder." ] },
+  { v: "V19", when: "09.10.2026 17:20", items: [
+    "Monster icons now load from one folder per game (monsters/MHWS/, monsters/MHRS/ …); betas use the folder of the main game.",
+    "MHRS (Rise: Sunbreak) data added to the sheet: 19 quests with top runs per weapon." ] },
+  { v: "V18", when: "09.10.2026 16:05", items: [
+    "Run entry tool: new Release date field when adding a quest (sheet column J; the Effective HP formula in column I stays untouched).",
+    "Run entry tool: release date shown in the quest info line." ] },
+  { v: "V17", when: "09.10.2026 16:00", items: [
+    "Info & changelog button (top right) with the version history." ] },
+  { v: "V16", when: "09.10.2026 15:42", items: [
+    "Overview: lower rows, smaller monster icons and weapon header." ] },
+  { v: "V15", when: "09.10.2026 15:34", items: [
+    "Quest order toggle Popularity / Release for all views (release dates added to the sheet).",
+    "New main tab Newest Runs: the 60 latest runs with quest, weapon, time and rank.",
+    "Overview is now the first tab and opens by default.",
+    "Light mode reworked to a warm papyrus look." ] },
+  { v: "V14", when: "09.10.2026 15:17", items: [
+    "Overview: quest title shown next to the icon (shortened with …).",
+    "Several monsters share the space of one icon (2×2 grid) in every view.",
+    "Fix: monster icons were scattered in the weapon view." ] },
+  { v: "V13", when: "09.10.2026 15:11", items: [
+    "Overview simplified: monster icon + star rank only, no horizontal scrolling.",
+    "Cells show only the selected value (Time, DPS or Ratio)." ] },
+  { v: "V12", when: "09.10.2026 14:44", items: [
+    "Monster icons in front of every quest name (sidebar, title, weapon view, overview).",
+    "Icons loaded as .webp from the monsters/ folder; AT and normal monsters have their own icon." ] },
+  { v: "V11", when: "09.10.2026 12:00 – 13:10", items: [
+    "Run entry tool (inside Claude): add runs to the sheet, see which weapons are missing.",
+    "YouTube search buttons per weapon in EN / JP / KR / CN, Japanese quest title with copy button.",
+    "Fix: submitted runs now land in the first empty row." ] },
+  { v: "V10", when: "09.10.2026 11:07", items: [
+    "Sheet: Status column removed, Heroics is now a checkbox.",
+    "Heroics flags corrected for several quests (e.g. Jin Dahaad)." ] },
+  { v: "V9", when: "09.10.2026 11:02", items: [
+    "Unified quest names \"N★ Title\" and a Monster column with automatic monster tags." ] },
+  { v: "V8", when: "09.10.2026 10:53", items: [
+    "Game abbreviations from the Spiele tab (MHWs, MHWsβ, MHRS …), newest game first." ] },
+  { v: "V7", when: "08.10.2026, late evening", items: [
+    "Weapon view: rank shown as #n, medals 🥇🥈🥉 for places 1–3, centred." ] },
+  { v: "V6", when: "08.10.2026 23:04", items: [
+    "ΣHP (total monster HP) and ΔHP (HP removed by the weapon) with short explanations." ] },
+  { v: "V5", when: "08.10.2026 22:41", items: [
+    "Weapon icons (PNG) instead of weapon names." ] },
+  { v: "V4", when: "08.10.2026 22:38", items: [
+    "Weapon colours; colour strength follows the ratio in weapon view and overview." ] },
+  { v: "V3", when: "08.10.2026 21:42", items: [
+    "New unit Ratio (average best time ÷ time) and a hint on what DPS can and cannot tell." ] },
+  { v: "V2", when: "08.10.2026 21:30", items: [
+    "Three views: By quest, By weapon (popular quests first), Overview table.",
+    "HP column and DPS (HP ÷ seconds); bars switch between Time and DPS.",
+    "All 14 weapons fit on a 16:9 screen without scrolling." ] },
+  { v: "V1", when: "08.10.2026 19:15", items: [
+    "First version: new consolidated Google Sheet and leaderboard page.",
+    "Game tabs, quest list, 14 weapons, Best time / Top 3, Heroics filter (all / no / only)." ] },
+];
+(function setupInfo() {
+  const dlg = document.getElementById("infoDlg");
+  document.getElementById("infoVer").textContent = `${CHANGELOG[0].v} (${CHANGELOG[0].when})`;
+  document.getElementById("changelog").innerHTML = CHANGELOG.map(e =>
+    `<li><span class="v">${esc(e.v)}</span><div><span class="when">${esc(e.when)}</span><ul>${e.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div></li>`).join("");
+  document.getElementById("infoBtn").onclick = () => dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+  document.getElementById("infoClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+})();
+
+(function setupAbout() {
+  // native <dialog>: Esc closes it automatically; ✕ and a click on the backdrop close it as well
+  const dlg = document.getElementById("aboutDlg");
+  document.getElementById("aboutBtn").onclick = () => dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+  document.getElementById("aboutClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => {
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();   // only clicks outside the box (on the backdrop), not on its padding
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
+})();
+
+/* ---------- theme ---------- */
+const themeBtn = document.getElementById("themeBtn");
+/* the button shows the mode it switches to, with that mode's icon */
+function themeLabel() {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  themeBtn.innerHTML = `<img class="bicon" src="icons/UI/${next}-mode.png" alt="" onerror="this.remove()"><span>${tr(next === "dark" ? "Dark mode" : "Light mode")}</span>`;
+}
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  themeLabel();
+  try { localStorage.setItem("mhlb-theme", t); } catch (e) {}
+  if (state.games && state.games.length) render();
+}
+themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+try { setTheme(localStorage.getItem("mhlb-theme") || "dark"); } catch (e) { setTheme("dark"); }
+
+/* language: "lang=ja" in the link wins, otherwise the last choice in this browser, otherwise English */
+document.getElementById("langBtn").onclick = () => setLang(LANG === "ja" ? "en" : "ja");
+{
+  let l = readHash().lang;
+  if (!l) try { l = localStorage.getItem("mhlb-lang"); } catch (e) {}
+  setLang(l || "en", false);
+}
+
+window.addEventListener("hashchange", () => {
+  if (!state.games.length) return;
+  const h = readHash();
+  if (h.lang && h.lang !== LANG) setLang(h.lang, false);
+  if (h.game && h.game !== state.game && state.games.includes(h.game)) return selectGame(h.game, h.quest);
+  state.view = VIEWS.includes(h.view) ? h.view : defaultView();
+  if (h.quest) state.quest = h.quest;
+  if (W[h.weapon]) state.weapon = h.weapon;
+  render();
+});
+
+load();
+</script>
+</body>
+</html>
