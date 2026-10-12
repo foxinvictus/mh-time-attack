@@ -882,6 +882,32 @@
    The sheet must be shared as "Anyone with the link: Viewer".
    ========================================================= */
 const SHEET_ID = "17PRtB7pln0lmChh22niPJ3a2mdScQGdj44B4X75wmo8";
+
+/* =========================================================
+   VISITOR STATISTICS (GoatCounter – no cookies, no consent banner)
+   Enter your GoatCounter code here, e.g. "foxinvictus" for https://foxinvictus.goatcounter.com.
+   Empty = no statistics. Nothing is counted while the page is opened as a local file.
+   Counted: every page visit, plus switches between the main tabs ("view-…") and the
+   language switch ("lang-…") as events, so you can see which parts are used.
+   ========================================================= */
+const GOATCOUNTER_CODE = "foxinvictus";
+if (GOATCOUNTER_CODE && /^https?:$/.test(location.protocol)) {
+  const gc = document.createElement("script");
+  gc.async = true;
+  gc.dataset.goatcounter = `https://${GOATCOUNTER_CODE}.goatcounter.com/count`;
+  gc.src = "https://gc.zgo.at/count.js";
+  document.head.append(gc);
+}
+function gcEvent(path, title) {
+  try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title, event: true }); } catch (e) {}
+}
+let gcLastView = null;
+function countView() {
+  if (state.view === gcLastView) return;
+  const first = gcLastView === null;
+  gcLastView = state.view;
+  if (!first) gcEvent("view-" + state.view, "Tab: " + state.view);   // the start view is part of the normal page visit
+}
 const sheetUrl = name =>
   `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(name)}`;
 
@@ -1713,6 +1739,7 @@ function render() {
   syncControls();
   renderSidebar();
   writeHash();
+  countView();
   const rowsEl = document.getElementById("rows");
   const tableEl = document.getElementById("table");
   const top3 = state.depth === 3 && (state.view === "quest" || state.view === "weapon");
@@ -2311,6 +2338,12 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V53", when: "12.10.2026 19:50", items: [
+    "Minor technical improvements." ] },
+  { v: "V52", when: "12.10.2026 19:45", items: [
+    "Minor technical improvements." ] },
+  { v: "V51", when: "12.10.2026 19:45", items: [
+    "Minor technical improvements." ] },
   { v: "V50", when: "12.10.2026 19:25", items: [
     "Short description of the page under the title (calculated DPS, title-update split, separate Heroics rankings).",
     "Japanese interface: the 日本語 button switches all texts, quest names (Japanese column), weapon and game names and dates; English stays the default.",
@@ -2496,7 +2529,7 @@ themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "li
 try { setTheme(localStorage.getItem("mhlb-theme") || "dark"); } catch (e) { setTheme("dark"); }
 
 /* language: "lang=ja" in the link wins, otherwise the last choice in this browser, otherwise English */
-document.getElementById("langBtn").onclick = () => setLang(LANG === "ja" ? "en" : "ja");
+document.getElementById("langBtn").onclick = () => { setLang(LANG === "ja" ? "en" : "ja"); gcEvent("lang-" + LANG, "Language: " + LANG); };
 {
   let l = readHash().lang;
   if (!l) try { l = localStorage.getItem("mhlb-lang"); } catch (e) {}
