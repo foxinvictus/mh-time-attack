@@ -2,7 +2,7 @@
 
 Monster Hunter speedrun leaderboards for several games – best times per weapon and quest, collected by **Fox Invictus**.
 
-**▶ Website:** https://foxinvictus.github.io/mh-leaderboards/
+**▶ Website:** https://foxinvictus.github.io/mh-time-attack/
 
 ## Features
 
