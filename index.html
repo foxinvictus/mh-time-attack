@@ -61,6 +61,16 @@
   /* Japanese headers: keep short column titles on one line */
   html[lang="ja"] .newest th:not(.n-ch), html[lang="ja"] .medals th { white-space: nowrap; }
   .tagline b { color: var(--gold); font-weight: 500; }
+  /* introduction video: small, quiet link under the tagline */
+  .intro-link {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: 8px; padding: 4px 12px 4px 8px;
+    border: 1px solid var(--ink-3); border-radius: 999px; background: var(--ink-2);
+    color: var(--paper); font-size: 13px; line-height: 1.2; text-decoration: none; transition: border-color .15s;
+  }
+  .intro-link:hover, .intro-link:focus-visible { border-color: var(--gold); }
+  .intro-yt { width: 20px; height: 20px; object-fit: contain; flex: none; }
+  .intro-link small { color: var(--muted); font-size: 12px; }
+  @media (prefers-reduced-motion: reduce) { .intro-link { transition: none; } }
   /* Japanese interface: Japanese glyphs come from Noto Sans JP */
   html[lang="ja"] body, html[lang="ja"] button, html[lang="ja"] select { font-family: "Barlow", "Noto Sans JP", sans-serif; }
   html[lang="ja"] h1, html[lang="ja"] h2, html[lang="ja"] h3, html[lang="ja"] strong, html[lang="ja"] .w-en,
@@ -802,6 +812,7 @@
     <h1>MH Speedrun Leaderboards</h1>
     <span class="by">collected by <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">Fox Invictus</a></span>
     <p class="tagline" id="tagline"></p>
+    <a class="intro-link" id="introLink" href="https://youtu.be/axVBnouN450" target="_blank" rel="noopener"><img class="intro-yt" src="icons/watch/youtube.png" alt="" onerror="this.remove()"><span id="introText">Quick tour</span><small id="introLen">(1 min)</small></a>
   </div>
   <div class="games-wrap" id="gamesWrap">
     <button class="gscroll gl" type="button" tabindex="-1" aria-hidden="true">‹</button>
@@ -1184,6 +1195,10 @@ function setLang(l, rerender = true) {
   b.lang = LANG === "ja" ? "en" : "ja";
   b.title = LANG === "ja" ? "Switch to English" : "日本語に切り替え";
   document.getElementById("tagline").innerHTML = LANG === "ja" ? JA.TAGLINE : TAGLINE_EN;
+  // introduction video: own video per language
+  document.getElementById("introLink").href = LANG === "ja" ? "https://youtu.be/JpbHDOzmr_8" : "https://youtu.be/axVBnouN450";
+  document.getElementById("introText").textContent = LANG === "ja" ? "サイト紹介" : "Quick tour";
+  document.getElementById("introLen").textContent = LANG === "ja" ? "（1分）" : "(1 min)";
   translateStatic();
   if (typeof themeLabel === "function") themeLabel();
   if (rerender && state.games && state.games.length) selectGame(state.game, state.quest);
@@ -2420,6 +2435,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V58", when: "13.10.2026 17:00", items: [
+    "New \"Quick tour (1 min)\" video link under the page description – opens the English or the Japanese video, depending on the language." ] },
   { v: "V57", when: "13.10.2026 12:40", items: [
     "Weapon Strength: medals 🥇🥈🥉 for places 1–3 in the table and in the ranking below it." ] },
   { v: "V56", when: "13.10.2026 12:40", items: [
