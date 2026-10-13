@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MH Speedrun Leaderboards</title>
-<link rel="icon" href="icons/UI/favicon.png">
+<link rel="icon" href="icons/UI/favicon.png?v=2">
 <meta name="description" content="Monster Hunter endgame speedrun leaderboards by weapon, collected by Fox Invictus.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,7 +50,10 @@
   h1 {
     font: 700 clamp(30px, 5vw, 46px)/1 "Barlow Condensed", sans-serif;
     letter-spacing: .01em; margin: 0;
+    display: inline-flex; align-items: center; gap: .28em;
   }
+  /* site logo (the favicon) in front of the title */
+  .brand-logo { width: 1.15em; height: 1.15em; object-fit: contain; flex: none; }
   .by { color: var(--muted); font-size: 15px; }
   .by a { color: var(--gold); text-decoration: none; }
   .by a:hover { text-decoration: underline; }
@@ -809,7 +812,7 @@
 
 <header>
   <div class="brand">
-    <h1>MH Speedrun Leaderboards</h1>
+    <h1><img class="brand-logo" src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()">MH Speedrun Leaderboards</h1>
     <span class="by">collected by <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">Fox Invictus</a></span>
     <p class="tagline" id="tagline"></p>
     <a class="intro-link" id="introLink" href="https://youtu.be/axVBnouN450" target="_blank" rel="noopener"><img class="intro-yt" src="icons/watch/youtube.png" alt="" onerror="this.remove()"><span id="introText">Quick tour</span><small id="introLen">(1 min)</small></a>
@@ -2435,6 +2438,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V59", when: "13.10.2026 18:00", items: [
+    "New site logo in front of the title (also used as the browser tab icon)." ] },
   { v: "V58", when: "13.10.2026 17:00", items: [
     "New \"Quick tour (1 min)\" video link under the page description – opens the English or the Japanese video, depending on the language." ] },
   { v: "V57", when: "13.10.2026 12:40", items: [
