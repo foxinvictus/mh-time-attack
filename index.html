@@ -1115,7 +1115,8 @@ const JA = {
   "Average ratio of every weapon per game (without open betas). Click a column for its ranking below.": "作品ごとの全武器の平均レシオ（オープンベータを除く）。列をクリックすると下にランキングを表示します。",
   "Best: only the fastest run per quest and weapon counts.": "最速：クエスト・武器ごとの最速記録のみを集計します。",
   "Top 3: the 3 fastest runs per quest and weapon count.": "トップ3：クエスト・武器ごとの上位3記録を集計します。",
-  "The top and bottom {p} % of each weapon's runs are ignored (slider) – anyone can have a bad run.": "各武器の記録の上位と下位{p}%は除外されます（スライダー）。誰にでも失敗はあるためです。",
+  "If only a few runs have been submitted for a weapon in a quest, their clear times have a very strong effect on the average (the weapon's ratio). To avoid this, these extreme values can be ignored: the slider removes the top and bottom {p} % of each weapon's runs.":
+    "あるクエストで特定の武器の記録が少ないと、そのクリアタイムが平均（武器のレシオ）に非常に大きく影響します。これを避けるため、極端な値を除外できます。スライダーで各武器の記録の上位と下位{p}%を除外します。",
   "Ratio = average best time of all weapons in the quest ÷ clear time; 1.00 = quest average, higher = faster.": "レシオ = クエスト内の全武器の最速タイムの平均 ÷ クリアタイム。1.00 = クエスト平均、高いほど速い。",
   "Runs are assigned to a title update by their YouTube upload date.": "記録はYouTubeの投稿日によってアップデートに割り当てられます。",
   "{n} run without upload date is not counted here (but in “By title”).": "投稿日のない{n}件の記録はここでは集計されません（「タイトル別」では集計されます）。",
@@ -2242,7 +2243,7 @@ const desktop = window.matchMedia("(min-width: 821px)");
    or per open beta test ("By OBT", game codes with β).
    Ratio of a run = average of every weapon's best time in that quest (all runs) ÷ the run's time.
    Per weapon and column the top and bottom X % of the runs are dropped (like TRIMMEAN in the sheet:
-   floor(n·2X) runs are removed, rounded down to an even number, half at each end) – anyone can have a bad run.
+   floor(n·2X) runs are removed, rounded down to an even number, half at each end) – with few runs per weapon, single extreme times would distort the average.
    A run belongs to the newest counted title update (Updates tab, Zählt = Ja) released on or before its upload date. */
 let wsCache = null;
 const WS_FEW = 3;   // cells with fewer runs are faded
@@ -2347,7 +2348,7 @@ function renderStrengthView() {
   if (cols.some(c => colN[c.key])) cols = cols.filter(c => colN[c.key]);
   const unassigned = byUpdate ? items.filter(x => x.r.game === state.game && !x.upd).length : 0;
   const hints = [tr(state.wsRuns === "best" ? "Best: only the fastest run per quest and weapon counts." : "Top 3: the 3 fastest runs per quest and weapon count."),
-    tr("The top and bottom {p} % of each weapon's runs are ignored (slider) – anyone can have a bad run.", { p: state.trim }),
+    tr("If only a few runs have been submitted for a weapon in a quest, their clear times have a very strong effect on the average (the weapon's ratio). To avoid this, these extreme values can be ignored: the slider removes the top and bottom {p} % of each weapon's runs.", { p: state.trim }),
     tr("Ratio = average best time of all weapons in the quest ÷ clear time; 1.00 = quest average, higher = faster.")];
   if (byUpdate) hints.push(tr("Runs are assigned to a title update by their YouTube upload date.") +
     (unassigned ? " " + trn(unassigned, "{n} run without upload date is not counted here (but in “By title”).", "{n} runs without upload date are not counted here (but in “By title”).") : "") +
@@ -2440,6 +2441,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V61", when: "14.10.2026 13:40", items: [
+    "Weapon Strength: clearer explanation of why extreme values can be ignored with the slider." ] },
   { v: "V60", when: "14.10.2026 11:35", items: [
     "Larger site logo next to the title." ] },
   { v: "V59", when: "13.10.2026 18:00", items: [
