@@ -2241,16 +2241,19 @@ const desktop = window.matchMedia("(min-width: 821px)");
 /* ---------- view 5: Weapon Strength ----------
    Average ratio per weapon, per title update of one game ("By update"), per full game ("By title")
    or per open beta test ("By OBT", game codes with β).
-   Ratio of a run = average of every weapon's best time in that quest (all runs) ÷ the run's time.
+   Ratio of a run = average of every weapon's best time in that quest ÷ the run's time. The reference uses the
+   same runs as the view (Heroics filter applied), so 1.00 is always the average of what is shown.
    Per weapon and column the top and bottom X % of the runs are dropped (like TRIMMEAN in the sheet:
    floor(n·2X) runs are removed, rounded down to an even number, half at each end) – with few runs per weapon, single extreme times would distort the average.
    A run belongs to the newest counted title update (Updates tab, Zählt = Ja) released on or before its upload date. */
 let wsCache = null;
 const WS_FEW = 3;   // cells with fewer runs are faded
 function wsBase() {
-  if (wsCache && wsCache.runs === state.runs && wsCache.updates === state.updates) return wsCache;
+  const hero = heroMode();
+  if (wsCache && wsCache.runs === state.runs && wsCache.updates === state.updates && wsCache.hero === hero) return wsCache;
+  const runs = state.runs.filter(heroOk);   // reference and runs from the same Heroics selection
   const best = new Map();
-  for (const r of state.runs) {
+  for (const r of runs) {
     const k = r.game + "|" + r.quest + "|" + r.weapon;
     if (!best.has(k) || r.sec < best.get(k)) best.set(k, r.sec);
   }
@@ -2261,14 +2264,14 @@ function wsBase() {
   }
   const byGame = {};
   for (const u of state.updates) (byGame[u.game] ||= []).push(u);
-  const items = state.runs.map(r => {
+  const items = runs.map(r => {
     const s = sum.get(r.game + "|" + r.quest);
     const ratio = s && r.sec ? (s.t / s.n) / r.sec : null;
     let upd = null;
     if (/^\d{4}-\d\d-\d\d$/.test(r.date || "")) for (const u of byGame[r.game] || []) if (u.date <= r.date) upd = u.label;
     return { r, ratio, upd };
   }).filter(x => x.ratio);
-  return (wsCache = { runs: state.runs, updates: state.updates, items, byGame });
+  return (wsCache = { runs: state.runs, updates: state.updates, hero, items, byGame });
 }
 /* "Top 3" / "Best": per quest and weapon keep only the n fastest runs (one per YouTube channel; runs without channel count separately) */
 function limitRuns(list, n) {
@@ -2441,6 +2444,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V62", when: "14.10.2026 13:50", items: [
+    "Weapon Strength: with \"No Heroics\" or \"Heroics only\" the ratio is now measured against the average of the selected runs, so 1.00 again means the quest average." ] },
   { v: "V61", when: "14.10.2026 13:40", items: [
     "Weapon Strength: clearer explanation of why extreme values can be ignored with the slider." ] },
   { v: "V60", when: "14.10.2026 11:35", items: [
