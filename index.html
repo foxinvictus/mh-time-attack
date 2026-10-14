@@ -338,6 +338,8 @@
   }
   header { position: relative; }
   header .top-actions { position: absolute; top: 22px; right: 16px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+  /* with Submit + Vote the buttons no longer fit beside the title: put them in their own row below it */
+  header .top-actions { position: static; width: 100%; margin: 10px 0; justify-content: flex-start; }
   .theme-btn { background: none; border: 1px solid var(--ink-3); border-radius: 999px; padding: 3px 12px; cursor: pointer; color: var(--muted); font-size: 13px; }
 
   /* ---------- view switcher ---------- */
@@ -695,6 +697,21 @@
   .sub-f select:focus, .sub-f input:focus { outline: 2px solid var(--gold); outline-offset: 0; }
   .sub-f .seg { justify-self: start; }
   .sub-small { font-size: 12px; color: var(--muted); }
+  /* voting */
+  .top-actions .vote-btn[hidden] { display: none; }
+  .vote-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
+  .vote-list li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px;
+    background: var(--ink); border: 1px solid var(--ink-3); border-radius: 8px; }
+  .vote-name { font: 700 17px/1.15 "Barlow Condensed", sans-serif; }
+  .vote-name small { display: block; font: 400 12px/1.3 "Noto Sans JP", sans-serif; color: var(--muted); }
+  .vote-bar { grid-column: 1; height: 8px; background: var(--ink-2); border-radius: 4px; overflow: hidden; }
+  .vote-bar i { display: block; height: 100%; background: var(--gold); border-radius: 4px; transition: width .4s ease; }
+  .vote-n { grid-column: 2; grid-row: 2; font: 700 15px/1 "Barlow Condensed", sans-serif; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .vote-go { grid-column: 2; grid-row: 1; padding: 5px 12px; border: 1px solid var(--gold); border-radius: 999px; background: none; color: var(--gold);
+    cursor: pointer; font: 700 14px/1 "Barlow Condensed", sans-serif; white-space: nowrap; }
+  .vote-go:hover:not(:disabled) { background: var(--gold); color: var(--on-gold); }
+  .vote-go:disabled { border-color: var(--ink-3); color: var(--muted); cursor: default; }
+  .vote-dm { display: inline-block; margin-top: 10px; color: var(--gold); font-size: 14px; }
   .sub-rule { margin: 0; font-size: 13px; color: var(--gold); }
   .sub-third { margin: -4px 0 0; font-size: 13px; color: var(--muted); }
   .sub-third strong { color: var(--paper); }
@@ -814,7 +831,6 @@
       display: flex; align-items: flex-end; gap: 12px 32px; flex-wrap: wrap;
       padding: 14px 24px 0; border-bottom: 1px solid var(--ink-3);
     }
-    header .top-actions { top: 16px; right: 24px; }
     header, main, footer { max-width: 1280px; }
     h1 { font-size: 34px; }
     .brand { padding-bottom: 10px; }
@@ -986,6 +1002,7 @@
   </div>
   <div class="top-actions">
     <button class="theme-btn submit-btn" id="submitBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/submit-run.png" alt="" onerror="this.remove()"><span>Submit a run</span></button>
+    <button class="theme-btn vote-btn" id="voteBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/vote.png" alt="" onerror="this.replaceWith('🗳️')"><span>Vote for the next game</span></button>
     <button class="theme-btn lang-btn" id="langBtn" type="button"></button>
     <button class="theme-btn" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.remove()"><span>Changelog</span></button>
     <button class="theme-btn" id="themeBtn" type="button"><img class="bicon" src="icons/UI/light-mode.png" alt="" onerror="this.remove()"><span>Light mode</span></button>
@@ -1117,6 +1134,17 @@
     <button class="sub-send" id="sSend" type="submit">Submit</button>
     <p class="sub-status" id="sStatus" aria-live="polite"></p>
   </form>
+</dialog>
+<dialog class="about submit" id="voteDlg" aria-labelledby="voteTitle">
+  <div class="about-head">
+    <h2 id="voteTitle" class="sub-title"><img src="icons/UI/vote.png" alt="" onerror="this.remove()"><span>Vote for the next game</span></h2>
+    <button class="theme-btn about-x" id="voteClose" type="button" aria-label="Close">✕</button>
+  </div>
+  <p class="sub-lead">Which game should be added next? Vote for it – you can vote for several games.</p>
+  <ul class="vote-list" id="voteList"></ul>
+  <p class="sub-hint">Important: no matter how many votes a game gets, someone first has to contact me via DM and take care of that game. I would program everything for them – automatic quest detection, Heroics detection and weapon detection. The only thing they would have to do is quickly watch the found videos and approve them. As long as a game is still in this list, nobody has volunteered yet.</p>
+  <a class="vote-dm" href="https://x.com/fox_invictus" target="_blank" rel="noopener">DM on X: @fox_invictus ↗</a>
+  <p class="sub-status" id="voteStatus" aria-live="polite"></p>
 </dialog>
 <dialog class="info" id="infoDlg" aria-labelledby="infoTitle">
   <div class="info-head">
@@ -1349,6 +1377,11 @@ const JA = {
   "Please enter the time as mm:ss, e.g. 03:24.": "タイムは mm:ss の形式で入力してください（例：03:24）。",
   "Format mm:ss – milliseconds are not needed.": "形式は mm:ss です。ミリ秒は不要です。",
   "Please select a weapon": "武器を選択してください",
+  "Vote for the next game": "次のタイトルに投票", "Vote": "投票", "Voted ✓": "投票済み ✓", "{n} votes": "{n}票", "{n} vote": "{n}票",
+  "Loading votes…": "投票状況を読み込み中…", "No games to vote for right now.": "現在、投票できるタイトルはありません。",
+  "Thanks for your vote!": "投票ありがとうございます！", "DM on X: @fox_invictus ↗": "XでDM：@fox_invictus ↗",
+  "Which game should be added next? Vote for it – you can vote for several games.": "次に追加してほしいタイトルに投票してください。複数のタイトルに投票できます。",
+  "Important: no matter how many votes a game gets, someone first has to contact me via DM and take care of that game. I would program everything for them – automatic quest detection, Heroics detection and weapon detection. The only thing they would have to do is quickly watch the found videos and approve them. As long as a game is still in this list, nobody has volunteered yet.": "重要：投票数に関係なく、まずそのタイトルを担当してくれる方からDMで連絡をいただく必要があります。クエストの自動判定、火事場の自動判定、武器の自動判定など、必要なものはすべて私がプログラムします。担当の方にお願いするのは、見つかった動画を軽く確認して承認することだけです。このリストに残っているタイトルは、まだ担当者が見つかっていません。",
   "⚠️ The run must be faster than the current 3rd place for this weapon and category (with / without Heroics).": "⚠️ 投稿できるのは、その武器・カテゴリー（火事場あり／なし）の現在の3位より速い記録だけです。",
   "Current 3rd place ({w}, {c}): <strong>{t}</strong> – your time must be faster.": "現在の3位（{w}・{c}）：<strong>{t}</strong> – これより速いタイムが必要です。",
   "The top 3 for {w} ({c}) is not full yet – every time counts.": "{w}（{c}）のトップ3はまだ埋まっていません。どのタイムでも投稿できます。", "Please select a weapon.": "武器を選択してください。",
@@ -1400,7 +1433,7 @@ const qTitle = q => LANG === "ja" && q.jp ? `${qn(q)}\n${q.quest}` : q.quest;
 
 /* static texts in the HTML (header, view switcher, controls, dialogs, footer): translated in place,
    the English original is kept so switching back works */
-const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #submitDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
+const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #submitDlg, #voteDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
 const i18nOrig = new WeakMap();
 function translateStatic() {
   document.querySelectorAll(I18N_STATIC).forEach(root => {
@@ -2757,6 +2790,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V75", when: "14.10.2026 19:10", items: [
+    "New: vote for the next game to be added (button „Vote for the next game“ at the top). The current votes of every game are shown." ] },
   { v: "V74", when: "14.10.2026 18:30", items: [
     "Submit a run: note that the run must beat the current 3rd place of its weapon and category; the time to beat is shown right in the form." ] },
   { v: "V73", when: "14.10.2026 18:20", items: [
@@ -3057,6 +3092,66 @@ function fillSubmitQuests(sel) {
     } catch (err) { say(tr("Something went wrong. Please try again later."), "err"); }
     send.disabled = false;
   };
+})();
+
+/* ---------- vote for the next game ----------
+   Same Apps Script web app as the submissions (voting.gs): GET ?action=votes lists the games, POST {action:"vote"} adds one.
+   One vote per game per browser (remembered in localStorage). */
+/* names shown for each vote id (the id = English abbreviation, the only thing stored in the sheet) */
+const VOTE_GAMES = {
+  "MH4U Plus": { en: "MH4U Plus (fan-made)", ja: "MH4G Plus（ファンメイド）" },
+  "MH4U":      { en: "MH4U (2014)",  ja: "MH4G (2014)" },
+  "MHGU":      { en: "MHGU (2017)",  ja: "MHXX (2017)" },
+  "MHP3rd":    { en: "MHP3rd (2010)", ja: "MHP3 (2010)" },
+  "MH3U":      { en: "MH3U (2011)",  ja: "MH3G (2011)" },
+  "MHFU":      { en: "MHFU (2008)",  ja: "MHP2G (2008)" },
+  "MHG":       { en: "MHG (2005)",   ja: "MHG (2005)" },
+  "MHF-ZZ":    { en: "MHF-ZZ (2007, private servers)", ja: "MHF-ZZ（2007、プライベートサーバー）" },
+};
+(function setupVote() {
+  const dlg = document.getElementById("voteDlg"), list = document.getElementById("voteList"), st = document.getElementById("voteStatus");
+  const btn = document.getElementById("voteBtn");
+  btn.hidden = !SUBMIT_URL;
+  let games = [];
+  const mine = () => { try { return JSON.parse(localStorage.getItem("mhlb-votes") || "[]"); } catch (e) { return []; } };
+  const remember = g => { try { localStorage.setItem("mhlb-votes", JSON.stringify([...new Set(mine().concat(g))])); } catch (e) {} };
+  const draw = () => {
+    if (!games.length) { list.innerHTML = `<li>${tr("No games to vote for right now.")}</li>`; return; }
+    const max = Math.max(1, ...games.map(g => g.votes)), done = mine();
+    list.innerHTML = [...games].sort((a, b) => b.votes - a.votes).map(g => {
+      const has = done.includes(g.id);
+      const nm = VOTE_GAMES[g.id] || { en: g.id, ja: g.id };
+      return `<li><span class="vote-name">${esc(LANG === "ja" ? nm.ja : nm.en)}</span>` +
+        `<button type="button" class="vote-go" data-game="${esc(g.id)}"${has ? " disabled" : ""}>${tr(has ? "Voted ✓" : "Vote")}</button>` +
+        `<span class="vote-bar"><i style="width:${(g.votes / max * 100).toFixed(1)}%"></i></span>` +
+        `<span class="vote-n">${trn(g.votes, "{n} vote", "{n} votes")}</span></li>`;
+    }).join("");
+  };
+  const say = (msg, cls) => { st.textContent = msg; st.className = "sub-status " + (cls || ""); };
+  btn.onclick = async () => {
+    say(""); list.innerHTML = `<li>${tr("Loading votes…")}</li>`;
+    dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+    try {
+      const out = await (await fetch(SUBMIT_URL + "?action=votes")).json();
+      games = out.games || []; draw();
+    } catch (e) { list.innerHTML = ""; say(tr("Something went wrong. Please try again later."), "err"); }
+  };
+  list.onclick = async e => {
+    const b = e.target.closest(".vote-go"); if (!b || b.disabled) return;
+    const g = b.dataset.game;
+    b.disabled = true;
+    try {
+      const out = await (await fetch(SUBMIT_URL, { method: "POST", body: JSON.stringify({ action: "vote", game: g }) })).json();
+      if (out.ok) { remember(g); games = out.games || games; draw(); say(tr("Thanks for your vote!"), "ok"); gcEvent("vote-" + g, "Vote: " + g); }
+      else { b.disabled = false; say(tr(out.code === "limit" || out.code === "busy" ? "Too many submissions right now. Please try again later." : "Something went wrong. Please try again later."), "err"); }
+    } catch (err) { b.disabled = false; say(tr("Something went wrong. Please try again later."), "err"); }
+  };
+  document.getElementById("voteClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => {
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
 })();
 
 (function setupAbout() {
