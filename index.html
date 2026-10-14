@@ -415,12 +415,15 @@
     font: 700 16px/1 "Barlow Condensed", sans-serif; white-space: nowrap;
   }
   .quickbar button img { width: 20px; height: 20px; object-fit: contain; flex: none; }
+  .quickbar .qb-theme { padding: 5px; width: 32px; height: 32px; justify-content: center; flex: none; margin-left: auto; color: var(--muted); font-size: 16px; }
+  .qb-views { margin-left: auto; }
+  .qb-views + .qb-theme { margin-left: 0; }
   .quickbar button:hover { border-color: var(--gold); }
   .quickbar button[aria-current="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
   @media (max-width: 760px) {
     /* phone: six equal cells, icon above a small label */
     .quickbar { gap: 4px; padding-inline: 8px; }
-    .qb-brand { width: 100%; justify-content: center; align-items: center; }
+    .qb-brand { width: 100%; justify-content: center; align-items: center; padding-inline: 30px; box-sizing: border-box; gap: 4px 8px; }
     .qb-brand img { width: 22px; height: 22px; }
     .qb-title { font-size: 17px; }
     .qb-by { font-size: 11px; }
@@ -428,6 +431,25 @@
     .quickbar button { flex: 1 1 0; flex-direction: column; gap: 3px; padding: 5px 2px; border-radius: 8px;
       font-size: 11px; white-space: normal; text-align: center; line-height: 1.05; }
     .quickbar button img { width: 22px; height: 22px; }
+    .quickbar { position: fixed; }
+    .quickbar .qb-theme { position: absolute; top: calc(4px + env(safe-area-inset-top, 0px)); right: 8px; width: 28px; height: 28px; padding: 4px; flex-direction: row; border-radius: 999px; }
+    .quickbar .qb-theme img { width: 18px; height: 18px; }
+  }
+  /* Weapon Strength: once the filters scroll away, they stay pinned right under the quick bar */
+  .ctl-slot { min-width: 0; }
+  .controls.float {
+    position: fixed; left: 0; right: 0; top: var(--qb-h, 0px); z-index: 49;
+    justify-content: center; padding: 8px 16px; gap: 8px;
+    background: var(--ink-2); border-bottom: 1px solid var(--ink-3); box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+  }
+  .controls.float .hero-na { display: none; }
+  @media (max-width: 760px) {
+    .controls.float { padding: 6px 8px; gap: 6px; }
+    .controls.float { gap: 4px; }
+    .controls.float .seg button { padding: 4px 8px; font-size: 13px; }
+    .controls.float .seg-label { display: none; }
+    .controls.float .trim-ctl { font-size: 12px; gap: 4px; padding: 0 8px; }
+    .controls.float .trim-ctl input { width: 70px; }
   }
   @media (prefers-reduced-motion: no-preference) { .quickbar { animation: qbIn .18s ease-out; } }
   @keyframes qbIn { from { transform: translateY(-100%); } to { transform: none; } }
@@ -565,12 +587,55 @@
   .ws .up, .ws .down { font-weight: 700; }
   .ws tr.cnt td, .ws tr.cnt th { height: auto; padding: 5px 4px; font-size: 12px; color: var(--muted); background: var(--ink-2); }
   .ws-chart { margin-top: 18px; }
+  /* Weapon Strength: display picker (sheet / bar chart / tier list) with small previews */
+  .ws-disp { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 8px; }
+  .ws-disp[hidden] { display: none; }
+  .ws-disp button { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 10px 5px; cursor: pointer;
+    background: transparent; color: var(--muted); border: 1px solid var(--ink-3); border-radius: 10px; font: 700 15px/1 "Barlow Condensed", sans-serif; }
+  .ws-disp button svg { width: 72px; height: 44px; display: block; }
+  .ws-disp button:hover { color: var(--paper); border-color: var(--muted); }
+  .ws-disp button[aria-pressed="true"] { color: var(--paper); border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+  .controls.float .ws-disp { flex: 0 0 auto; gap: 4px; }
+  .controls.float .ws-disp button { flex-direction: row; padding: 5px 10px; border-radius: 999px; font-size: 14px; }
+  .controls.float .ws-disp button svg { display: none; }
+  /* column picker above bar chart / tier list */
+  .ws-cols { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+  .ws-cols button { padding: 5px 12px; border: 1px solid var(--ink-3); border-radius: 999px; background: transparent; color: var(--paper); cursor: pointer;
+    font: 700 15px/1.1 "Barlow Condensed", sans-serif; text-align: center; }
+  .ws-cols button small { display: block; font: 400 11px/1.1 "Barlow", sans-serif; color: var(--muted); }
+  .ws-cols button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+  .ws-cols button[aria-pressed="true"] small { color: var(--on-gold); opacity: .8; }
+  /* tier list */
+  .tiers { display: grid; gap: 4px; padding: 4px; background: var(--ink-2); border-radius: 8px; }
+  .tier { display: grid; grid-template-columns: 64px 1fr; gap: 4px; min-height: 58px; }
+  .tier-l { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 4px; color: #fff;
+    font: 700 30px/1 "Barlow", sans-serif; }
+  .tier-l small { font: 600 11px/1.2 "Barlow", sans-serif; opacity: .85; }
+  .tier-l.dark { color: #1d1d1d; }
+  .tier-c { display: flex; flex-wrap: wrap; align-content: center; gap: 6px; padding: 6px; background: var(--ink); border-radius: 4px; }
+  .tchip { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 4px 3px; min-width: 44px; border-radius: 8px; background: var(--ink-2); border: 1px solid var(--ink-3); }
+  .tchip .wi.th { width: 34px; height: 34px; }
+  .tchip .tv { font: 700 14px/1 "Barlow Condensed", sans-serif; color: var(--muted); font-variant-numeric: tabular-nums; }
+  @media (max-width: 600px) {
+    .tier { grid-template-columns: 44px 1fr; min-height: 46px; }
+    .tier-l { font-size: 24px; }
+    .tier-l small { font-size: 9px; }
+    .tchip { min-width: 38px; padding: 3px 3px 2px; }
+    .tchip .wi.th { width: 28px; height: 28px; }
+    .tchip .tv { font-size: 12px; }
+    .ws-disp button svg { width: 60px; height: 37px; }
+  }
   .ws-chart h3 { margin: 0 0 8px; font: 700 22px/1.1 "Barlow Condensed", sans-serif; }
   .ws-chart h3 small { font: 400 14px/1 "Barlow", sans-serif; color: var(--muted); margin-left: 8px; }
   .wsb { display: grid; grid-template-columns: 34px 150px 1fr 54px 56px; align-items: center; gap: 10px; padding: 3px 0; }
   .wsb .pos { font: 700 19px/1 "Barlow Condensed", sans-serif; color: var(--paper); text-align: right; }
   .wsb .nm { display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; }
-  .wsb .track { height: 22px; background: var(--ink-2); border-radius: 4px; overflow: hidden; }
+  .wsb .track { position: relative; height: 22px; background: var(--ink-2); border-radius: 4px; overflow: hidden; }
+  /* Top 3: lowest → highest counted ratio, drawn through the middle of the bar */
+  .wsb .rng { position: absolute; top: 50%; height: 8px; transform: translateY(-50%); box-sizing: border-box; opacity: .55;
+    border-left: 1.5px solid var(--paper); border-right: 1.5px solid var(--paper); }
+  .wsb .rng::before { content: ""; position: absolute; left: 0; right: 0; top: 3.5px; height: 1px; background: var(--paper); }
+  .ws-filters { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
   .wsb .fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
   .wsb .val { font: 700 19px/1 "Barlow Condensed", sans-serif; text-align: right; }
   .wsb .dl { font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -845,6 +910,35 @@
     .meta { font-size: 12px; justify-content: flex-start; }
     footer { padding: 8px 16px 32px; }
   }
+
+  /* phone, by quest: one compact line per weapon so all 14 fit on one screen.
+     The bar's time is the video link; beside it only the Heroics icon and one extra value. */
+  @media (max-width: 600px) {
+    body[data-view="quest"] .rows { margin-top: 8px; }
+    body[data-view="quest"] .row { padding: 3px 0; gap: 0 8px; }
+    body[data-view="quest"] .row.has-icon { grid-template-columns: 24px 30px 1fr; }
+    body[data-view="quest"] .row.has-icon .wi { width: 30px; height: 30px; border-radius: 7px; }
+    body[data-view="quest"] .rank { font-size: 17px; }
+    body[data-view="quest"] .rank .uimedal { width: 22px; height: 22px; }
+    body[data-view="quest"] .runs { gap: 3px; }
+    body[data-view="quest"] .run { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+    body[data-view="quest"] .bar-wrap { height: 26px; }
+    body[data-view="quest"] .time { font-size: 18px; left: 8px; }
+    body[data-view="quest"] .run.minor .bar-wrap { height: 15px; }
+    body[data-view="quest"] .run.minor .time { font-size: 13px; }
+    body[data-view="quest"] .meta { gap: 4px; justify-content: flex-end; overflow: visible; font-size: 12px; }
+    body[data-view="quest"] .meta .p,
+    body[data-view="quest"] .meta .wl,
+    body[data-view="quest"] .meta .ch,
+    body[data-view="quest"] .meta .d,
+    body[data-view="quest"] .meta .alt:not(.wl + .alt) { display: none; }
+    body[data-view="quest"] .meta .hb { width: 16px; }
+    body[data-view="quest"] .meta .hicon { width: 16px; height: 16px; }
+    body[data-view="quest"] .meta .badge { font-size: 10px; padding: 0 3px; line-height: 14px; }
+    body[data-view="quest"] .alt.u-dps { width: 50px; }
+    body[data-view="quest"] .alt.u-time { width: 32px; }
+    body[data-view="quest"] .run.minor .meta { font-size: 11px; }
+  }
 </style>
 </head>
 <body>
@@ -896,6 +990,7 @@
   <button data-view="strength"><img src="icons/UI/weapon-strength.png" alt="" onerror="this.remove()"><span>Weapon Strength</span></button>
   <button data-view="hof"><img src="icons/UI/hall-of-fame.png" alt="" onerror="this.remove()"><span>Hall of Fame</span></button>
   </div>
+  <button class="qb-theme" id="qbTheme" type="button"></button>
 </nav>
 
 <main>
@@ -907,7 +1002,12 @@
   <section aria-live="polite">
     <div class="board-head">
       <div class="board-title" id="boardTitle"></div>
-      <div class="controls">
+      <div class="ctl-slot" id="ctlSlot"><div class="controls" id="controls">
+        <div class="ws-disp" role="group" aria-label="Display" id="wsDispSeg" hidden>
+          <button data-wsdisp="sheet" aria-pressed="true"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><g fill="#edbc60"><rect x="6" y="6" width="12" height="7" rx="1.5" opacity=".9"/><rect x="21" y="6" width="12" height="7" rx="1.5" opacity=".5"/><rect x="36" y="6" width="12" height="7" rx="1.5" opacity=".7"/><rect x="51" y="6" width="15" height="7" rx="1.5" opacity=".35"/><rect x="6" y="16" width="12" height="7" rx="1.5" opacity=".4"/><rect x="21" y="16" width="12" height="7" rx="1.5" opacity=".85"/><rect x="36" y="16" width="12" height="7" rx="1.5" opacity=".3"/><rect x="51" y="16" width="15" height="7" rx="1.5" opacity=".6"/><rect x="6" y="26" width="12" height="7" rx="1.5" opacity=".65"/><rect x="21" y="26" width="12" height="7" rx="1.5" opacity=".3"/><rect x="36" y="26" width="12" height="7" rx="1.5" opacity=".95"/><rect x="51" y="26" width="15" height="7" rx="1.5" opacity=".45"/><rect x="6" y="36" width="12" height="4" rx="1" opacity=".25"/><rect x="21" y="36" width="12" height="4" rx="1" opacity=".55"/><rect x="36" y="36" width="12" height="4" rx="1" opacity=".4"/><rect x="51" y="36" width="15" height="4" rx="1" opacity=".75"/></g></svg><span>Sheet</span></button>
+          <button data-wsdisp="bars" aria-pressed="false"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><rect x="6" y="6" width="58" height="5" rx="1.5" fill="#ff4a3d"/><rect x="6" y="13.5" width="50" height="5" rx="1.5" fill="#ffa100"/><rect x="6" y="21" width="43" height="5" rx="1.5" fill="#00a855"/><rect x="6" y="28.5" width="35" height="5" rx="1.5" fill="#5188cb"/><rect x="6" y="36" width="26" height="5" rx="1.5" fill="#b20092"/></svg><span>Bar chart</span></button>
+          <button data-wsdisp="tier" aria-pressed="false"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><rect x="5" y="5" width="9" height="7" fill="#f24b24"/><rect x="5" y="14" width="9" height="7" fill="#ffa62f"/><rect x="5" y="23" width="9" height="7" fill="#ffd02f"/><rect x="5" y="32" width="9" height="7" fill="#17b05a"/><g fill="currentColor" opacity=".55"><rect x="17" y="6" width="6" height="5" rx="1"/><rect x="25" y="6" width="6" height="5" rx="1"/><rect x="17" y="15" width="6" height="5" rx="1"/><rect x="25" y="15" width="6" height="5" rx="1"/><rect x="33" y="15" width="6" height="5" rx="1"/><rect x="17" y="24" width="6" height="5" rx="1"/><rect x="25" y="24" width="6" height="5" rx="1"/><rect x="33" y="24" width="6" height="5" rx="1"/><rect x="41" y="24" width="6" height="5" rx="1"/><rect x="17" y="33" width="6" height="5" rx="1"/></g></svg><span>Tier list</span></button>
+        </div>
         <div class="seg" role="group" aria-label="Quest order" id="sortSeg">
           <span class="seg-label">Quests</span>
           <button data-sort="release" aria-pressed="true" title="Newest quests first; quests released on the same day: most recorded runs first">Release</button>
@@ -942,7 +1042,7 @@
           <button data-hero="only" aria-pressed="false">Heroics only</button>
         </div>
         <p class="hero-na" id="heroNa" hidden></p>
-      </div>
+      </div></div>
     </div>
     <p class="note" id="note" hidden></p>
     <p class="note ws-warn" id="wsWarn" hidden></p>
@@ -1159,9 +1259,9 @@ const JA = {
   "{u} – released {d}": "{u} – 配信日 {d}",
   " Runs without Heroics only.": " 火事場なしの記録のみ。", " Heroics runs only.": " 火事場の記録のみ。",
   "Weapon Strength · {g}": "武器の強さ · {g}", "Weapon Strength · open betas": "武器の強さ · オープンベータ", "Weapon Strength · all titles": "武器の強さ · 全タイトル",
-  "Average ratio of every weapon after each title update. Click a column for its ranking below.": "各アップデート後の全武器の平均レシオ。列をクリックすると下にランキングを表示します。",
-  "Average ratio of every weapon per open beta test (OBT). Click a column for its ranking below.": "オープンベータテスト（OBT）ごとの全武器の平均レシオ。列をクリックすると下にランキングを表示します。",
-  "Average ratio of every weapon per game (without open betas). Click a column for its ranking below.": "作品ごとの全武器の平均レシオ（オープンベータを除く）。列をクリックすると下にランキングを表示します。",
+  "Average ratio of every weapon after each title update. Click a column to see its ranking.": "各アップデート後の全武器の平均レシオ。列をクリックするとランキングを表示します。",
+  "Average ratio of every weapon per open beta test (OBT). Click a column to see its ranking.": "オープンベータテスト（OBT）ごとの全武器の平均レシオ。列をクリックするとランキングを表示します。",
+  "Average ratio of every weapon per game (without open betas). Click a column to see its ranking.": "作品ごとの全武器の平均レシオ（オープンベータを除く）。列をクリックするとランキングを表示します。",
   "Best: only the fastest run per quest and weapon counts.": "最速：クエスト・武器ごとの最速記録のみを集計します。",
   "Top 3: the 3 fastest runs per quest and weapon count.": "トップ3：クエスト・武器ごとの上位3記録を集計します。",
   "If only a few runs have been submitted for a weapon in a quest, their clear times have a very strong effect on the average (the weapon's ratio). To avoid this, these extreme values can be ignored: the slider removes the top and bottom {p} % of each weapon's runs.":
@@ -1181,6 +1281,16 @@ const JA = {
   "rank {r}, {runs}": "{r}位、{runs}", "vs. {p}": "（{p}との差）",
   "Ranking · {x}": "ランキング · {x}", " · arrows: change vs. {p}": " · 矢印：{p}からの変化",
   "No runs in {x} yet.": "{x}にはまだ記録がありません。",
+  "{g}, title update {u}": "{g}・アップデート {u}",
+  "top 3 runs per quest and weapon": "クエスト・武器ごとの上位3記録", "best run per quest and weapon": "クエスト・武器ごとの最速記録",
+  "without Heroics": "火事場なし", "Heroics runs only": "火事場のみ", "with and without Heroics": "火事場あり・なし両方",
+  "top and bottom {p} % ignored": "上下{p}%を除外", "no values ignored": "除外なし",
+  "Active filters: {x}.": "適用中のフィルター：{x}。",
+  "Sheet": "表", "Bar chart": "棒グラフ", "Tier list": "ティアリスト", "Display": "表示", "Column": "列",
+  "Tier list · {x}": "ティアリスト · {x}",
+  "Tiers are set automatically by ratio (1.00 = quest average).": "ティアはレシオから自動で決まります（1.00＝クエスト平均）。",
+  "The line in each bar spans the lowest to the highest ratio that still counts.": "各バーの線は、集計対象となる最低〜最高のレシオの範囲を示します。",
+  "Counted runs: ratio {a} to {b}": "集計対象：レシオ {a}〜{b}",
 };
 let LANG = "en";
 /* "English text" (with {placeholders}) -> text in the active language */
@@ -1290,6 +1400,13 @@ function weaponIcon(k, cls = "") {
 /* Ratio -> colour strength. Ratio 0.6 or lower is very transparent, 1.6 or higher is full colour. */
 const strength = ratio => ratio ? 0.12 + 0.88 * Math.min(1, Math.max(0, (ratio - 0.6) / 1.0)) : 0.12;
 
+/* Weapon Strength tier list: fixed ratio limits (1.00 = quest average) */
+const TIERS = [
+  { l: "S", min: 1.20, c: "#f24b24" }, { l: "A", min: 1.10, c: "#ffa62f", dark: true }, { l: "B", min: 1.03, c: "#ffd02f", dark: true },
+  { l: "C", min: 0.97, c: "#17b05a" }, { l: "D", min: 0.90, c: "#0e98ff" }, { l: "E", min: 0.80, c: "#9b4cff" }, { l: "F", min: 0, c: "#ff45f3" },
+];
+const tierOf = v => TIERS.find(t => v >= t.min);
+
 /* ---------- tiny CSV parser (handles quotes) ---------- */
 function parseCSV(text) {
   const rows = []; let row = [], cell = "", q = false;
@@ -1379,7 +1496,7 @@ function channelTag(r, cls = "ch") {
 
 /* ---------- state ---------- */
 const state = { gameNames: {}, runs: [], quests: [], games: [], updates: [], game: null, view: "table", quest: null, weapon: "GS", depth: 1, hero: "all", metric: "time", sort: "release",
-  wsMode: "updates", trim: 15, wsCol: null, wsRuns: "best", wsHero: "no", hofDays: 90, hofScope: "weapon", newestW: [], wfOpen: false };
+  wsMode: "updates", trim: 15, wsCol: null, wsRuns: "best", wsDisp: "sheet", wsHero: "no", hofDays: 90, hofScope: "weapon", newestW: [], wfOpen: false };
 /* Heroics filter of the active view: Weapon Strength has its own setting (default "No Heroics"), all other views share one (default "All runs") */
 const heroMode = () => state.view === "strength" ? state.wsHero : state.hero;
 const VIEWS = ["table", "quest", "weapon", "newest", "strength", "hof"];
@@ -1388,7 +1505,7 @@ const TRIM_DEFAULT = 15;
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   return { game: p.get("game"), view: p.get("view"), quest: p.get("quest"), weapon: p.get("weapon"), depth: p.get("top"), hero: p.get("heroics"), metric: p.get("bars"), sort: p.get("order"),
-    wsMode: p.get("compare"), trim: p.get("trim"), wsCol: p.get("col"), wsRuns: p.get("runs"), hofDays: p.get("days"), hofScope: p.get("active"), nw: p.get("w"), lang: p.get("lang") };
+    wsMode: p.get("compare"), trim: p.get("trim"), wsCol: p.get("col"), wsRuns: p.get("runs"), wsDisp: p.get("show"), hofDays: p.get("days"), hofScope: p.get("active"), nw: p.get("w"), lang: p.get("lang") };
 }
 function writeHash() {
   const p = new URLSearchParams();
@@ -1411,6 +1528,7 @@ function writeHash() {
     if (state.trim !== TRIM_DEFAULT) p.set("trim", state.trim);
     if (state.wsCol) p.set("col", state.wsCol);
     if (state.wsRuns !== "best") p.set("runs", state.wsRuns);
+    if (state.wsDisp !== "sheet") p.set("show", state.wsDisp);
   }
   if (LANG === "ja") p.set("lang", "ja");
   history.replaceState(null, "", "#" + p.toString());
@@ -1549,6 +1667,7 @@ function init() {
   state.trim = h.trim != null && !isNaN(+h.trim) ? Math.min(25, Math.max(0, Math.round(+h.trim))) : TRIM_DEFAULT;
   state.wsCol = h.wsCol || null;
   state.wsRuns = h.wsRuns === "top3" ? "top3" : "best";
+  state.wsDisp = ["bars", "tier"].includes(h.wsDisp) ? h.wsDisp : "sheet";
   state.hofDays = HOF_PERIODS.some(x => String(x[0]) === h.hofDays) ? Number(h.hofDays) : 90;
   state.hofScope = h.hofScope === "all" ? "all" : "weapon";
   state.newestW = String(h.nw || "").split(",").filter(k => W[k]);
@@ -1858,6 +1977,8 @@ function syncControls() {
   document.querySelectorAll("#wsModeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.wsmode === state.wsMode));
   document.getElementById("wsModeSeg").hidden = !ws;
   document.getElementById("wsRunsSeg").hidden = !ws;
+  document.getElementById("wsDispSeg").hidden = !ws;
+  document.querySelectorAll("#wsDispSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.wsdisp === state.wsDisp));
   document.querySelectorAll("#wsRunsSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.wsruns === state.wsRuns));
   if (!ws) document.getElementById("wsWarn").hidden = true;
   document.getElementById("trimCtl").hidden = !ws;
@@ -1892,8 +2013,16 @@ onSeg("quickbar",  d => {
     pending = false;
     const r = vb.getBoundingClientRect();
     qb.hidden = !(r.height > 0 && r.bottom <= 0);
+    // Weapon Strength: pin the filters under the quick bar once their own place has scrolled under it
+    const slot = document.getElementById("ctlSlot"), ctl = document.getElementById("controls");
+    const qbH = qb.hidden ? 0 : qb.offsetHeight;
+    document.documentElement.style.setProperty("--qb-h", qbH + "px");
+    const floatIt = state.view === "strength" && !qb.hidden && slot.getBoundingClientRect().top < qbH;
+    if (floatIt && !ctl.classList.contains("float")) { slot.style.height = slot.offsetHeight + "px"; ctl.classList.add("float"); }
+    else if (!floatIt && ctl.classList.contains("float")) { ctl.classList.remove("float"); slot.style.height = ""; }
   };
   const queue = () => { if (!pending) { pending = true; requestAnimationFrame(check); } };
+  window.qbCheck = queue;
   window.addEventListener("scroll", queue, { passive: true });
   window.addEventListener("resize", queue);
   check();
@@ -1904,6 +2033,7 @@ onSeg("metricSeg", d => { state.metric = d.metric; });
 onSeg("sortSeg",   d => { state.sort = d.sort; });
 onSeg("wsModeSeg", d => { state.wsMode = d.wsmode; state.wsCol = null; });
 onSeg("wsRunsSeg", d => { state.wsRuns = d.wsruns; });
+onSeg("wsDispSeg", d => { state.wsDisp = d.wsdisp; });
 document.getElementById("trimRange").addEventListener("input", e => { state.trim = Number(e.target.value); render(); });
 
 /* ---------- main render ---------- */
@@ -1926,6 +2056,7 @@ function render() {
   else if (state.view === "newest") renderNewestView();
   else renderTableView();
   fitRows();
+  window.qbCheck?.();
 }
 
 function setNote(hints) {
@@ -2377,6 +2508,13 @@ function trimmedMean(vals, pct) {
   const keep = v.slice(k, n - k);
   return keep.reduce((a, b) => a + b, 0) / keep.length;
 }
+/* lowest and highest value that still counts after trimming */
+function trimmedRange(vals, pct) {
+  const v = [...vals].sort((a, b) => a - b), n = v.length;
+  if (!n) return null;
+  const k = Math.floor(Math.floor(n * 2 * pct / 100) / 2);
+  return { lo: v[k], hi: v[n - k - 1] };
+}
 function renderStrengthView() {
   const title = document.getElementById("boardTitle");
   const tableEl = document.getElementById("table");
@@ -2399,10 +2537,10 @@ function renderStrengthView() {
   const noHeroSkill = state.wsMode === "obt" || (byUpdate && heroUntracked(state.game) === "beta");   // betas have no Heroics skill
   const heroTxt = noHeroSkill ? "" : state.wsHero === "no" ? tr(" Runs without Heroics only.") : state.wsHero === "only" ? tr(" Heroics runs only.") : "";
   title.innerHTML = byUpdate
-    ? `<h2>${tr("Weapon Strength · {g}", { g: esc(gname(state.game)) })}</h2><p>${tr("Average ratio of every weapon after each title update. Click a column for its ranking below.")}</p>`
+    ? `<h2>${tr("Weapon Strength · {g}", { g: esc(gname(state.game)) })}</h2><p>${tr("Average ratio of every weapon after each title update. Click a column to see its ranking.")}</p>`
     : state.wsMode === "obt"
-    ? `<h2>${tr("Weapon Strength · open betas")}</h2><p>${tr("Average ratio of every weapon per open beta test (OBT). Click a column for its ranking below.")}</p>`
-    : `<h2>${tr("Weapon Strength · all titles")}</h2><p>${tr("Average ratio of every weapon per game (without open betas). Click a column for its ranking below.")}</p>`;
+    ? `<h2>${tr("Weapon Strength · open betas")}</h2><p>${tr("Average ratio of every weapon per open beta test (OBT). Click a column to see its ranking.")}</p>`
+    : `<h2>${tr("Weapon Strength · all titles")}</h2><p>${tr("Average ratio of every weapon per game (without open betas). Click a column to see its ranking.")}</p>`;
 
   // values
   const cell = {};   // cell[colKey][weapon] = { v, n }
@@ -2413,7 +2551,7 @@ function renderStrengthView() {
     cell[c.key] = {};
     for (const [k] of WEAPONS) {
       const vals = mine.filter(x => x.r.weapon === k).map(x => x.ratio);
-      cell[c.key][k] = vals.length ? { v: trimmedMean(vals, state.trim), n: vals.length } : null;
+      cell[c.key][k] = vals.length ? { v: trimmedMean(vals, state.trim), n: vals.length, ...trimmedRange(vals, state.trim) } : null;
     }
     // rank inside the column (1 = strongest)
     const order = WEAPONS.map(([k]) => k).filter(k => cell[c.key][k]).sort((a, b) => cell[c.key][b].v - cell[c.key][a].v);
@@ -2471,22 +2609,50 @@ function renderStrengthView() {
     return `<tr><th scope="row" class="ws-lab"><span class="ws-w">${weaponIcon(k, "small")}<span class="wn">${en}</span></span></th>${tds}</tr>`;
   }).join("");
   const cnt = `<tr class="cnt"><th scope="row" class="ws-lab">${tr("Runs")}</th>` + cols.map(c => `<td>${colN[c.key] || "–"}</td>`).join("") + `</tr>`;
-  tableEl.innerHTML = `<table class="ws">${head}<tbody>${body}${cnt}</tbody></table>`;
-  tableEl.querySelectorAll(".colbtn").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
+  const disp = state.wsDisp;
+  tableEl.hidden = disp !== "sheet";
+  tableEl.innerHTML = disp === "sheet" ? `<table class="ws">${head}<tbody>${body}${cnt}</tbody></table>` : "";
+  // in the sheet, a click on a column opens its ranking as a bar chart
+  tableEl.querySelectorAll(".colbtn").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; state.wsDisp = "bars"; render(); });
+  if (disp === "sheet") { chartEl.hidden = true; chartEl.innerHTML = ""; return; }
+  chartEl.hidden = false;
+  // bar chart / tier list: pick the column right here
+  const colPick = `<div class="ws-cols" role="group" aria-label="${esc(tr("Column"))}">` + cols.map(c =>
+    `<button data-col="${esc(c.key)}" aria-pressed="${c === sel}" title="${esc(c.title)}"${colN[c.key] ? "" : " disabled"}>${esc(c.label)}${c.sub ? `<small>${esc(c.sub)}</small>` : ""}</button>`).join("") + `</div>`;
 
   // ranking of the selected column
   const rows = WEAPONS.map(([k]) => ({ k, en: wnShort(k), x: cell[sel.key][k] })).filter(o => o.x).sort((a, b) => b.x.v - a.x.v);
-  const max = Math.max(...rows.map(o => o.x.v), 0.01);
+  const top3 = state.wsRuns === "top3";
+  const max = Math.max(...rows.map(o => top3 ? Math.max(o.x.v, o.x.hi) : o.x.v), 0.01);
   const p = prevOf(sel);
-  chartEl.innerHTML = rows.length
+  const pc = x => (x / max * 100).toFixed(1);
+  // the filters behind this ranking, as one short sentence
+  const scope = byUpdate ? tr("{g}, title update {u}", { g: esc(gname(state.game)), u: esc(sel.label) }) : esc(gname(sel.key));
+  const parts = [scope, tr(top3 ? "top 3 runs per quest and weapon" : "best run per quest and weapon")];
+  if (!noHeroSkill) parts.push(tr(state.wsHero === "no" ? "without Heroics" : state.wsHero === "only" ? "Heroics runs only" : "with and without Heroics"));
+  parts.push(state.trim ? tr("top and bottom {p} % ignored", { p: state.trim }) : tr("no values ignored"));
+  const filterLine = `<p class="ws-filters">${tr("Active filters: {x}.", { x: parts.join(" · ") })}` +
+    (top3 ? " " + tr("The line in each bar spans the lowest to the highest ratio that still counts.") : "") + `</p>`;
+  if (disp === "tier") {
+    const tiers = TIERS.map(t => ({ ...t, list: rows.filter(o => tierOf(o.x.v) === t) }));
+    chartEl.innerHTML = colPick + (rows.length
+      ? `<h3>${tr("Tier list · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}<small>${trn(colN[sel.key], "{n} run", "{n} runs")}</small></h3>` +
+        `<div class="tiers">` + tiers.map(t => `<div class="tier"><div class="tier-l${t.dark ? " dark" : ""}" style="background:${t.c}">${t.l}<small>${t.min ? "≥ " + fmtRatio(t.min) : "< " + fmtRatio(TIERS[TIERS.length - 2].min)}</small></div>` +
+          `<div class="tier-c">${t.list.map(o => `<span class="tchip" title="${esc(`${o.en}: ${fmtRatio(o.x.v)} (${trn(o.x.n, "{n} run", "{n} runs")})`)}">${weaponIcon(o.k, "th")}<span class="tv">${fmtRatio(o.x.v)}</span></span>`).join("")}</div></div>`).join("") + `</div>` +
+        filterLine.replace("</p>", " " + tr("Tiers are set automatically by ratio (1.00 = quest average).") + "</p>")
+      : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`);
+  } else
+  chartEl.innerHTML = colPick + (rows.length
     ? `<h3>${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}<small>${trn(colN[sel.key], "{n} run", "{n} runs")}${p ? tr(" · arrows: change vs. {p}", { p: esc(p.label) }) : ""}</small></h3>` +
       rows.map((o, i) => {
-        const t = tint(o.k, strength(o.x.v));
+        const t = tint(o.k, Math.min(1, 0.3 + strength(o.x.v)));   // ranking bars: stronger colours than the table
         return `<div class="wsb"><span class="pos">${MEDALS[i + 1] ? medalImg(i + 1) : "#" + (i + 1)}</span><span class="nm">${weaponIcon(o.k, "small")}<span class="wn">${o.en}</span></span>` +
-          `<span class="track"><span class="fill" style="display:block;width:${(o.x.v / max * 100).toFixed(1)}%;background:${t.bg}"></span></span>` +
+          `<span class="track"><span class="fill" style="display:block;width:${pc(o.x.v)}%;background:${t.bg}"></span>` +
+          (top3 && o.x.hi > o.x.lo ? `<span class="rng" style="left:${pc(o.x.lo)}%;width:${(pc(o.x.hi) - pc(o.x.lo)).toFixed(1)}%" title="${esc(tr("Counted runs: ratio {a} to {b}", { a: fmtRatio(o.x.lo), b: fmtRatio(o.x.hi) }))}"></span>` : "") + `</span>` +
           `<span class="val">${fmtRatio(o.x.v)}</span><span class="dl">${arrow(delta(sel, o.k))}</span></div>`;
-      }).join("")
-    : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`;
+      }).join("") + filterLine
+    : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`);
+  chartEl.querySelectorAll(".ws-cols button").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
 }
 
 function fitRows() {
@@ -2517,6 +2683,22 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V69", when: "14.10.2026 16:25", items: [
+    "Tier list: weapons are shown as icons only, with the ratio below each icon." ] },
+  { v: "V68", when: "14.10.2026 16:40", items: [
+    "Weapon Strength: choose how to show the results – Sheet, Bar chart or Tier list (with small previews). Only the chosen display is shown, so there is much less scrolling.",
+    "New tier list: weapons are sorted into tiers S–F automatically by their ratio.",
+    "Bar chart and tier list have their own column picker; clicking a column in the sheet opens its bar chart." ] },
+  { v: "V67", when: "14.10.2026 16:15", items: [
+    "The quick bar at the top now also has the light/dark mode button.",
+    "Weapon Strength ranking: stronger bar colours; the Top 3 range line is more subtle." ] },
+  { v: "V66", when: "14.10.2026 16:10", items: [
+    "Weapon Strength: the filters (Best/Top 3, Ignore extremes, Heroics …) now stay pinned at the top while you scroll down to the ranking, so you can try settings and see the bars change right away." ] },
+  { v: "V65", when: "14.10.2026 16:00", items: [
+    "Weapon Strength: with Top 3, a line through each ranking bar shows the lowest and highest ratio that still counts.",
+    "Weapon Strength: a short sentence under the ranking now lists the active filters." ] },
+  { v: "V64", when: "14.10.2026 14:30", items: [
+    "Mobile: \"By quest\" now uses one compact line per weapon, so all 14 weapons fit on one screen. Tap the time to watch the video." ] },
   { v: "V63", when: "14.10.2026 14:00", items: [
     "New quick bar: once the view tiles have scrolled out of sight, a compact bar with the site title and all views stays pinned to the top of the screen, so you can switch views without scrolling back up." ] },
   { v: "V62", when: "14.10.2026 13:50", items: [
@@ -2718,6 +2900,11 @@ const themeBtn = document.getElementById("themeBtn");
 function themeLabel() {
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
   themeBtn.innerHTML = `<img class="bicon" src="icons/UI/${next}-mode.png" alt="" onerror="this.remove()"><span>${tr(next === "dark" ? "Dark mode" : "Light mode")}</span>`;
+  const qt = document.getElementById("qbTheme");
+  if (qt) {
+    qt.innerHTML = `<img src="icons/UI/${next}-mode.png" alt="" onerror="this.replaceWith(document.createTextNode('${next === "dark" ? "☾" : "☀"}'))">`;
+    qt.title = qt.ariaLabel = tr(next === "dark" ? "Dark mode" : "Light mode");
+  }
 }
 function setTheme(t) {
   document.documentElement.dataset.theme = t;
@@ -2726,6 +2913,7 @@ function setTheme(t) {
   if (state.games && state.games.length) render();
 }
 themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
+document.getElementById("qbTheme").addEventListener("click", e => { e.stopPropagation(); themeBtn.onclick(); });
 try { setTheme(localStorage.getItem("mhlb-theme") || "dark"); } catch (e) { setTheme("dark"); }
 
 /* language: "lang=ja" in the link wins, otherwise the last choice in this browser, otherwise English */
