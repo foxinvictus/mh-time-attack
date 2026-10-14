@@ -683,6 +683,27 @@
   .about-card span { display: block; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
   .about-card .arrow { color: var(--gold); font-size: 18px; flex: none; }
   .about-note { margin: 14px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+  /* submit a run */
+  .top-actions .submit-btn { color: var(--gold); border-color: var(--gold); font-weight: 600; }
+  .top-actions .submit-btn[hidden] { display: none; }
+  dialog.submit { width: min(460px, calc(100vw - 32px)); }
+  .sub-lead { margin: -6px 0 12px; font-size: 13px; color: var(--muted); }
+  #submitForm { display: grid; gap: 10px; }
+  .sub-f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .sub-f select, .sub-f input { width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--ink-3);
+    background: var(--ink); color: var(--paper); font: 500 15px "Barlow", "Noto Sans JP", sans-serif; }
+  .sub-f select:focus, .sub-f input:focus { outline: 2px solid var(--gold); outline-offset: 0; }
+  .sub-f .seg { justify-self: start; }
+  .sub-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .sub-hint { margin: 2px 0 0; font-size: 13px; color: var(--paper); background: var(--ink); border: 1px solid var(--ink-3); border-radius: 8px; padding: 8px 10px; }
+  .sub-send { padding: 10px 16px; border: 0; border-radius: 999px; background: var(--gold); color: var(--on-gold); cursor: pointer;
+    font: 700 18px/1 "Barlow Condensed", sans-serif; }
+  .sub-send:disabled { opacity: .55; cursor: default; }
+  .sub-status { margin: 0; min-height: 1.2em; font-size: 14px; }
+  .sub-status.ok { color: #3fbf6a; } .sub-status.err { color: var(--hero); }
+  .qsubmit { margin-top: 8px; padding: 4px 12px; border: 1px dashed var(--gold); border-radius: 999px; background: none; color: var(--gold);
+    cursor: pointer; font: 600 13px "Barlow", sans-serif; }
+  .qsubmit:hover { background: var(--ink-2); }
   /* newest runs */
   body[data-view="newest"] main { grid-template-columns: 1fr; }
   .newest .micons.ov { --s: 30px; }
@@ -956,6 +977,7 @@
     <button class="gscroll gr" type="button" tabindex="-1" aria-hidden="true">›</button>
   </div>
   <div class="top-actions">
+    <button class="theme-btn submit-btn" id="submitBtn" type="button" aria-haspopup="dialog" hidden><span aria-hidden="true">＋</span><span>Submit a run</span></button>
     <button class="theme-btn lang-btn" id="langBtn" type="button"></button>
     <button class="theme-btn" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.remove()"><span>Changelog</span></button>
     <button class="theme-btn" id="themeBtn" type="button"><img class="bicon" src="icons/UI/light-mode.png" alt="" onerror="this.remove()"><span>Light mode</span></button>
@@ -1063,6 +1085,28 @@
     <li><a class="about-card" href="https://www.paypal.com/donate?hosted_button_id=7C863EJY5KN2N" target="_blank" rel="noopener"><img class="about-icon" src="icons/UI/paypal.png" alt="" onerror="this.remove()"><div><strong>Support on PayPal</strong><span>Donate via PayPal</span></div><span class="arrow" aria-hidden="true">↗</span></a></li>
   </ul>
   <p class="about-note">Unofficial fan project.</p>
+</dialog>
+<dialog class="about submit" id="submitDlg" aria-labelledby="submitTitle">
+  <div class="about-head">
+    <h2 id="submitTitle">Submit a run</h2>
+    <button class="theme-btn about-x" id="submitClose" type="button" aria-label="Close">✕</button>
+  </div>
+  <p class="sub-lead">Missing a run? Send it in. Every submission is checked by hand before it appears on the site.</p>
+  <form id="submitForm" novalidate>
+    <label class="sub-f"><span>Game</span><select id="sGame"></select></label>
+    <label class="sub-f"><span>Quest</span><select id="sQuest"></select></label>
+    <label class="sub-f"><span>Weapon</span><select id="sWeapon"></select></label>
+    <div class="sub-f"><span>Heroics</span>
+      <div class="seg" role="group" aria-label="Heroics" id="sHero"><button type="button" data-h="no" aria-pressed="true">No Heroics</button><button type="button" data-h="yes" aria-pressed="false">Heroics</button></div>
+    </div>
+    <label class="sub-f"><span>Clear time</span><input id="sTime" type="text" placeholder="03:24.53" autocomplete="off" required></label>
+    <label class="sub-f"><span>Video link</span><input id="sLink" type="url" placeholder="https://youtu.be/…" autocomplete="off" required></label>
+    <label class="sub-f"><span>Note (optional)</span><input id="sNote" type="text" maxlength="300" autocomplete="off"></label>
+    <input class="sub-hp" id="sHp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <p class="sub-hint">ℹ️ Upload date and runner name are detected automatically from the video – you only need to enter the time and the link.</p>
+    <button class="sub-send" id="sSend" type="submit">Submit</button>
+    <p class="sub-status" id="sStatus" aria-live="polite"></p>
+  </form>
 </dialog>
 <dialog class="info" id="infoDlg" aria-labelledby="infoTitle">
   <div class="info-head">
@@ -1286,6 +1330,18 @@ const JA = {
   "without Heroics": "火事場なし", "Heroics runs only": "火事場のみ", "with and without Heroics": "火事場あり・なし両方",
   "top and bottom {p} % ignored": "上下{p}%を除外", "no values ignored": "除外なし",
   "Active filters: {x}.": "適用中のフィルター：{x}。",
+  "Submit a run": "記録を投稿", "Submit a missing run": "未掲載の記録を投稿", "Submit": "送信", "Game": "タイトル",
+  "Clear time": "クリアタイム", "Video link": "動画リンク", "Note (optional)": "メモ（任意）",
+  "Missing a run? Send it in. Every submission is checked by hand before it appears on the site.": "掲載されていない記録はありますか？ こちらから送ってください。投稿はすべて手動で確認してからサイトに掲載されます。",
+  "ℹ️ Upload date and runner name are detected automatically from the video – you only need to enter the time and the link.": "ℹ️ 投稿日とランナー名は動画から自動で取得されます。入力が必要なのはタイムとリンクだけです。",
+  "Sending…": "送信中…",
+  "Thank you! Your run was submitted and will be checked soon.": "ありがとうございます！ 記録を受け付けました。近日中に確認します。",
+  "Please enter the time like 03:24 or 03:24.53.": "タイムは 03:24 または 03:24.53 の形式で入力してください。",
+  "Please enter a YouTube or Niconico link to the run.": "記録のYouTubeまたはニコニコ動画のリンクを入力してください。",
+  "This run is already on the leaderboard.": "この記録はすでにランキングに掲載されています。",
+  "This run has already been submitted – thank you!": "この記録はすでに投稿されています。ありがとうございます！",
+  "Too many submissions right now. Please try again later.": "現在投稿が集中しています。しばらくしてからもう一度お試しください。",
+  "Something went wrong. Please try again later.": "エラーが発生しました。しばらくしてからもう一度お試しください。",
   "Sheet": "表", "Bar chart": "棒グラフ", "Tier list": "ティアリスト", "Display": "表示", "Column": "列",
   "Tier list · {x}": "ティアリスト · {x}",
   "Tiers are set automatically by ratio (1.00 = quest average).": "ティアはレシオから自動で決まります（1.00＝クエスト平均）。",
@@ -1329,7 +1385,7 @@ const qTitle = q => LANG === "ja" && q.jp ? `${qn(q)}\n${q.quest}` : q.quest;
 
 /* static texts in the HTML (header, view switcher, controls, dialogs, footer): translated in place,
    the English original is kept so switching back works */
-const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
+const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #submitDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
 const i18nOrig = new WeakMap();
 function translateStatic() {
   document.querySelectorAll(I18N_STATIC).forEach(root => {
@@ -2127,7 +2183,10 @@ function renderQuestView() {
   const hp = q.hp
     ? `<p class="hpline">${hpPair(q)}<span class="hpx">${tr("ΣHP = total monster HP, ΔHP = HP removed by the weapon alone")}</span></p>`
     : `<p class="hpline"><span class="hpx">${tr("ΣHP / ΔHP not entered yet")}</span></p>`;
-  title.innerHTML = `<h2 class="with-micons">${monsterIcons(q, "title")}<span>${esc(qn(q))}</span></h2>${sub ? `<p>${sub}</p>` : ""}${hp}`;
+  title.innerHTML = `<h2 class="with-micons">${monsterIcons(q, "title")}<span>${esc(qn(q))}</span></h2>${sub ? `<p>${sub}</p>` : ""}${hp}` +
+    (SUBMIT_URL ? `<button type="button" class="qsubmit" id="qSubmit">＋ ${tr("Submit a missing run")}</button>` : "");
+  const qs = document.getElementById("qSubmit");
+  if (qs) qs.onclick = () => openSubmit(q.game, q.quest);
 
   const board = weaponBoard(q);
   const hints = [];
@@ -2683,6 +2742,10 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V71", when: "14.10.2026 18:00", items: [
+    "Run submissions are now open." ] },
+  { v: "V70", when: "14.10.2026 18:00", items: [
+    "New: submit a missing run. Use the „Submit a run“ button at the top, or „Submit a missing run“ on a quest page (quest already filled in). Pick game, quest, weapon and Heroics, then enter only the time and the video link – upload date and runner name are detected automatically. Every submission is checked by hand." ] },
   { v: "V69", when: "14.10.2026 16:25", items: [
     "Tier list: weapons are shown as icons only, with the ratio below each icon." ] },
   { v: "V68", when: "14.10.2026 16:40", items: [
@@ -2880,6 +2943,76 @@ const CHANGELOG = [
   document.getElementById("infoBtn").onclick = () => dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
   document.getElementById("infoClose").onclick = () => dlg.close();
   dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+})();
+
+/* ---------- submit a run ----------
+   Sends the form to a Google Apps Script web app (einreichungen.gs, its own spreadsheet).
+   Empty SUBMIT_URL = feature switched off (buttons stay hidden). */
+const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbx01l_h6_vFuB9e7Hwn6y4lAOHoP-Ue6cqxWf_l7h_k_si8LR3Bt4eOjDoR5BOWCVYkmA/exec";
+function openSubmit(game, quest, weapon) {
+  const dlg = document.getElementById("submitDlg");
+  const sg = document.getElementById("sGame"), sw = document.getElementById("sWeapon");
+  sg.innerHTML = state.games.map(g => `<option value="${esc(g)}">${esc(gameName(g))}</option>`).join("");
+  sg.value = game || state.game;
+  fillSubmitQuests(quest || (sg.value === state.game ? state.quest : null));
+  sw.innerHTML = WEAPONS.map(([k]) => `<option value="${k}">${esc(wn(k))}</option>`).join("");
+  sw.value = weapon || (state.view === "weapon" ? state.weapon : "GS");
+  const st = document.getElementById("sStatus"); st.textContent = ""; st.className = "sub-status";
+  document.getElementById("sSend").disabled = false;
+  dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+}
+function fillSubmitQuests(sel) {
+  const sg = document.getElementById("sGame"), sq = document.getElementById("sQuest");
+  sq.innerHTML = questsOf(sg.value).map(q => `<option value="${esc(q.quest)}">${esc(qn(q))}</option>`).join("");
+  if (sel && [...sq.options].some(o => o.value === sel)) sq.value = sel;
+}
+(function setupSubmit() {
+  const dlg = document.getElementById("submitDlg"), form = document.getElementById("submitForm");
+  const st = document.getElementById("sStatus"), send = document.getElementById("sSend");
+  const btn = document.getElementById("submitBtn");
+  btn.hidden = !SUBMIT_URL;
+  btn.onclick = () => openSubmit();
+  document.getElementById("submitClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => {
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
+  document.getElementById("sGame").onchange = () => fillSubmitQuests();
+  let hero = false;
+  const heroSeg = document.getElementById("sHero");
+  heroSeg.onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    hero = b.dataset.h === "yes";
+    heroSeg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  };
+  const say = (msg, cls) => { st.textContent = msg; st.className = "sub-status " + (cls || ""); };
+  const MSG = {
+    time: "Please enter the time like 03:24 or 03:24.53.", link: "Please enter a YouTube or Niconico link to the run.",
+    known: "This run is already on the leaderboard.", dup: "This run has already been submitted – thank you!",
+    limit: "Too many submissions right now. Please try again later.", busy: "Too many submissions right now. Please try again later.",
+  };
+  form.onsubmit = async e => {
+    e.preventDefault();
+    if (!SUBMIT_URL) return;
+    const time = document.getElementById("sTime").value.trim(), link = document.getElementById("sLink").value.trim();
+    if (!/^\d{1,2}\s*(?::|'|′|’|分)\s*[0-5]?\d(?:\s*(?:[.:"″”]|''|秒)\s*\d{0,3})?$/.test(time.normalize("NFKC"))) { say(tr(MSG.time), "err"); return; }
+    if (!/(youtu\.be\/|youtube\.com\/(watch|shorts|live)|nicovideo\.jp\/watch\/|nico\.ms\/)/i.test(link)) { say(tr(MSG.link), "err"); return; }
+    const data = { game: document.getElementById("sGame").value, quest: document.getElementById("sQuest").value,
+      weapon: document.getElementById("sWeapon").value, heroics: hero, time, link,
+      note: document.getElementById("sNote").value.trim(), website: document.getElementById("sHp").value, lang: LANG };
+    send.disabled = true; say(tr("Sending…"));
+    try {
+      const res = await fetch(SUBMIT_URL, { method: "POST", body: JSON.stringify(data) });   // text/plain: no CORS preflight
+      const out = await res.json();
+      if (out.ok) {
+        say(tr("Thank you! Your run was submitted and will be checked soon."), "ok");
+        document.getElementById("sTime").value = ""; document.getElementById("sLink").value = ""; document.getElementById("sNote").value = "";
+        gcEvent("submit-run", "Run submitted");
+      } else say(tr(MSG[out.code] || "Something went wrong. Please try again later."), "err");
+    } catch (err) { say(tr("Something went wrong. Please try again later."), "err"); }
+    send.disabled = false;
+  };
 })();
 
 (function setupAbout() {
