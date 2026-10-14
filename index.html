@@ -394,6 +394,43 @@
   .views button:hover { background: var(--ink-3); }
   .views button[aria-selected="true"] { background: var(--gold); color: var(--on-gold); }
   .views button[aria-selected="true"] strong { color: var(--on-gold); }
+  /* quick bar: pinned view switcher, shown after the big tabs scroll out of view */
+  .quickbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    padding: calc(6px + env(safe-area-inset-top, 0px)) 16px 6px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px 18px; flex-wrap: wrap;
+    background: var(--ink-2); border-bottom: 1px solid var(--ink-3);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
+  }
+  .quickbar[hidden] { display: none; }
+  .qb-brand { display: inline-flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; min-width: 0; text-decoration: none; color: var(--paper); }
+  .qb-brand img { width: 30px; height: 30px; object-fit: contain; align-self: center; flex: none; }
+  .qb-title { font: 700 22px/1 "Barlow Condensed", sans-serif; letter-spacing: .01em; }
+  .qb-by { font-size: 13px; color: var(--muted); }
+  .qb-views { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; min-width: 0; }
+  .quickbar button {
+    display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+    padding: 6px 12px; border: 1px solid var(--ink-3); border-radius: 999px;
+    background: transparent; color: var(--paper); cursor: pointer;
+    font: 700 16px/1 "Barlow Condensed", sans-serif; white-space: nowrap;
+  }
+  .quickbar button img { width: 20px; height: 20px; object-fit: contain; flex: none; }
+  .quickbar button:hover { border-color: var(--gold); }
+  .quickbar button[aria-current="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+  @media (max-width: 760px) {
+    /* phone: six equal cells, icon above a small label */
+    .quickbar { gap: 4px; padding-inline: 8px; }
+    .qb-brand { width: 100%; justify-content: center; align-items: center; }
+    .qb-brand img { width: 22px; height: 22px; }
+    .qb-title { font-size: 17px; }
+    .qb-by { font-size: 11px; }
+    .qb-views { width: 100%; flex-wrap: nowrap; gap: 4px; }
+    .quickbar button { flex: 1 1 0; flex-direction: column; gap: 3px; padding: 5px 2px; border-radius: 8px;
+      font-size: 11px; white-space: normal; text-align: center; line-height: 1.05; }
+    .quickbar button img { width: 22px; height: 22px; }
+  }
+  @media (prefers-reduced-motion: no-preference) { .quickbar { animation: qbIn .18s ease-out; } }
+  @keyframes qbIn { from { transform: translateY(-100%); } to { transform: none; } }
 
   main > section { min-width: 0; }
   .controls { min-width: 0; }
@@ -848,6 +885,18 @@
    </div></div>
   </div>
 </div>
+<!-- compact copy of the view tabs, pinned to the top once the big tabs have scrolled away -->
+<nav class="quickbar" id="quickbar" aria-label="Views" hidden>
+  <a class="qb-brand" href="#" onclick="window.scrollTo({ top: 0 }); return false;"><img src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><span class="qb-title">MH Speedrun Leaderboards</span><span class="qb-by"><span>collected by</span> Fox Invictus</span></a>
+  <div class="qb-views">
+  <button data-view="table"><img src="icons/UI/overview.png" alt="" onerror="this.remove()"><span>Overview</span></button>
+  <button data-view="quest"><img src="icons/UI/quest.png" alt="" onerror="this.remove()"><span>By quest</span></button>
+  <button data-view="weapon"><img src="icons/UI/weapon.png" alt="" onerror="this.remove()"><span>By weapon</span></button>
+  <button data-view="newest"><img src="icons/UI/newest-runs.png" alt="" onerror="this.remove()"><span>Newest Runs</span></button>
+  <button data-view="strength"><img src="icons/UI/weapon-strength.png" alt="" onerror="this.remove()"><span>Weapon Strength</span></button>
+  <button data-view="hof"><img src="icons/UI/hall-of-fame.png" alt="" onerror="this.remove()"><span>Hall of Fame</span></button>
+  </div>
+</nav>
 
 <main>
   <aside class="side" aria-label="List">
@@ -1170,7 +1219,7 @@ const qTitle = q => LANG === "ja" && q.jp ? `${qn(q)}\n${q.quest}` : q.quest;
 
 /* static texts in the HTML (header, view switcher, controls, dialogs, footer): translated in place,
    the English original is kept so switching back works */
-const I18N_STATIC = "header .brand, header .top-actions, .viewbar, .board-head .controls, #aboutDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
+const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
 const i18nOrig = new WeakMap();
 function translateStatic() {
   document.querySelectorAll(I18N_STATIC).forEach(root => {
@@ -1789,6 +1838,7 @@ function renderSidebar() {
 /* ---------- controls ---------- */
 function syncControls() {
   document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-selected", b.dataset.view === state.view));
+  document.querySelectorAll("#quickbar button").forEach(b => b.setAttribute("aria-current", String(b.dataset.view === state.view)));
   document.querySelectorAll("#depthSeg button").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.depth) === state.depth));
   document.querySelectorAll("#heroSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.hero === heroMode()));
   // betas: no Heroics switcher (no skill). Games before Rise: switcher plus a note that Heroics is detected automatically.
@@ -1825,6 +1875,29 @@ const onSeg = (id, fn) => document.getElementById(id).addEventListener("click", 
   const b = e.target.closest("button"); if (b) { fn(b.dataset); render(); }
 });
 onSeg("viewSeg",   d => { state.view = d.view; window.scrollTo({ top: 0 }); });
+/* quick bar: switch view and land at the start of the content, just below the pinned bar */
+onSeg("quickbar",  d => {
+  state.view = d.view;
+  requestAnimationFrame(() => {
+    const main = document.querySelector("main"), qb = document.getElementById("quickbar");
+    window.scrollTo({ top: Math.max(0, main.getBoundingClientRect().top + window.scrollY - (qb.hidden ? 0 : qb.offsetHeight) - 8) });
+  });
+});
+/* show the quick bar only once the big view tabs have scrolled completely out of sight (above the window) */
+(function () {
+  const qb = document.getElementById("quickbar"), vb = document.querySelector(".viewbar");
+  if (!qb || !vb) return;
+  let pending = false;
+  const check = () => {
+    pending = false;
+    const r = vb.getBoundingClientRect();
+    qb.hidden = !(r.height > 0 && r.bottom <= 0);
+  };
+  const queue = () => { if (!pending) { pending = true; requestAnimationFrame(check); } };
+  window.addEventListener("scroll", queue, { passive: true });
+  window.addEventListener("resize", queue);
+  check();
+})();
 onSeg("depthSeg",  d => { state.depth = Number(d.depth); });
 onSeg("heroSeg",   d => { if (state.view === "strength") state.wsHero = d.hero; else state.hero = d.hero; });
 onSeg("metricSeg", d => { state.metric = d.metric; });
@@ -2444,6 +2517,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V63", when: "14.10.2026 14:00", items: [
+    "New quick bar: once the view tiles have scrolled out of sight, a compact bar with the site title and all views stays pinned to the top of the screen, so you can switch views without scrolling back up." ] },
   { v: "V62", when: "14.10.2026 13:50", items: [
     "Weapon Strength: with \"No Heroics\" or \"Heroics only\" the ratio is now measured against the average of the selected runs, so 1.00 again means the quest average." ] },
   { v: "V61", when: "14.10.2026 13:40", items: [
