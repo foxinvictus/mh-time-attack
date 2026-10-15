@@ -637,7 +637,26 @@
   .wsb .rng { position: absolute; top: 50%; height: 8px; transform: translateY(-50%); box-sizing: border-box; opacity: .55;
     border-left: 1.5px solid var(--paper); border-right: 1.5px solid var(--paper); }
   .wsb .rng::before { content: ""; position: absolute; left: 0; right: 0; top: 3.5px; height: 1px; background: var(--paper); }
-  .ws-filters { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+  .ws-filters { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+  .ws-filters p { margin: 4px 0; }
+  .ws-filters ul, .ws-hints { margin: 2px 0 0; padding-left: 18px; }
+  .ws-filters li, .ws-hints li { margin: 2px 0; }
+  .ws-filters b { color: var(--paper); }
+  .ws-hints strong { color: var(--gold); }
+  /* runs analysed + accuracy badges */
+  .ws-stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+  .ws-runs, .ws-acc { position: relative; display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 12px; border-radius: 8px;
+    background: var(--ink-2); border: 1px solid var(--ink-3); font-size: 14px; color: var(--muted); overflow: hidden; }
+  .ws-runs strong, .ws-acc strong { font: 700 22px/1 "Barlow Condensed", sans-serif; color: var(--paper); }
+  .ws-acc i { position: absolute; left: 0; bottom: 0; height: 3px; background: currentColor; }
+  .ws-acc.acc-hi { color: #3fbf6a; } .ws-acc.acc-mid { color: #e2b23a; } .ws-acc.acc-lo { color: #ef6a55; }
+  .ws-acc { font-weight: 600; }
+  .acc-pill { font-weight: 700; }
+  .acc-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 5px; vertical-align: middle;
+    box-shadow: 0 0 0 1.5px rgba(0,0,0,.35); }
+  .acc-dot.acc-hi { background: #3fbf6a; } .acc-dot.acc-mid { background: #e2b23a; } .acc-dot.acc-lo { background: #ef6a55; }
+  .wsb .val { white-space: nowrap; }
+  .acc-pill.acc-hi { color: #3fbf6a; } .acc-pill.acc-mid { color: #e2b23a; } .acc-pill.acc-lo { color: #ef6a55; }
   .wsb .fill { height: 100%; border-radius: 4px; transition: width .4s ease; }
   .wsb .val { font: 700 19px/1 "Barlow Condensed", sans-serif; text-align: right; }
   .wsb .dl { font-size: 13px; font-weight: 600; white-space: nowrap; }
@@ -1051,9 +1070,9 @@
       <div class="board-title" id="boardTitle"></div>
       <div class="ctl-slot" id="ctlSlot"><div class="controls" id="controls">
         <div class="ws-disp" role="group" aria-label="Display" id="wsDispSeg" hidden>
-          <button data-wsdisp="sheet" aria-pressed="true"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><g fill="#edbc60"><rect x="6" y="6" width="12" height="7" rx="1.5" opacity=".9"/><rect x="21" y="6" width="12" height="7" rx="1.5" opacity=".5"/><rect x="36" y="6" width="12" height="7" rx="1.5" opacity=".7"/><rect x="51" y="6" width="15" height="7" rx="1.5" opacity=".35"/><rect x="6" y="16" width="12" height="7" rx="1.5" opacity=".4"/><rect x="21" y="16" width="12" height="7" rx="1.5" opacity=".85"/><rect x="36" y="16" width="12" height="7" rx="1.5" opacity=".3"/><rect x="51" y="16" width="15" height="7" rx="1.5" opacity=".6"/><rect x="6" y="26" width="12" height="7" rx="1.5" opacity=".65"/><rect x="21" y="26" width="12" height="7" rx="1.5" opacity=".3"/><rect x="36" y="26" width="12" height="7" rx="1.5" opacity=".95"/><rect x="51" y="26" width="15" height="7" rx="1.5" opacity=".45"/><rect x="6" y="36" width="12" height="4" rx="1" opacity=".25"/><rect x="21" y="36" width="12" height="4" rx="1" opacity=".55"/><rect x="36" y="36" width="12" height="4" rx="1" opacity=".4"/><rect x="51" y="36" width="15" height="4" rx="1" opacity=".75"/></g></svg><span>Sheet</span></button>
-          <button data-wsdisp="bars" aria-pressed="false"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><rect x="6" y="6" width="58" height="5" rx="1.5" fill="#ff4a3d"/><rect x="6" y="13.5" width="50" height="5" rx="1.5" fill="#ffa100"/><rect x="6" y="21" width="43" height="5" rx="1.5" fill="#00a855"/><rect x="6" y="28.5" width="35" height="5" rx="1.5" fill="#5188cb"/><rect x="6" y="36" width="26" height="5" rx="1.5" fill="#b20092"/></svg><span>Bar chart</span></button>
+          <button data-wsdisp="bars" aria-pressed="true"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><rect x="6" y="6" width="58" height="5" rx="1.5" fill="#ff4a3d"/><rect x="6" y="13.5" width="50" height="5" rx="1.5" fill="#ffa100"/><rect x="6" y="21" width="43" height="5" rx="1.5" fill="#00a855"/><rect x="6" y="28.5" width="35" height="5" rx="1.5" fill="#5188cb"/><rect x="6" y="36" width="26" height="5" rx="1.5" fill="#b20092"/></svg><span>Bar chart</span></button>
           <button data-wsdisp="tier" aria-pressed="false"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><rect x="5" y="5" width="9" height="7" fill="#f24b24"/><rect x="5" y="14" width="9" height="7" fill="#ffa62f"/><rect x="5" y="23" width="9" height="7" fill="#ffd02f"/><rect x="5" y="32" width="9" height="7" fill="#17b05a"/><g fill="currentColor" opacity=".55"><rect x="17" y="6" width="6" height="5" rx="1"/><rect x="25" y="6" width="6" height="5" rx="1"/><rect x="17" y="15" width="6" height="5" rx="1"/><rect x="25" y="15" width="6" height="5" rx="1"/><rect x="33" y="15" width="6" height="5" rx="1"/><rect x="17" y="24" width="6" height="5" rx="1"/><rect x="25" y="24" width="6" height="5" rx="1"/><rect x="33" y="24" width="6" height="5" rx="1"/><rect x="41" y="24" width="6" height="5" rx="1"/><rect x="17" y="33" width="6" height="5" rx="1"/></g></svg><span>Tier list</span></button>
+          <button data-wsdisp="sheet" aria-pressed="false"><svg viewBox="0 0 72 44" aria-hidden="true"><rect x="1" y="1" width="70" height="42" rx="4" fill="currentColor" opacity=".12"/><g fill="#edbc60"><rect x="6" y="6" width="12" height="7" rx="1.5" opacity=".9"/><rect x="21" y="6" width="12" height="7" rx="1.5" opacity=".5"/><rect x="36" y="6" width="12" height="7" rx="1.5" opacity=".7"/><rect x="51" y="6" width="15" height="7" rx="1.5" opacity=".35"/><rect x="6" y="16" width="12" height="7" rx="1.5" opacity=".4"/><rect x="21" y="16" width="12" height="7" rx="1.5" opacity=".85"/><rect x="36" y="16" width="12" height="7" rx="1.5" opacity=".3"/><rect x="51" y="16" width="15" height="7" rx="1.5" opacity=".6"/><rect x="6" y="26" width="12" height="7" rx="1.5" opacity=".65"/><rect x="21" y="26" width="12" height="7" rx="1.5" opacity=".3"/><rect x="36" y="26" width="12" height="7" rx="1.5" opacity=".95"/><rect x="51" y="26" width="15" height="7" rx="1.5" opacity=".45"/><rect x="6" y="36" width="12" height="4" rx="1" opacity=".25"/><rect x="21" y="36" width="12" height="4" rx="1" opacity=".55"/><rect x="36" y="36" width="12" height="4" rx="1" opacity=".4"/><rect x="51" y="36" width="15" height="4" rx="1" opacity=".75"/></g></svg><span>Sheet</span></button>
         </div>
         <div class="seg" role="group" aria-label="Quest order" id="sortSeg">
           <span class="seg-label">Quests</span>
@@ -1076,9 +1095,8 @@
           <button data-wsmode="obt" aria-pressed="false" title="All open beta tests side by side">By OBT</button>
         </div>
         <div class="seg" role="group" aria-label="Runs per quest" id="wsRunsSeg" hidden>
-          <span class="seg-label">Runs</span>
-          <button data-wsruns="best" aria-pressed="true" title="Only the fastest run per quest and weapon">Best</button>
-          <button data-wsruns="top3" aria-pressed="false" title="The 3 fastest runs (different channels) per quest and weapon">Top 3</button>
+          <button data-wsruns="best" aria-pressed="false" title="Only the fastest run per quest and weapon">Maximum performance</button>
+          <button data-wsruns="top3" aria-pressed="true" title="Up to 3 runs (different runners) per quest and weapon – recommended">Realistic</button>
         </div>
         <label class="trim-ctl" id="trimCtl" hidden title="Share of runs ignored at the top and at the bottom of every weapon">
           Ignore extremes <input type="range" id="trimRange" min="0" max="25" step="1" value="15"> <output id="trimOut">15 %</output>
@@ -1368,6 +1386,24 @@ const JA = {
   "without Heroics": "火事場なし", "Heroics runs only": "火事場のみ", "with and without Heroics": "火事場あり・なし両方",
   "top and bottom {p} % ignored": "上下{p}%を除外", "no values ignored": "除外なし",
   "Active filters: {x}.": "適用中のフィルター：{x}。",
+  "Maximum performance": "最大パフォーマンス", "Realistic": "実戦向け",
+  "Only the fastest run per quest and weapon": "クエスト・武器ごとの最速記録のみ",
+  "Up to 3 runs (different runners) per quest and weapon – recommended": "クエスト・武器ごとに最大3記録（別ランナー）– おすすめ",
+  "Recommended: “Realistic” + “No Heroics”.": "おすすめ設定：「実戦向け」＋「火事場なし」",
+  "Ratio = average best time of all weapons in the quest ÷ clear time (1.00 = average, higher = faster).": "レシオ＝クエスト内の全武器の最速タイム平均 ÷ クリアタイム（1.00＝平均、高いほど速い）。",
+  "Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.": "極端な値を除外：各武器の上下{p}%の値を除き、単発の外れ値の影響を減らします。",
+  "Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low).": "精度＝ランキングを支える記録の充実度。クエスト・武器ごとに1件目の記録が60%、2件目が25%、3件目が15%として計算します。各バーの後ろの点はその武器の精度です（緑＝高、黄＝中、赤＝低）。",
+  "{w}: accuracy {p} %": "{w}：精度 {p}%",
+  "Active filters:": "適用中のフィルター：",
+  "<b>Realistic</b> – up to 3 runs per quest and weapon (different runners), so more runs are used": "<b>実戦向け</b> – クエスト・武器ごとに最大3記録（別ランナー）を使用。より多くの記録で集計",
+  "<b>Maximum performance</b> – only the fastest run per quest and weapon": "<b>最大パフォーマンス</b> – クエスト・武器ごとの最速記録のみ",
+  "<b>No Heroics</b> – runs without the Heroics damage buff": "<b>火事場なし</b> – 火事場（攻撃力アップ）なしの記録",
+  "<b>Heroics only</b> – only runs with the Heroics damage buff": "<b>火事場のみ</b> – 火事場ありの記録だけ",
+  "<b>All runs</b> – with and without Heroics": "<b>全記録</b> – 火事場あり・なし両方",
+  "<b>Ignore extremes {p} %</b> – outliers at the top and bottom are left out": "<b>極端な値を除外 {p}%</b> – 上下の外れ値を除外",
+  "<b>Ignore extremes off</b> – every value counts": "<b>除外なし</b> – すべての値を集計",
+  "run analysed": "記録を分析", "runs analysed": "記録を分析", "Accuracy": "精度", "High": "高", "Medium": "中", "Low": "低",
+  "arrows: change vs. {p}": "矢印：{p}からの変化",
   "Submit a run": "記録を投稿", "Submit a missing run": "未掲載の記録を投稿", "Submit": "送信", "Game": "タイトル",
   "Clear time": "クリアタイム", "Video link": "動画リンク", "Note (optional)": "メモ（任意）",
   "New runs are collected automatically by a script. If you still found a missing run, I'm very grateful if you send it in! Every submission is checked by hand before it appears on the site.": "新しい記録はスクリプトで自動的に集めています。それでも掲載されていない記録を見つけたら、ぜひ送ってください。とても助かります！ 投稿はすべて手動で確認してからサイトに掲載されます。",
@@ -1510,6 +1546,10 @@ const TIERS = [
   { l: "C", min: 0.97, c: "#17b05a" }, { l: "D", min: 0.90, c: "#0e98ff" }, { l: "E", min: 0.80, c: "#9b4cff" }, { l: "F", min: 0, c: "#ff45f3" },
 ];
 const tierOf = v => TIERS.find(t => v >= t.min);
+/* Weapon Strength accuracy (share of filled ranking slots) -> label + colour class */
+const accOf = a => a >= 0.7 ? { label: "High", cls: "acc-hi" } : a >= 0.4 ? { label: "Medium", cls: "acc-mid" } : { label: "Low", cls: "acc-lo" };
+/* small coloured dot = accuracy of one weapon */
+const accDot = (a, name) => `<span class="acc-dot ${accOf(a).cls}" title="${esc(tr("{w}: accuracy {p} %", { w: name, p: Math.round(a * 100) }))}"></span>`;
 
 /* ---------- tiny CSV parser (handles quotes) ---------- */
 function parseCSV(text) {
@@ -1600,7 +1640,7 @@ function channelTag(r, cls = "ch") {
 
 /* ---------- state ---------- */
 const state = { gameNames: {}, runs: [], quests: [], games: [], updates: [], game: null, view: "table", quest: null, weapon: "GS", depth: 1, hero: "all", metric: "time", sort: "release",
-  wsMode: "updates", trim: 15, wsCol: null, wsRuns: "best", wsDisp: "sheet", wsHero: "no", hofDays: 90, hofScope: "weapon", newestW: [], wfOpen: false };
+  wsMode: "updates", trim: 15, wsCol: null, wsRuns: "top3", wsDisp: "bars", wsHero: "no", hofDays: 90, hofScope: "weapon", newestW: [], wfOpen: false };
 /* Heroics filter of the active view: Weapon Strength has its own setting (default "No Heroics"), all other views share one (default "All runs") */
 const heroMode = () => state.view === "strength" ? state.wsHero : state.hero;
 const VIEWS = ["table", "quest", "weapon", "newest", "strength", "hof"];
@@ -1631,8 +1671,8 @@ function writeHash() {
     if (state.wsMode !== "updates") p.set("compare", state.wsMode);
     if (state.trim !== TRIM_DEFAULT) p.set("trim", state.trim);
     if (state.wsCol) p.set("col", state.wsCol);
-    if (state.wsRuns !== "best") p.set("runs", state.wsRuns);
-    if (state.wsDisp !== "sheet") p.set("show", state.wsDisp);
+    if (state.wsRuns !== "top3") p.set("runs", state.wsRuns);
+    if (state.wsDisp !== "bars") p.set("show", state.wsDisp);
   }
   if (LANG === "ja") p.set("lang", "ja");
   history.replaceState(null, "", "#" + p.toString());
@@ -1770,8 +1810,8 @@ function init() {
   state.wsMode = ["titles", "obt"].includes(h.wsMode) ? h.wsMode : "updates";
   state.trim = h.trim != null && !isNaN(+h.trim) ? Math.min(25, Math.max(0, Math.round(+h.trim))) : TRIM_DEFAULT;
   state.wsCol = h.wsCol || null;
-  state.wsRuns = h.wsRuns === "top3" ? "top3" : "best";
-  state.wsDisp = ["bars", "tier"].includes(h.wsDisp) ? h.wsDisp : "sheet";
+  state.wsRuns = h.wsRuns === "best" ? "best" : "top3";
+  state.wsDisp = ["sheet", "tier"].includes(h.wsDisp) ? h.wsDisp : "bars";
   state.hofDays = HOF_PERIODS.some(x => String(x[0]) === h.hofDays) ? Number(h.hofDays) : 90;
   state.hofScope = h.hofScope === "all" ? "all" : "weapon";
   state.newestW = String(h.nw || "").split(",").filter(k => W[k]);
@@ -2651,10 +2691,26 @@ function renderStrengthView() {
 
   // values
   const cell = {};   // cell[colKey][weapon] = { v, n }
-  const colN = {};
+  const colN = {}, colAcc = {}, wAcc = {};
   for (const c of cols) {
-    const mine = limitRuns(items.filter(c.pick), state.wsRuns === "top3" ? 3 : 1);
+    const picked = items.filter(c.pick);
+    const mine = limitRuns(picked, state.wsRuns === "top3" ? 3 : 1);
     colN[c.key] = mine.length;
+    // accuracy per weapon: for every quest with runs, the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %
+    // ("Maximum performance": only the 1st run, 100 %). Overall = average of all weapons, pulled down by the weakest one.
+    const quests = new Set(picked.map(x => x.r.quest)), nq = quests.size;
+    const W8 = state.wsRuns === "top3" ? [0.6, 0.25, 0.15] : [1];
+    const per = {};
+    mine.forEach(x => { const k = x.r.quest + "|" + x.r.weapon; per[k] = (per[k] || 0) + 1; });
+    wAcc[c.key] = {};
+    for (const [k] of WEAPONS) {
+      let sc = 0;
+      quests.forEach(q => { const n = Math.min(per[q + "|" + k] || 0, W8.length); for (let i = 0; i < n; i++) sc += W8[i]; });
+      wAcc[c.key][k] = nq ? sc / nq : 0;
+    }
+    const accs = Object.values(wAcc[c.key]);
+    const mean = accs.reduce((a, b) => a + b, 0) / accs.length;
+    colAcc[c.key] = nq ? 0.8 * mean + 0.2 * Math.min(...accs) : 0;
     cell[c.key] = {};
     for (const [k] of WEAPONS) {
       const vals = mine.filter(x => x.r.weapon === k).map(x => x.ratio);
@@ -2668,19 +2724,21 @@ function renderStrengthView() {
   const empty = cols.filter(c => !colN[c.key]);
   if (cols.some(c => colN[c.key])) cols = cols.filter(c => colN[c.key]);
   const unassigned = byUpdate ? items.filter(x => x.r.game === state.game && !x.upd).length : 0;
-  const hints = [tr(state.wsRuns === "best" ? "Best: only the fastest run per quest and weapon counts." : "Top 3: the 3 fastest runs per quest and weapon count."),
-    tr("If only a few runs have been submitted for a weapon in a quest, their clear times have a very strong effect on the average (the weapon's ratio). To avoid this, these extreme values can be ignored: the slider removes the top and bottom {p} % of each weapon's runs.", { p: state.trim }),
-    tr("Ratio = average best time of all weapons in the quest ÷ clear time; 1.00 = quest average, higher = faster.")];
+  const hints = [`<strong>${tr("Recommended: “Realistic” + “No Heroics”.")}</strong>`,
+    tr("Ratio = average best time of all weapons in the quest ÷ clear time (1.00 = average, higher = faster)."),
+    tr("Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.", { p: state.trim }),
+    tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low).")];
   if (byUpdate) hints.push(tr("Runs are assigned to a title update by their YouTube upload date.") +
     (unassigned ? " " + trn(unassigned, "{n} run without upload date is not counted here (but in “By title”).", "{n} runs without upload date are not counted here (but in “By title”).") : "") +
     (empty.length && cols.length < empty.length + cols.length ? " " + tr("No runs yet for: {list}.", { list: empty.map(c => c.label).join(", ") }) : ""));
-  hints.push(tr("Faded cells marked * are based on fewer than {n} runs.", { n: WS_FEW }));
-  setNote([hints.join(" ") + heroTxt]);   // setNote removes the spaces between Japanese sentences
+  if (state.wsDisp === "sheet") hints.push(tr("Faded cells marked * are based on fewer than {n} runs.", { n: WS_FEW }));
+  const noteEl = document.getElementById("note");
+  noteEl.hidden = false;
+  noteEl.innerHTML = `<ul class="ws-hints">${hints.map(h => `<li>${h}</li>`).join("")}</ul>`;
   const warn = document.getElementById("wsWarn");
   const warnings = [];
   // Heroics runs included ("All runs" or "Heroics only"): the skill distorts the comparison
   if (!noHeroSkill && state.wsHero !== "no") warnings.push(tr("❗ Heroics is included: Heroics is a 30 % damage buff and strongly changes the natural damage output of the weapons. The skill is used only by speedrunners and is not recommended for a realistic comparison. Choose “No Heroics” for a fair view."));
-  if (state.wsRuns === "top3") warnings.push(tr("⚠️ Top 3 is active: the 3 fastest runs (different channels) per quest and weapon count. These values can be very misleading – often a weapon has only one run in a quest, and if that single run is very good or very bad, the result becomes unrealistic. Use Top 3 for a rough look only, not as an exact ranking."));
   warn.hidden = !warnings.length;
   warn.textContent = warnings.join("\n\n");
 
@@ -2710,12 +2768,13 @@ function renderStrengthView() {
       const t = tint(k, strength(x.v));
       const d = delta(c, k);
       return `<td class="${c === sel ? "sel" : ""}${x.n < WS_FEW ? " few" : ""}" style="background:${t.bg};color:${t.fg}" title="${esc(`${en} · ${c.label}: ${fmtRatio(x.v)} (${tr("rank {r}, {runs}", { r: x.rank, runs: trn(x.n, "{n} run", "{n} runs") })})` + (d != null ? ` · ${d >= 0 ? "+" : ""}${d.toFixed(2)} ${tr("vs. {p}", { p: prevOf(c).label })}` : ""))}">` +
-        `<span class="vr"><span class="wsrk">${MEDALS[x.rank] ? medalImg(x.rank) : "#" + x.rank}</span><span class="v">${fmtRatio(x.v)}</span></span>` +
+        `<span class="vr"><span class="wsrk">${MEDALS[x.rank] ? medalImg(x.rank) : "#" + x.rank}</span><span class="v">${fmtRatio(x.v)}${accDot(wAcc[c.key][k], en)}</span></span>` +
         (d != null && Math.abs(d) >= 0.005 ? `<span class="sub">${arrow(d)}</span>` : "") + `</td>`;
     }).join("");
     return `<tr><th scope="row" class="ws-lab"><span class="ws-w">${weaponIcon(k, "small")}<span class="wn">${en}</span></span></th>${tds}</tr>`;
   }).join("");
-  const cnt = `<tr class="cnt"><th scope="row" class="ws-lab">${tr("Runs")}</th>` + cols.map(c => `<td>${colN[c.key] || "–"}</td>`).join("") + `</tr>`;
+  const cnt = `<tr class="cnt"><th scope="row" class="ws-lab">${tr("Runs")}</th>` + cols.map(c => `<td>${colN[c.key] || "–"}</td>`).join("") + `</tr>` +
+    `<tr class="cnt"><th scope="row" class="ws-lab">${tr("Accuracy")}</th>` + cols.map(c => `<td><span class="acc-pill ${accOf(colAcc[c.key]).cls}">${Math.round(colAcc[c.key] * 100)} %</span></td>`).join("") + `</tr>`;
   const disp = state.wsDisp;
   tableEl.hidden = disp !== "sheet";
   tableEl.innerHTML = disp === "sheet" ? `<table class="ws">${head}<tbody>${body}${cnt}</tbody></table>` : "";
@@ -2733,30 +2792,39 @@ function renderStrengthView() {
   const max = Math.max(...rows.map(o => top3 ? Math.max(o.x.v, o.x.hi) : o.x.v), 0.01);
   const p = prevOf(sel);
   const pc = x => (x / max * 100).toFixed(1);
-  // the filters behind this ranking, as one short sentence
+  // the filters behind this ranking, each with a short explanation
   const scope = byUpdate ? tr("{g}, title update {u}", { g: esc(gname(state.game)), u: esc(sel.label) }) : esc(gname(sel.key));
-  const parts = [scope, tr(top3 ? "top 3 runs per quest and weapon" : "best run per quest and weapon")];
-  if (!noHeroSkill) parts.push(tr(state.wsHero === "no" ? "without Heroics" : state.wsHero === "only" ? "Heroics runs only" : "with and without Heroics"));
-  parts.push(state.trim ? tr("top and bottom {p} % ignored", { p: state.trim }) : tr("no values ignored"));
-  const filterLine = `<p class="ws-filters">${tr("Active filters: {x}.", { x: parts.join(" · ") })}` +
-    (top3 ? " " + tr("The line in each bar spans the lowest to the highest ratio that still counts.") : "") + `</p>`;
+  const fl = [scope, top3
+    ? tr("<b>Realistic</b> – up to 3 runs per quest and weapon (different runners), so more runs are used")
+    : tr("<b>Maximum performance</b> – only the fastest run per quest and weapon")];
+  if (!noHeroSkill) fl.push(tr(state.wsHero === "no" ? "<b>No Heroics</b> – runs without the Heroics damage buff"
+    : state.wsHero === "only" ? "<b>Heroics only</b> – only runs with the Heroics damage buff" : "<b>All runs</b> – with and without Heroics"));
+  fl.push(state.trim ? tr("<b>Ignore extremes {p} %</b> – outliers at the top and bottom are left out", { p: state.trim }) : tr("<b>Ignore extremes off</b> – every value counts"));
+  const filterLine = `<div class="ws-filters"><p>${tr("Active filters:")}</p><ul>${fl.map(x => `<li>${x}</li>`).join("")}</ul>` +
+    (top3 && disp === "bars" ? `<p>${tr("The line in each bar spans the lowest to the highest ratio that still counts.")}</p>` : "") +
+    (disp === "tier" ? `<p>${tr("Tiers are set automatically by ratio (1.00 = quest average).")}</p>` : "") + `</div>`;
+  // runs used + accuracy, clearly visible under the heading
+  const acc = accOf(colAcc[sel.key]);
+  const stats = `<div class="ws-stats"><span class="ws-runs"><strong>${fmtNum(colN[sel.key])}</strong> ${tr(colN[sel.key] === 1 ? "run analysed" : "runs analysed")}</span>` +
+    `<span class="ws-acc ${acc.cls}" title="${esc(tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low)."))}">` +
+    `${tr("Accuracy")} <strong>${Math.round(colAcc[sel.key] * 100)} %</strong> · ${tr(acc.label)}<i style="width:${Math.round(colAcc[sel.key] * 100)}%"></i></span></div>`;
   if (disp === "tier") {
     const tiers = TIERS.map(t => ({ ...t, list: rows.filter(o => tierOf(o.x.v) === t) }));
     chartEl.innerHTML = colPick + (rows.length
-      ? `<h3>${tr("Tier list · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}<small>${trn(colN[sel.key], "{n} run", "{n} runs")}</small></h3>` +
+      ? `<h3>${tr("Tier list · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}</h3>` + stats +
         `<div class="tiers">` + tiers.map(t => `<div class="tier"><div class="tier-l${t.dark ? " dark" : ""}" style="background:${t.c}">${t.l}<small>${t.min ? "≥ " + fmtRatio(t.min) : "< " + fmtRatio(TIERS[TIERS.length - 2].min)}</small></div>` +
-          `<div class="tier-c">${t.list.map(o => `<span class="tchip" title="${esc(`${o.en}: ${fmtRatio(o.x.v)} (${trn(o.x.n, "{n} run", "{n} runs")})`)}">${weaponIcon(o.k, "th")}<span class="tv">${fmtRatio(o.x.v)}</span></span>`).join("")}</div></div>`).join("") + `</div>` +
-        filterLine.replace("</p>", " " + tr("Tiers are set automatically by ratio (1.00 = quest average).") + "</p>")
+          `<div class="tier-c">${t.list.map(o => `<span class="tchip" title="${esc(`${o.en}: ${fmtRatio(o.x.v)} (${trn(o.x.n, "{n} run", "{n} runs")})`)}">${weaponIcon(o.k, "th")}<span class="tv">${fmtRatio(o.x.v)}${accDot(wAcc[sel.key][o.k], o.en)}</span></span>`).join("")}</div></div>`).join("") + `</div>` +
+        filterLine
       : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`);
   } else
   chartEl.innerHTML = colPick + (rows.length
-    ? `<h3>${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}<small>${trn(colN[sel.key], "{n} run", "{n} runs")}${p ? tr(" · arrows: change vs. {p}", { p: esc(p.label) }) : ""}</small></h3>` +
+    ? `<h3>${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}${p ? `<small>${tr("arrows: change vs. {p}", { p: esc(p.label) })}</small>` : ""}</h3>` + stats +
       rows.map((o, i) => {
         const t = tint(o.k, Math.min(1, 0.3 + strength(o.x.v)));   // ranking bars: stronger colours than the table
         return `<div class="wsb"><span class="pos">${MEDALS[i + 1] ? medalImg(i + 1) : "#" + (i + 1)}</span><span class="nm">${weaponIcon(o.k, "small")}<span class="wn">${o.en}</span></span>` +
           `<span class="track"><span class="fill" style="display:block;width:${pc(o.x.v)}%;background:${t.bg}"></span>` +
           (top3 && o.x.hi > o.x.lo ? `<span class="rng" style="left:${pc(o.x.lo)}%;width:${(pc(o.x.hi) - pc(o.x.lo)).toFixed(1)}%" title="${esc(tr("Counted runs: ratio {a} to {b}", { a: fmtRatio(o.x.lo), b: fmtRatio(o.x.hi) }))}"></span>` : "") + `</span>` +
-          `<span class="val">${fmtRatio(o.x.v)}</span><span class="dl">${arrow(delta(sel, o.k))}</span></div>`;
+          `<span class="val">${fmtRatio(o.x.v)}${accDot(wAcc[sel.key][o.k], o.en)}</span><span class="dl">${arrow(delta(sel, o.k))}</span></div>`;
       }).join("") + filterLine
     : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`);
   chartEl.querySelectorAll(".ws-cols button").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
@@ -2790,6 +2858,13 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V77", when: "15.10.2026 11:50", items: [
+    "Weapon Strength: fairer Accuracy – per quest and weapon the 1st run counts most (60 %), the 2nd 25 %, the 3rd 15 %; a weakly covered weapon lowers the overall value.",
+    "Weapon Strength: a small coloured dot after every bar (and in the tier list and sheet) shows the accuracy of each weapon." ] },
+  { v: "V76", when: "15.10.2026 11:45", items: [
+    "Weapon Strength: new order Bar chart · Tier list · Sheet, with the bar chart shown first.",
+    "Weapon Strength: “Best” / “Top 3” are now called “Maximum performance” / “Realistic”. Recommended and preselected: Realistic + No Heroics.",
+    "Weapon Strength: the number of analysed runs and a new Accuracy rating (share of filled ranking slots) are shown clearly above every ranking; shorter notes as bullet points; the active filters are listed with a short explanation." ] },
   { v: "V75", when: "14.10.2026 19:10", items: [
     "New: vote for the next game to be added (button „Vote for the next game“ at the top). The current votes of every game are shown." ] },
   { v: "V74", when: "14.10.2026 18:30", items: [
