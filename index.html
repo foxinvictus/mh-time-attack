@@ -1494,11 +1494,17 @@ const JA = {
   "Only the fastest run per quest and weapon": "クエスト・武器ごとの最速記録のみ",
   "Up to 3 runs per quest and weapon – recommended": "クエスト・武器ごとに最大3記録 – おすすめ",
   "Recommended: “Realistic” + “No Heroics”.": "おすすめ設定：「実戦向け」＋「火事場なし」",
+  "Recommended: “Realistic”.": "おすすめ設定：「実戦向け」",
+  "Heroics runs are ignored here: the Heroics damage buff (+30 %) distorts the results too much and is not realistic for normal play.": "ここでは火事場の記録は除外しています：火事場（攻撃力+30%）は結果を大きくゆがめ、通常のプレイとはかけ離れているためです。",
+  "<b>No Heroics</b> – Heroics runs are ignored (they distort the results and are not realistic)": "<b>火事場なし</b> – 火事場の記録は除外（結果をゆがめ、実戦的ではないため）",
   "Ratio = average best time of all weapons in the quest ÷ clear time (1.00 = average, higher = faster).": "レシオ＝クエスト内の全武器の最速タイム平均 ÷ クリアタイム（1.00＝平均、高いほど速い）。",
+  "Ratio = average time of the same place (1st, 2nd, 3rd) of all weapons in the quest ÷ clear time, normalised so that the weapon average is 1.00 (higher = faster).": "レシオ＝クエスト内の全武器の同順位（1位・2位・3位）タイムの平均 ÷ クリアタイム。武器平均が1.00になるよう正規化（高いほど速い）。",
   "Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.": "極端な値を除外：各武器の上下{p}%の値を除き、単発の外れ値の影響を減らします。",
   "Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low).": "精度＝ランキングを支える記録の充実度。クエスト・武器ごとに1件目の記録が60%、2件目が25%、3件目が15%として計算します。各バーの後ろの点はその武器の精度です（緑＝高、黄＝中、赤＝低）。",
   "{w}: accuracy {p} %": "{w}：精度 {p}%",
-  "Ratio": "レシオ", "quest average": "クエスト平均", "time": "タイム",
+  "Ratio": "レシオ", "quest average": "クエスト平均", "time": "タイム", "quest average of place k": "クエスト内k位の平均",
+  "Same place: each weapon's 1st run is compared with the quest's average 1st-place time, the 2nd with the 2nd, the 3rd with the 3rd – so having more or fewer runs gives no advantage.": "同順位比較：各武器の1位の記録はクエスト内の1位タイムの平均と、2位は2位、3位は3位と比較します。記録の多い・少ないで有利不利は生じません。", "all weapons": "全武器",
+  "Normalised: the average of all weapons is always 1.00 – above 1.00 = stronger than average.": "正規化：全武器の平均は常に1.00です。1.00より上＝平均より強い。",
   "with automatic weapon tier lists": "武器ティア表を自動作成",
   "Quantity": "量", "Quality": "質",
   "Save image": "画像を保存", "Weapon ranking": "武器ランキング", "Share": "共有", "Weapon tier list": "武器ティア表",
@@ -1670,9 +1676,12 @@ const tierOf = v => TIERS.find(t => v >= t.min);
 function wsFormula() {
   const w = `w<sub>q</sub>`;
   return `<div class="ws-formula">` +
-    `<p><span class="f">${tr("Ratio")} = Σ ${w}·r ÷ Σ ${w}</span><span class="f">${w} = (n<sub>q</sub> ÷ 14)²</span><span class="f">r = ${tr("quest average")} ÷ ${tr("time")}</span></p>` +
+    `<p><span class="f">${tr("Ratio")} = R ÷ Ø R<sub>${tr("all weapons")}</sub></span><span class="f">R = Σ ${w}·r ÷ Σ ${w}</span></p>` +
+    `<p><span class="f">${w} = (n<sub>q</sub> ÷ 14)²</span><span class="f">r<sub>k</sub> = ${tr("quest average of place k")} ÷ ${tr("time")}</span></p>` +
     `<p><span class="f">${tr("Accuracy")} = Σ ${w}·(0.6·a<sub>1</sub> + 0.25·a<sub>2</sub> + 0.15·a<sub>3</sub>) ÷ Σ ${w}</span></p>` +
     `<p class="leg">${tr("n<sub>q</sub> = weapons with a run in quest q · a<sub>1–3</sub> = 1st / 2nd / 3rd run exists (1 or 0)")}</p>` +
+    `<p class="leg">${tr("Same place: each weapon's 1st run is compared with the quest's average 1st-place time, the 2nd with the 2nd, the 3rd with the 3rd – so having more or fewer runs gives no advantage.")}</p>` +
+    `<p class="leg">${tr("Normalised: the average of all weapons is always 1.00 – above 1.00 = stronger than average.")}</p>` +
     `<details class="ws-ex"><summary>${tr("Example")}</summary>` +
     `<p>${tr("Quest A: only 4 of 14 weapons have a run, Dual Blades ratio 1.80 → weight (4 ÷ 14)² ≈ 0.08.")}</p><p>${tr("Quests B–J: all 14 weapons, Dual Blades ratio 1.00 → weight 1 each.")}</p><p>${tr("Weighted: (0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · simple average: (1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>")}</p><p class="leg">${tr("Other leaderboards usually use the simple average, so one thinly covered quest can push a weapon up several places. The weighting used here keeps the ranking realistic.")}</p></details></div>`;
 }
@@ -1793,7 +1802,7 @@ function writeHash() {
     if (state.hofScope !== "weapon") p.set("active", state.hofScope);
   }
   if (state.depth !== 1) p.set("top", state.depth);
-  if (state.view === "strength") { if (state.wsHero !== "no") p.set("heroics", state.wsHero); }
+  // Weapon Strength always ignores Heroics runs (no URL parameter needed)
   else if (state.hero !== "all") p.set("heroics", state.hero);
   if (state.metric !== "time") p.set("bars", state.metric);
   if (state.sort !== "release") p.set("order", state.sort);
@@ -1935,7 +1944,7 @@ function init() {
   // in a Weapon Strength link "heroics" belongs to Weapon Strength (default "no"), otherwise to the other views (default "all")
   const wsLink = state.view === "strength";
   state.hero = !wsLink && ["no", "only"].includes(h.hero) ? h.hero : "all";
-  state.wsHero = wsLink && ["all", "only"].includes(h.hero) ? h.hero : "no";
+  state.wsHero = "no";   // Weapon Strength: Heroics runs are always ignored
   state.metric = ["dps", "ratio"].includes(h.metric) ? h.metric : "time";
   state.quest = h.quest;
   state.wsMode = ["titles", "obt"].includes(h.wsMode) ? h.wsMode : "updates";
@@ -2240,9 +2249,9 @@ function syncControls() {
   // Weapon Strength "By title" keeps the switcher without note, "By OBT" counts as beta.
   const heroNa = state.view === "strength" && state.wsMode === "titles" ? ""
     : state.view === "strength" && state.wsMode === "obt" ? "beta" : heroUntracked(state.game);
-  document.getElementById("heroSeg").hidden = heroNa === "beta" || state.view === "hof";
+  document.getElementById("heroSeg").hidden = heroNa === "beta" || state.view === "hof" || state.view === "strength";
   const na = document.getElementById("heroNa");
-  na.hidden = !heroNa || state.view === "hof";
+  na.hidden = !heroNa || state.view === "hof" || state.view === "strength";
   na.classList.toggle("warn", heroNa === "old");
   na.textContent = heroNa === "beta"
     ? tr("No Heroics in this beta – the skill does not exist here.")
@@ -2304,7 +2313,7 @@ onSeg("quickbar",  d => {
   check();
 })();
 onSeg("depthSeg",  d => { state.depth = Number(d.depth); });
-onSeg("heroSeg",   d => { if (state.view === "strength") state.wsHero = d.hero; else state.hero = d.hero; });
+onSeg("heroSeg",   d => { if (state.view !== "strength") state.hero = d.hero; });
 onSeg("metricSeg", d => { state.metric = d.metric; });
 onSeg("sortSeg",   d => { state.sort = d.sort; });
 onSeg("wsModeSeg", d => { state.wsMode = d.wsmode; state.wsCol = null; });
@@ -2809,7 +2818,19 @@ function wsStats(all, minW) {
   const cover = {};
   all.forEach(x => (cover[x.r.quest] = cover[x.r.quest] || new Set()).add(x.r.weapon));
   const picked = minW > 1 ? all.filter(x => cover[x.r.quest].size >= minW) : all;
-  const mine = limitRuns(picked, state.wsRuns === "top3" ? 3 : 1);
+  const top = limitRuns(picked, state.wsRuns === "top3" ? 3 : 1);
+  // same-place reference: each weapon's 1st run is compared with the average 1st-place time of the quest,
+  // its 2nd run with the average 2nd-place time, its 3rd with the average 3rd-place time.
+  // So a weapon is neither punished for having more runs nor favoured for having fewer.
+  const grp = {}, refs = {};
+  top.forEach(x => (grp[x.r.quest + "|" + x.r.weapon] = grp[x.r.quest + "|" + x.r.weapon] || []).push(x));
+  const ranked = [];
+  Object.values(grp).forEach(g => {
+    g.sort((a, b) => a.r.sec - b.r.sec);
+    g.forEach((x, i) => { const k = x.r.quest + "|" + (i + 1); (refs[k] = refs[k] || []).push(x.r.sec); ranked.push([x, i + 1]); });
+  });
+  const avgOf = a => a.reduce((s, v) => s + v, 0) / a.length;
+  const mine = ranked.map(([x, rk]) => ({ ...x, place: rk, ratio: avgOf(refs[x.r.quest + "|" + rk]) / x.r.sec }));
   // quest weight = (weapons with a run in this quest ÷ 14)²: a quest with only 3–4 weapons counts very little
   const qW = {};
   Object.keys(cover).forEach(q => qW[q] = Math.pow(cover[q].size / WEAPONS.length, 2));
@@ -2960,6 +2981,10 @@ function renderStrengthView() {
       const list = mine.filter(x => x.r.weapon === k), vals = list.map(x => x.ratio);
       cell[c.key][k] = vals.length ? { v: trimmedMeanW(list.map(x => ({ v: x.ratio, w: qW[x.r.quest] })), state.trim), n: vals.length, ...trimmedRange(vals, state.trim) } : null;
     }
+    // normalise: divide by the average of all weapons in this column, so the weapon average is exactly 1.00
+    const vs = WEAPONS.map(([k]) => cell[c.key][k]).filter(Boolean);
+    const avgV = vs.length ? vs.reduce((a, x) => a + x.v, 0) / vs.length : 1;
+    if (avgV > 0) vs.forEach(x => { x.v /= avgV; if (x.lo != null) x.lo /= avgV; if (x.hi != null) x.hi /= avgV; });
     // rank inside the column (1 = strongest)
     const order = WEAPONS.map(([k]) => k).filter(k => cell[c.key][k]).sort((a, b) => cell[c.key][b].v - cell[c.key][a].v);
     order.forEach((k, i) => cell[c.key][k].rank = i + 1);
@@ -2968,8 +2993,8 @@ function renderStrengthView() {
   const empty = cols.filter(c => !colN[c.key]);
   if (cols.some(c => colN[c.key])) cols = cols.filter(c => colN[c.key]);
   const unassigned = byUpdate ? items.filter(x => x.r.game === state.game && !x.upd).length : 0;
-  const hints = [`<strong>${tr("Recommended: “Realistic” + “No Heroics”.")}</strong>`,
-    tr("Ratio = average best time of all weapons in the quest ÷ clear time (1.00 = average, higher = faster)."),
+  const hints = [noHeroSkill ? "" : `<strong>${tr("Heroics runs are ignored here: the Heroics damage buff (+30 %) distorts the results too much and is not realistic for normal play.")}</strong>`, tr("Recommended: “Realistic”."),
+    tr("Ratio = average time of the same place (1st, 2nd, 3rd) of all weapons in the quest ÷ clear time, normalised so that the weapon average is 1.00 (higher = faster)."),
     tr("Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.", { p: state.trim }),
     tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low)."),
     tr("Quests count by how many weapons have a run there: fully covered quests count fully, quests with only a few weapons count very little.")];
@@ -2979,11 +3004,11 @@ function renderStrengthView() {
   if (state.wsDisp === "sheet") hints.push(tr("Faded cells marked * are based on fewer than {n} runs.", { n: WS_FEW }));
   const noteEl = document.getElementById("note");
   noteEl.hidden = false;
-  noteEl.innerHTML = `<ul class="ws-hints">${hints.map(h => `<li>${h}</li>`).join("")}</ul>`;
+  noteEl.innerHTML = `<ul class="ws-hints">${hints.filter(Boolean).map(h => `<li>${h}</li>`).join("")}</ul>`;
   const warn = document.getElementById("wsWarn");
   const warnings = [];
   // Heroics runs included ("All runs" or "Heroics only"): the skill distorts the comparison
-  if (!noHeroSkill && state.wsHero !== "no") warnings.push(tr("❗ Heroics is included: Heroics is a 30 % damage buff and strongly changes the natural damage output of the weapons. The skill is used only by speedrunners and is not recommended for a realistic comparison. Choose “No Heroics” for a fair view."));
+
   warn.hidden = !warnings.length;
   warn.textContent = warnings.join("\n\n");
 
@@ -3042,8 +3067,7 @@ function renderStrengthView() {
   const fl = [scope, top3
     ? tr("<b>Realistic</b> – up to 3 runs per quest and weapon, so more runs are used")
     : tr("<b>Maximum performance</b> – only the fastest run per quest and weapon")];
-  if (!noHeroSkill) fl.push(tr(state.wsHero === "no" ? "<b>No Heroics</b> – runs without the Heroics damage buff"
-    : state.wsHero === "only" ? "<b>Heroics only</b> – only runs with the Heroics damage buff" : "<b>All runs</b> – with and without Heroics"));
+  if (!noHeroSkill) fl.push(tr("<b>No Heroics</b> – Heroics runs are ignored (they distort the results and are not realistic)"));
   if (state.wsMinW > 1) fl.push(tr("<b>Quality {n}/14</b> – only quests where at least {n} weapons have a run", { n: state.wsMinW }));
   fl.push(state.trim ? tr("<b>Ignore extremes {p} %</b> – outliers at the top and bottom are left out", { p: state.trim }) : tr("<b>Ignore extremes off</b> – every value counts"));
   const filterLine = `<div class="ws-filters"><p>${tr("Active filters:")}</p><ul>${fl.map(x => `<li>${x}</li>`).join("")}</ul>` +
@@ -3118,6 +3142,12 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V97", when: "15.10.2026 23:25", items: [
+    "Weapon Strength (Realistic): every run is compared with the average of the same place – 1st with 1st, 2nd with 2nd, 3rd with 3rd. Weapons with only one or two runs per quest no longer get an unfair advantage." ] },
+  { v: "V96", when: "15.10.2026 22:55", items: [
+    "Weapon Strength now always ignores Heroics runs – the Heroics damage buff distorts the results too much and is not realistic. The Heroics switch is hidden there." ] },
+  { v: "V95", when: "15.10.2026 22:50", items: [
+    "Weapon Strength: values are normalised per column – the average of all weapons is now always exactly 1.00 (formula updated)." ] },
   { v: "V94", when: "15.10.2026 17:45", items: [
     "Bar chart: „Save image“ / „Share“ as for the tier list – ranking left, filters and formulas right." ] },
   { v: "V93", when: "15.10.2026 17:45", items: [
