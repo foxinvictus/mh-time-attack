@@ -46,16 +46,19 @@
   header {
     padding: 28px 24px 0; max-width: 1180px; margin: 0 auto;
   }
-  .brand { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   h1 {
     font: 700 clamp(30px, 5vw, 46px)/1 "Barlow Condensed", sans-serif;
     letter-spacing: .01em; margin: 0;
     display: inline-flex; align-items: center; gap: .28em;
   }
   /* site logo (the favicon) in front of the title */
-  .brand-logo { width: 1.7em; height: 1.7em; object-fit: contain; flex: none; }
+  .brand-logo { width: 2.2em; height: 2.2em; object-fit: contain; flex: none; }
+  .h1-txt { display: inline-flex; flex-direction: column; gap: .12em; }
+  /* exclusive feature, small under the title */
+  .h1-sub { font: 600 clamp(12px, 1.3vw, 15px)/1.2 "Barlow", "Noto Sans JP", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
   /* phone: the title wraps to two lines, so the logo spans both */
-  @media (max-width: 600px) { .brand-logo { width: 2.3em; height: 2.3em; } }
+  @media (max-width: 600px) { .brand-logo { width: 2.8em; height: 2.8em; } .h1-sub { font-size: 11px; letter-spacing: .04em; } }
   .by { color: var(--muted); font-size: 15px; }
   .by a { color: var(--gold); text-decoration: none; }
   .by a:hover { text-decoration: underline; }
@@ -405,10 +408,16 @@
     box-shadow: 0 4px 14px rgba(0, 0, 0, .25);
   }
   .quickbar[hidden] { display: none; }
-  .qb-brand { display: inline-flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; min-width: 0; text-decoration: none; color: var(--paper); }
-  .qb-brand img { width: 30px; height: 30px; object-fit: contain; align-self: center; flex: none; }
+  .qb-brand { display: inline-flex; align-items: center; gap: 4px 10px; flex-wrap: wrap; min-width: 0; text-decoration: none; color: var(--paper); }
+  .qb-brand img { width: 40px; height: 40px; object-fit: contain; align-self: center; flex: none; }
+  /* medium desktop widths: drop "collected by" in the pinned bar so everything stays on one row */
+  @media (min-width: 761px) and (max-width: 1400px) { .qb-by { display: none; } }
   .qb-title { font: 700 22px/1 "Barlow Condensed", sans-serif; letter-spacing: .01em; }
   .qb-by { font-size: 13px; color: var(--muted); }
+  /* logo of the selected game in the pinned bar */
+  .qb-game { display: inline-flex; align-items: center; gap: 4px; align-self: center; }
+  .qb-game img { height: 30px; width: auto; display: block; }
+  .qb-game .gbadge { position: static; font-size: 9px; }
   .qb-views { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; min-width: 0; }
   .quickbar button {
     display: inline-flex; align-items: center; gap: 6px; min-width: 0;
@@ -426,9 +435,10 @@
     /* phone: six equal cells, icon above a small label */
     .quickbar { gap: 4px; padding-inline: 8px; }
     .qb-brand { width: 100%; justify-content: center; align-items: center; padding-inline: 30px; box-sizing: border-box; gap: 4px 8px; }
-    .qb-brand img { width: 22px; height: 22px; }
+    .qb-brand img { width: 30px; height: 30px; }
     .qb-title { font-size: 17px; }
     .qb-by { font-size: 11px; }
+    .qb-game img { height: 22px; }
     .qb-views { width: 100%; flex-wrap: nowrap; gap: 4px; }
     .quickbar button { flex: 1 1 0; flex-direction: column; gap: 3px; padding: 5px 2px; border-radius: 8px;
       font-size: 11px; white-space: normal; text-align: center; line-height: 1.05; }
@@ -651,7 +661,37 @@
   .ws-acc i { position: absolute; left: 0; bottom: 0; height: 3px; background: currentColor; }
   .ws-acc.acc-hi { color: #3fbf6a; } .ws-acc.acc-mid { color: #e2b23a; } .ws-acc.acc-lo { color: #ef6a55; }
   .ws-acc { font-weight: 600; }
+  .ws-qq { display: grid; grid-template-columns: auto minmax(120px, 1fr) auto; align-items: end; gap: 2px 12px; padding: 8px 14px; border-radius: 10px;
+    background: var(--ink-2); border: 1px solid var(--ink-3); font-size: 13px; color: var(--muted); max-width: 520px; margin: 0 0 14px; }
+  .qq-side { display: grid; justify-items: center; line-height: 1.05; padding-bottom: 14px; min-width: 52px; }
+  .qq-side strong { font: 700 24px/1 "Barlow Condensed", sans-serif; color: var(--paper); }
+  .qq-side small { font-size: 11px; color: var(--muted); }
+  .qq-side.acc-hi strong, .qq-side.acc-hi small { color: #3fbf6a; }
+  .qq-side.acc-mid strong, .qq-side.acc-mid small { color: #e2b23a; }
+  .qq-side.acc-lo strong, .qq-side.acc-lo small { color: #ef6a55; }
+  .ws-qq input { width: 100%; accent-color: var(--gold); margin: 0; display: block; }
+  /* recommended value 10: small mark under the slider (thumb ≈ 16px, so positions run from 8px to 100% − 8px) */
+  .qq-track { position: relative; display: block; padding-bottom: 16px; }
+  .qq-curve { display: block; width: calc(100% - 16px); height: 26px; margin: 0 8px 2px; overflow: visible; }
+  .qq-area { fill: var(--gold); opacity: .18; }
+  .qq-line { fill: none; stroke: var(--gold); stroke-width: 2; }
+  .qq-best { stroke: var(--gold); stroke-width: 1; stroke-dasharray: 2 2; opacity: .7; }
+  .qq-dot { fill: var(--paper); stroke: var(--gold); stroke-width: .6; }
+  .qq-tip { display: none; }
+  .qq-mark { position: absolute; bottom: 10px; left: calc(8px + (100% - 16px) * 6 / 10); width: 3px; height: 10px; margin-left: -1.5px; background: var(--gold); border-radius: 2px;
+    box-shadow: 0 0 6px var(--gold); }
+  .qq-mark b { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font: 700 11px/1 "Barlow", sans-serif; color: var(--gold); }
+  .ws-qq .qq-l { font-weight: 600; font-size: 12px; margin-top: 3px; color: var(--muted); }
+  .ws-qq .qq-v { grid-column: 1 / -1; text-align: center; font-size: 12px; color: var(--paper); }
   .acc-pill { font-weight: 700; }
+  .ws-formula { margin-top: 12px; padding: 10px 14px; border: 1px dashed var(--ink-3); border-radius: 8px; color: var(--paper); }
+  .ws-formula p { margin: 3px 0; display: flex; flex-wrap: wrap; gap: 4px 22px; }
+  .ws-formula .f { font: 600 15px/1.4 "Barlow", "Noto Sans JP", sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ws-ex { margin-top: 6px; }
+  .ws-ex summary { cursor: pointer; color: var(--gold); font-size: 13px; font-weight: 600; }
+  .ws-ex p { display: block; font-size: 13px; margin: 4px 0; }
+  .ws-formula p.leg { display: block; font-size: 12px; color: var(--muted); }
+  @media (max-width: 600px) { .ws-formula .f { font-size: 13px; white-space: normal; } .ws-formula { padding: 8px 10px; } }
   .acc-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 5px; vertical-align: middle;
     box-shadow: 0 0 0 1.5px rgba(0,0,0,.35); }
   .acc-dot.acc-hi { background: #3fbf6a; } .acc-dot.acc-mid { background: #e2b23a; } .acc-dot.acc-lo { background: #ef6a55; }
@@ -1003,13 +1043,25 @@
     body[data-view="quest"] .alt.u-time { width: 32px; }
     body[data-view="quest"] .run.minor .meta { font-size: 11px; }
   }
+  /* phone: pinned Weapon Strength filters as compact as possible (about 3 short rows) */
+  @media (max-width: 760px) {
+    .controls.float { padding: 4px 6px; gap: 4px; }
+    .controls.float .seg { padding: 2px; }
+    .controls.float .seg button,
+    .controls.float .ws-disp button { padding: 3px 7px; font-size: 12px; line-height: 1.2; }
+    .controls.float .ws-disp { gap: 3px; }
+    .controls.float .trim-ctl { font-size: 0; gap: 4px; padding: 0 8px; min-height: 0; }   /* label text hidden, slider + % stay */
+    .controls.float .trim-ctl::before { content: "±"; font-size: 12px; color: var(--muted); }
+    .controls.float .trim-ctl input { width: 64px; height: 14px; }
+    .controls.float .trim-ctl output { font-size: 12px; min-width: 28px; }
+  }
 </style>
 </head>
 <body>
 
 <header>
   <div class="brand">
-    <h1><img class="brand-logo" src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()">MH Speedrun Leaderboards</h1>
+    <h1><img class="brand-logo" src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><span class="h1-txt">MH Speedrun Leaderboards<small class="h1-sub">with automatic weapon tier lists</small></span></h1>
     <span class="by">collected by <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">Fox Invictus</a></span>
     <p class="tagline" id="tagline"></p>
     <a class="intro-link" id="introLink" href="https://youtu.be/axVBnouN450" target="_blank" rel="noopener"><img class="intro-yt" src="icons/watch/youtube.png" alt="" onerror="this.remove()"><span id="introText">Quick tour</span><small id="introLen">(1 min)</small></a>
@@ -1047,7 +1099,7 @@
 </div>
 <!-- compact copy of the view tabs, pinned to the top once the big tabs have scrolled away -->
 <nav class="quickbar" id="quickbar" aria-label="Views" hidden>
-  <a class="qb-brand" href="#" onclick="window.scrollTo({ top: 0 }); return false;"><img src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><span class="qb-title">MH Speedrun Leaderboards</span><span class="qb-by"><span>collected by</span> Fox Invictus</span></a>
+  <a class="qb-brand" href="#" onclick="window.scrollTo({ top: 0 }); return false;"><img src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><span class="qb-title">MH Speedrun Leaderboards</span><span class="qb-by"><span>collected by</span> Fox Invictus</span><span class="qb-game" id="qbGame"></span></a>
   <div class="qb-views">
   <button data-view="table"><img src="icons/UI/overview.png" alt="" onerror="this.remove()"><span>Overview</span></button>
   <button data-view="quest"><img src="icons/UI/quest.png" alt="" onerror="this.remove()"><span>By quest</span></button>
@@ -1394,6 +1446,20 @@ const JA = {
   "Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.": "極端な値を除外：各武器の上下{p}%の値を除き、単発の外れ値の影響を減らします。",
   "Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low).": "精度＝ランキングを支える記録の充実度。クエスト・武器ごとに1件目の記録が60%、2件目が25%、3件目が15%として計算します。各バーの後ろの点はその武器の精度です（緑＝高、黄＝中、赤＝低）。",
   "{w}: accuracy {p} %": "{w}：精度 {p}%",
+  "Ratio": "レシオ", "quest average": "クエスト平均", "time": "タイム",
+  "with automatic weapon tier lists": "武器ティア表を自動作成",
+  "Quantity": "量", "Quality": "質",
+  "No quests with at least {n} weapons yet – move the slider to the left.": "{n}武器以上に記録があるクエストはまだありません。スライダーを左に動かしてください。", "run": "記録", "runs": "記録", "Recommended: 10": "おすすめ：10", "min. {n} weapons per quest": "1クエストにつき最低{n}武器",
+  "Left: every quest counts (more runs). Right: only quests where many weapons have a run (higher accuracy). The curve is highest where many runs and a high accuracy come together.": "左：すべてのクエストを集計（記録が多い）。右：多くの武器に記録があるクエストのみ（精度が高い）。曲線は記録数と精度のバランスが最も良い位置で最も高くなります。",
+  "Peak = best balance of runs and accuracy (here: {n})": "山の頂点＝記録数と精度のバランスが最良（ここでは{n}）",
+  "<b>Quality {n}/14</b> – only quests where at least {n} weapons have a run": "<b>質 {n}/14</b> – {n}武器以上に記録があるクエストのみ",
+  "Example": "計算例",
+  "Quest A: only 4 of 14 weapons have a run, Dual Blades ratio 1.80 → weight (4 ÷ 14)² ≈ 0.08.": "クエストA：14武器中4武器のみ記録あり、双剣のレシオ1.80 → 重み (4 ÷ 14)² ≈ 0.08。",
+  "Quests B–J: all 14 weapons, Dual Blades ratio 1.00 → weight 1 each.": "クエストB〜J：全14武器に記録あり、双剣のレシオ1.00 → 重みは各1。",
+  "Weighted: (0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · simple average: (1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>": "重み付き：(0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · 単純平均：(1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>",
+  "Other leaderboards usually use the simple average, so one thinly covered quest can push a weapon up several places. The weighting used here keeps the ranking realistic.": "他のランキングは通常、単純平均を使うため、記録の少ないクエスト1つで武器の順位が大きく上がることがあります。ここでは重み付けにより、より現実的なランキングになります。",
+  "n<sub>q</sub> = weapons with a run in quest q · a<sub>1–3</sub> = 1st / 2nd / 3rd run exists (1 or 0)": "n<sub>q</sub>＝クエストqで記録のある武器の数 · a<sub>1–3</sub>＝1〜3件目の記録の有無（1または0）",
+  "Quests count by how many weapons have a run there: fully covered quests count fully, quests with only a few weapons count very little.": "クエストは記録のある武器の数に応じて重み付けされます。全武器がそろったクエストは100%、少数の武器しか記録がないクエストはごくわずかしか影響しません。",
   "Active filters:": "適用中のフィルター：",
   "<b>Realistic</b> – up to 3 runs per quest and weapon, so more runs are used": "<b>実戦向け</b> – クエスト・武器ごとに最大3記録を使用。より多くの記録で集計",
   "<b>Maximum performance</b> – only the fastest run per quest and weapon": "<b>最大パフォーマンス</b> – クエスト・武器ごとの最速記録のみ",
@@ -1546,6 +1612,16 @@ const TIERS = [
   { l: "C", min: 0.97, c: "#17b05a" }, { l: "D", min: 0.90, c: "#0e98ff" }, { l: "E", min: 0.80, c: "#9b4cff" }, { l: "F", min: 0, c: "#ff45f3" },
 ];
 const tierOf = v => TIERS.find(t => v >= t.min);
+/* the weighting as short formulas under the ranking */
+function wsFormula() {
+  const w = `w<sub>q</sub>`;
+  return `<div class="ws-formula">` +
+    `<p><span class="f">${tr("Ratio")} = Σ ${w}·r ÷ Σ ${w}</span><span class="f">${w} = (n<sub>q</sub> ÷ 14)²</span><span class="f">r = ${tr("quest average")} ÷ ${tr("time")}</span></p>` +
+    `<p><span class="f">${tr("Accuracy")} = Σ ${w}·(0.6·a<sub>1</sub> + 0.25·a<sub>2</sub> + 0.15·a<sub>3</sub>) ÷ Σ ${w}</span></p>` +
+    `<p class="leg">${tr("n<sub>q</sub> = weapons with a run in quest q · a<sub>1–3</sub> = 1st / 2nd / 3rd run exists (1 or 0)")}</p>` +
+    `<details class="ws-ex"><summary>${tr("Example")}</summary>` +
+    `<p>${tr("Quest A: only 4 of 14 weapons have a run, Dual Blades ratio 1.80 → weight (4 ÷ 14)² ≈ 0.08.")}</p><p>${tr("Quests B–J: all 14 weapons, Dual Blades ratio 1.00 → weight 1 each.")}</p><p>${tr("Weighted: (0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · simple average: (1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>")}</p><p class="leg">${tr("Other leaderboards usually use the simple average, so one thinly covered quest can push a weapon up several places. The weighting used here keeps the ranking realistic.")}</p></details></div>`;
+}
 /* Weapon Strength accuracy (share of filled ranking slots) -> label + colour class */
 const accOf = a => a >= 0.7 ? { label: "High", cls: "acc-hi" } : a >= 0.4 ? { label: "Medium", cls: "acc-mid" } : { label: "Low", cls: "acc-lo" };
 /* small coloured dot = accuracy of one weapon */
@@ -1640,7 +1716,7 @@ function channelTag(r, cls = "ch") {
 
 /* ---------- state ---------- */
 const state = { gameNames: {}, runs: [], quests: [], games: [], updates: [], game: null, view: "table", quest: null, weapon: "GS", depth: 1, hero: "all", metric: "time", sort: "release",
-  wsMode: "updates", trim: 15, wsCol: null, wsRuns: "top3", wsDisp: "bars", wsHero: "no", hofDays: 90, hofScope: "weapon", newestW: [], wfOpen: false };
+  wsMode: "updates", trim: 15, wsCol: null, wsRuns: "top3", wsDisp: "bars", wsMinW: 10, wsHero: "no", hofDays: 90, hofScope: "weapon", newestW: [], wfOpen: false };
 /* Heroics filter of the active view: Weapon Strength has its own setting (default "No Heroics"), all other views share one (default "All runs") */
 const heroMode = () => state.view === "strength" ? state.wsHero : state.hero;
 const VIEWS = ["table", "quest", "weapon", "newest", "strength", "hof"];
@@ -1649,7 +1725,7 @@ const TRIM_DEFAULT = 15;
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   return { game: p.get("game"), view: p.get("view"), quest: p.get("quest"), weapon: p.get("weapon"), depth: p.get("top"), hero: p.get("heroics"), metric: p.get("bars"), sort: p.get("order"),
-    wsMode: p.get("compare"), trim: p.get("trim"), wsCol: p.get("col"), wsRuns: p.get("runs"), wsDisp: p.get("show"), hofDays: p.get("days"), hofScope: p.get("active"), nw: p.get("w"), lang: p.get("lang") };
+    wsMode: p.get("compare"), trim: p.get("trim"), wsCol: p.get("col"), wsRuns: p.get("runs"), wsDisp: p.get("show"), wsMinW: p.get("minw"), hofDays: p.get("days"), hofScope: p.get("active"), nw: p.get("w"), lang: p.get("lang") };
 }
 function writeHash() {
   const p = new URLSearchParams();
@@ -1673,6 +1749,7 @@ function writeHash() {
     if (state.wsCol) p.set("col", state.wsCol);
     if (state.wsRuns !== "top3") p.set("runs", state.wsRuns);
     if (state.wsDisp !== "bars") p.set("show", state.wsDisp);
+    if (state.wsMinW !== 10) p.set("minw", state.wsMinW);
   }
   if (LANG === "ja") p.set("lang", "ja");
   history.replaceState(null, "", "#" + p.toString());
@@ -1812,6 +1889,7 @@ function init() {
   state.wsCol = h.wsCol || null;
   state.wsRuns = h.wsRuns === "best" ? "best" : "top3";
   state.wsDisp = ["sheet", "tier"].includes(h.wsDisp) ? h.wsDisp : "bars";
+  state.wsMinW = Math.min(14, Math.max(4, parseInt(h.wsMinW, 10) || 10));
   state.hofDays = HOF_PERIODS.some(x => String(x[0]) === h.hofDays) ? Number(h.hofDays) : 90;
   state.hofScope = h.hofScope === "all" ? "all" : "weapon";
   state.newestW = String(h.nw || "").split(",").filter(k => W[k]);
@@ -2201,6 +2279,14 @@ function render() {
   else renderTableView();
   fitRows();
   window.qbCheck?.();
+  // game logo in the pinned bar (only rebuilt when the game changes)
+  const qg = document.getElementById("qbGame");
+  if (qg && qg.dataset.g !== state.game) {
+    qg.dataset.g = state.game || "";
+    const [first, ...next] = gameLogoSrcs(state.game);
+    qg.innerHTML = state.game ? `<img src="${esc(first)}" data-next="${esc(next.join("|"))}" alt="${esc(gameName(state.game))}" title="${esc(gameName(state.game))}" onerror="monsterIconError(this)">` +
+      (/\u03b2/.test(state.game) ? `<span class="gbadge">OBT</span>` : "") : "";
+  }
 }
 
 function setNote(hints) {
@@ -2640,6 +2726,15 @@ function limitRuns(list, n) {
   }
   return out;
 }
+/* like trimmedMean, but every value has a weight (quest coverage): trim by count, then weighted average */
+function trimmedMeanW(items, pct) {
+  const v = [...items].sort((a, b) => a.v - b.v), n = v.length;
+  if (!n) return null;
+  const k = Math.floor(Math.floor(n * 2 * pct / 100) / 2);
+  const keep = v.slice(k, n - k);
+  const ws = keep.reduce((a, x) => a + x.w, 0);
+  return ws ? keep.reduce((a, x) => a + x.v * x.w, 0) / ws : keep.reduce((a, x) => a + x.v, 0) / keep.length;
+}
 function trimmedMean(vals, pct) {
   const v = [...vals].sort((a, b) => a - b), n = v.length;
   if (!n) return null;
@@ -2653,6 +2748,60 @@ function trimmedRange(vals, pct) {
   if (!n) return null;
   const k = Math.floor(Math.floor(n * 2 * pct / 100) / 2);
   return { lo: v[k], hi: v[n - k - 1] };
+}
+/* runs and accuracy of one column for a given "min. weapons per quest" (quantity ↔ quality slider) */
+function wsStats(all, minW) {
+  // quantity ↔ quality: only quests where at least minW weapons have a run
+  const cover = {};
+  all.forEach(x => (cover[x.r.quest] = cover[x.r.quest] || new Set()).add(x.r.weapon));
+  const picked = minW > 1 ? all.filter(x => cover[x.r.quest].size >= minW) : all;
+  const mine = limitRuns(picked, state.wsRuns === "top3" ? 3 : 1);
+  // quest weight = (weapons with a run in this quest ÷ 14)²: a quest with only 3–4 weapons counts very little
+  const qW = {};
+  Object.keys(cover).forEach(q => qW[q] = Math.pow(cover[q].size / WEAPONS.length, 2));
+  // accuracy per weapon: per quest the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 % ("Maximum performance": 1st run only).
+  // Overall = average of all weapons, pulled down by the weakest one.
+  const quests = new Set(picked.map(x => x.r.quest)), nq = quests.size;
+  const W8 = state.wsRuns === "top3" ? [0.6, 0.25, 0.15] : [1];
+  const per = {};
+  mine.forEach(x => { const k = x.r.quest + "|" + x.r.weapon; per[k] = (per[k] || 0) + 1; });
+  const wAcc = {};
+  const wSum = [...quests].reduce((a, q) => a + qW[q], 0);
+  let raw = 0;                                   // unweighted fill of all slots (for the curve)
+  for (const [k] of WEAPONS) {
+    let sc = 0;
+    quests.forEach(q => { const n = Math.min(per[q + "|" + k] || 0, W8.length); let f = 0; for (let i = 0; i < n; i++) f += W8[i]; sc += f * qW[q]; raw += f; });
+    wAcc[k] = wSum ? sc / wSum : 0;
+  }
+  const accs = Object.values(wAcc);
+  const mean = accs.reduce((a, b) => a + b, 0) / accs.length;
+  return { mine, qW, wAcc, acc: nq ? 0.8 * mean + 0.2 * Math.min(...accs) : 0, fill: nq ? raw / (nq * WEAPONS.length) : 0 };
+}
+/* curve over the slider: balance of quantity (runs) and quality (accuracy) for every slider position.
+   High where many runs AND a high accuracy come together. */
+function wsCurve(all) {
+  const pts = [];
+  for (let m = 4; m <= 14; m++) { const st = wsStats(all, m); pts.push({ m, n: st.mine.length, fill: st.fill }); }
+  const n1 = Math.max(1, ...pts.map(p => p.n));
+  // quantity (share of all runs still used) × quality (how completely the remaining quests are filled)
+  pts.forEach(p => p.score = p.fill * (p.n / n1));
+  const max = Math.max(...pts.map(p => p.score)), min = Math.min(...pts.map(p => p.score));
+  const best = pts.reduce((a, b) => b.score > a.score ? b : a, pts[0]);
+  // stretched between lowest and highest value, so the peak stands out clearly
+  const X = m => (m - 4) / 10 * 100, Y = sc => max - min < 1e-6 ? 12 : 22 - (sc - min) / (max - min) * 20;
+  // smooth line through the 14 points (Catmull-Rom → cubic Bézier)
+  const P = pts.map(p => [X(p.m), Y(p.score)]);
+  let d = `M${P[0][0]},${P[0][1]}`;
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2;
+    d += ` C${p1[0] + (p2[0] - p0[0]) / 6},${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6},${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]},${p2[1]}`;
+  }
+  const cur = pts[state.wsMinW - 4];
+  return `<svg class="qq-curve" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">` +
+    `<path d="${d} L100,24 L0,24 Z" class="qq-area"/><path d="${d}" class="qq-line" vector-effect="non-scaling-stroke"/>` +
+    `<line x1="${X(best.m)}" x2="${X(best.m)}" y1="0" y2="24" class="qq-best" vector-effect="non-scaling-stroke"/>` +
+    `<circle cx="${X(cur.m)}" cy="${Y(cur.score)}" r="1.6" class="qq-dot"/></svg>` +
+    `<span class="qq-tip">${tr("Peak = best balance of runs and accuracy (here: {n})", { n: best.m })}</span>`;
 }
 function renderStrengthView() {
   const title = document.getElementById("boardTitle");
@@ -2683,30 +2832,19 @@ function renderStrengthView() {
 
   // values
   const cell = {};   // cell[colKey][weapon] = { v, n }
-  const colN = {}, colAcc = {}, wAcc = {};
+  const colN = {}, colAcc = {}, wAcc = {}, colAll = {};
   for (const c of cols) {
-    const picked = items.filter(c.pick);
-    const mine = limitRuns(picked, state.wsRuns === "top3" ? 3 : 1);
+    const all = items.filter(c.pick);
+    colAll[c.key] = all;
+    const st = wsStats(all, state.wsMinW);
+    const mine = st.mine, qW = st.qW;
     colN[c.key] = mine.length;
-    // accuracy per weapon: for every quest with runs, the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %
-    // ("Maximum performance": only the 1st run, 100 %). Overall = average of all weapons, pulled down by the weakest one.
-    const quests = new Set(picked.map(x => x.r.quest)), nq = quests.size;
-    const W8 = state.wsRuns === "top3" ? [0.6, 0.25, 0.15] : [1];
-    const per = {};
-    mine.forEach(x => { const k = x.r.quest + "|" + x.r.weapon; per[k] = (per[k] || 0) + 1; });
-    wAcc[c.key] = {};
-    for (const [k] of WEAPONS) {
-      let sc = 0;
-      quests.forEach(q => { const n = Math.min(per[q + "|" + k] || 0, W8.length); for (let i = 0; i < n; i++) sc += W8[i]; });
-      wAcc[c.key][k] = nq ? sc / nq : 0;
-    }
-    const accs = Object.values(wAcc[c.key]);
-    const mean = accs.reduce((a, b) => a + b, 0) / accs.length;
-    colAcc[c.key] = nq ? 0.8 * mean + 0.2 * Math.min(...accs) : 0;
+    wAcc[c.key] = st.wAcc;
+    colAcc[c.key] = st.acc;
     cell[c.key] = {};
     for (const [k] of WEAPONS) {
-      const vals = mine.filter(x => x.r.weapon === k).map(x => x.ratio);
-      cell[c.key][k] = vals.length ? { v: trimmedMean(vals, state.trim), n: vals.length, ...trimmedRange(vals, state.trim) } : null;
+      const list = mine.filter(x => x.r.weapon === k), vals = list.map(x => x.ratio);
+      cell[c.key][k] = vals.length ? { v: trimmedMeanW(list.map(x => ({ v: x.ratio, w: qW[x.r.quest] })), state.trim), n: vals.length, ...trimmedRange(vals, state.trim) } : null;
     }
     // rank inside the column (1 = strongest)
     const order = WEAPONS.map(([k]) => k).filter(k => cell[c.key][k]).sort((a, b) => cell[c.key][b].v - cell[c.key][a].v);
@@ -2719,7 +2857,8 @@ function renderStrengthView() {
   const hints = [`<strong>${tr("Recommended: “Realistic” + “No Heroics”.")}</strong>`,
     tr("Ratio = average best time of all weapons in the quest ÷ clear time (1.00 = average, higher = faster)."),
     tr("Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.", { p: state.trim }),
-    tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low).")];
+    tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low)."),
+    tr("Quests count by how many weapons have a run there: fully covered quests count fully, quests with only a few weapons count very little.")];
   if (byUpdate) hints.push(tr("Runs are assigned to a title update by their YouTube upload date.") +
     (unassigned ? " " + trn(unassigned, "{n} run without upload date is not counted here (but in “By title”).", "{n} runs without upload date are not counted here (but in “By title”).") : "") +
     (empty.length && cols.length < empty.length + cols.length ? " " + tr("No runs yet for: {list}.", { list: empty.map(c => c.label).join(", ") }) : ""));
@@ -2791,15 +2930,20 @@ function renderStrengthView() {
     : tr("<b>Maximum performance</b> – only the fastest run per quest and weapon")];
   if (!noHeroSkill) fl.push(tr(state.wsHero === "no" ? "<b>No Heroics</b> – runs without the Heroics damage buff"
     : state.wsHero === "only" ? "<b>Heroics only</b> – only runs with the Heroics damage buff" : "<b>All runs</b> – with and without Heroics"));
+  if (state.wsMinW > 1) fl.push(tr("<b>Quality {n}/14</b> – only quests where at least {n} weapons have a run", { n: state.wsMinW }));
   fl.push(state.trim ? tr("<b>Ignore extremes {p} %</b> – outliers at the top and bottom are left out", { p: state.trim }) : tr("<b>Ignore extremes off</b> – every value counts"));
   const filterLine = `<div class="ws-filters"><p>${tr("Active filters:")}</p><ul>${fl.map(x => `<li>${x}</li>`).join("")}</ul>` +
     (top3 && disp === "bars" ? `<p>${tr("The line in each bar spans the lowest to the highest ratio that still counts.")}</p>` : "") +
-    (disp === "tier" ? `<p>${tr("Tiers are set automatically by ratio (1.00 = quest average).")}</p>` : "") + `</div>`;
+    (disp === "tier" ? `<p>${tr("Tiers are set automatically by ratio (1.00 = quest average).")}</p>` : "") + `</div>` + wsFormula();
   // runs used + accuracy, clearly visible under the heading
   const acc = accOf(colAcc[sel.key]);
-  const stats = `<div class="ws-stats"><span class="ws-runs"><strong>${fmtNum(colN[sel.key])}</strong> ${tr(colN[sel.key] === 1 ? "run analysed" : "runs analysed")}</span>` +
-    `<span class="ws-acc ${acc.cls}" title="${esc(tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low)."))}">` +
-    `${tr("Accuracy")} <strong>${Math.round(colAcc[sel.key] * 100)} %</strong> · ${tr(acc.label)}<i style="width:${Math.round(colAcc[sel.key] * 100)}%"></i></span></div>`;
+  const accTitle = esc(tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low)."));
+  // one box: runs (quantity) left, slider + curve in the middle, accuracy (quality) right
+  const stats = `<label class="ws-qq" title="${esc(tr("Left: every quest counts (more runs). Right: only quests where many weapons have a run (higher accuracy). The curve is highest where many runs and a high accuracy come together."))}">` +
+    `<span class="qq-side"><strong>${fmtNum(colN[sel.key])}</strong><small>${tr(colN[sel.key] === 1 ? "run" : "runs")}</small><span class="qq-l">${tr("Quantity")}</span></span>` +
+    `<span class="qq-track">${wsCurve(colAll[sel.key])}<input type="range" id="wsQQ" min="4" max="14" step="1" value="${state.wsMinW}"><i class="qq-mark" title="${esc(tr("Recommended: 10"))}"><b>10</b></i></span>` +
+    `<span class="qq-side ${acc.cls}" title="${accTitle}"><strong>${Math.round(colAcc[sel.key] * 100)} %</strong><small>${tr(acc.label)}</small><span class="qq-l">${tr("Quality")}</span></span>` +
+    `<small class="qq-v" id="wsQQv">${tr("min. {n} weapons per quest", { n: state.wsMinW })}</small></label>`;
   if (disp === "tier") {
     const tiers = TIERS.map(t => ({ ...t, list: rows.filter(o => tierOf(o.x.v) === t) }));
     chartEl.innerHTML = colPick + (rows.length
@@ -2807,7 +2951,7 @@ function renderStrengthView() {
         `<div class="tiers">` + tiers.map(t => `<div class="tier"><div class="tier-l${t.dark ? " dark" : ""}" style="background:${t.c}">${t.l}<small>${t.min ? "≥ " + fmtRatio(t.min) : "< " + fmtRatio(TIERS[TIERS.length - 2].min)}</small></div>` +
           `<div class="tier-c">${t.list.map(o => `<span class="tchip" title="${esc(`${o.en}: ${fmtRatio(o.x.v)} (${trn(o.x.n, "{n} run", "{n} runs")})`)}">${weaponIcon(o.k, "th")}<span class="tv">${fmtRatio(o.x.v)}${accDot(wAcc[sel.key][o.k], o.en)}</span></span>`).join("")}</div></div>`).join("") + `</div>` +
         filterLine
-      : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`);
+      : stats + `<p class="status">${tr(state.wsMinW > 4 ? "No quests with at least {n} weapons yet – move the slider to the left." : "No runs in {x} yet.", { x: esc(sel.label), n: state.wsMinW })}</p>`);
   } else
   chartEl.innerHTML = colPick + (rows.length
     ? `<h3>${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}${p ? `<small>${tr("arrows: change vs. {p}", { p: esc(p.label) })}</small>` : ""}</h3>` + stats +
@@ -2818,8 +2962,13 @@ function renderStrengthView() {
           (top3 && o.x.hi > o.x.lo ? `<span class="rng" style="left:${pc(o.x.lo)}%;width:${(pc(o.x.hi) - pc(o.x.lo)).toFixed(1)}%" title="${esc(tr("Counted runs: ratio {a} to {b}", { a: fmtRatio(o.x.lo), b: fmtRatio(o.x.hi) }))}"></span>` : "") + `</span>` +
           `<span class="val">${fmtRatio(o.x.v)}${accDot(wAcc[sel.key][o.k], o.en)}</span><span class="dl">${arrow(delta(sel, o.k))}</span></div>`;
       }).join("") + filterLine
-    : `<p class="status">${tr("No runs in {x} yet.", { x: esc(sel.label) })}</p>`);
+    : stats + `<p class="status">${tr(state.wsMinW > 4 ? "No quests with at least {n} weapons yet – move the slider to the left." : "No runs in {x} yet.", { x: esc(sel.label), n: state.wsMinW })}</p>`);
   chartEl.querySelectorAll(".ws-cols button").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
+  const qq = document.getElementById("wsQQ");
+  if (qq) {
+    qq.oninput = () => { document.getElementById("wsQQv").textContent = tr("min. {n} weapons per quest", { n: qq.value }); };
+    qq.onchange = () => { state.wsMinW = Number(qq.value); render(); document.getElementById("wsQQ")?.focus({ preventScroll: true }); };
+  }
 }
 
 function fitRows() {
@@ -2850,6 +2999,29 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V89", when: "15.10.2026 16:55", items: [
+    "Fix: Weapon Strength – the Quantity ↔ Quality slider stays visible even when no quest matches, so it can always be moved back.",
+    "The pinned bar at the top now also shows the logo of the selected game." ] },
+  { v: "V88", when: "15.10.2026 16:45", items: [
+    "Weapon Strength: runs, Quantity ↔ Quality slider and accuracy are now combined in one compact box." ] },
+  { v: "V87", when: "15.10.2026 16:40", items: [
+    "Weapon Strength: the Quantity ↔ Quality slider now starts at 4 weapons per quest; the recommended value 10 is marked more clearly." ] },
+  { v: "V86", when: "15.10.2026 16:50", items: [
+    "Weapon Strength: a curve above the Quantity ↔ Quality slider shows where many runs and a high accuracy come together best (dashed line = peak)." ] },
+  { v: "V85", when: "15.10.2026 16:40", items: [
+    "Weapon Strength: the Quantity ↔ Quality slider starts at 10 weapons per quest (recommended, marked on the slider)." ] },
+  { v: "V84", when: "15.10.2026 16:35", items: [
+    "Weapon Strength: new Quantity ↔ Quality slider between „runs analysed“ and Accuracy – to the right only quests where many weapons have a run count (fewer runs, higher accuracy)." ] },
+  { v: "V83", when: "15.10.2026 16:25", items: [
+    "Header: „with automatic weapon tier lists“ under the title; bigger logo in the header and in the pinned bar." ] },
+  { v: "V82", when: "15.10.2026 16:20", items: [
+    "Weapon Strength: a short worked example under the formulas shows why the quest weighting makes the ranking more realistic." ] },
+  { v: "V81", when: "15.10.2026 16:15", items: [
+    "Weapon Strength: short formulas under the ranking show how ratio, quest weight and accuracy are calculated." ] },
+  { v: "V80", when: "15.10.2026 16:05", items: [
+    "Weapon Strength: quests are weighted by how many weapons have a run there – quests with only a few weapons barely affect the ranking and the accuracy any more." ] },
+  { v: "V79", when: "15.10.2026 12:40", items: [
+    "Mobile: the pinned Weapon Strength filters take much less space." ] },
   { v: "V78", when: "15.10.2026 12:30", items: [
     "Weapon Strength „Realistic“: the 3 fastest runs per quest and weapon count, even if several are by the same runner." ] },
   { v: "V77", when: "15.10.2026 11:50", items: [
