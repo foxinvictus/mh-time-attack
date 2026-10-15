@@ -1096,7 +1096,7 @@
         </div>
         <div class="seg" role="group" aria-label="Runs per quest" id="wsRunsSeg" hidden>
           <button data-wsruns="best" aria-pressed="false" title="Only the fastest run per quest and weapon">Maximum performance</button>
-          <button data-wsruns="top3" aria-pressed="true" title="Up to 3 runs (different runners) per quest and weapon – recommended">Realistic</button>
+          <button data-wsruns="top3" aria-pressed="true" title="Up to 3 runs per quest and weapon – recommended">Realistic</button>
         </div>
         <label class="trim-ctl" id="trimCtl" hidden title="Share of runs ignored at the top and at the bottom of every weapon">
           Ignore extremes <input type="range" id="trimRange" min="0" max="25" step="1" value="15"> <output id="trimOut">15 %</output>
@@ -1388,14 +1388,14 @@ const JA = {
   "Active filters: {x}.": "適用中のフィルター：{x}。",
   "Maximum performance": "最大パフォーマンス", "Realistic": "実戦向け",
   "Only the fastest run per quest and weapon": "クエスト・武器ごとの最速記録のみ",
-  "Up to 3 runs (different runners) per quest and weapon – recommended": "クエスト・武器ごとに最大3記録（別ランナー）– おすすめ",
+  "Up to 3 runs per quest and weapon – recommended": "クエスト・武器ごとに最大3記録 – おすすめ",
   "Recommended: “Realistic” + “No Heroics”.": "おすすめ設定：「実戦向け」＋「火事場なし」",
   "Ratio = average best time of all weapons in the quest ÷ clear time (1.00 = average, higher = faster).": "レシオ＝クエスト内の全武器の最速タイム平均 ÷ クリアタイム（1.00＝平均、高いほど速い）。",
   "Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.": "極端な値を除外：各武器の上下{p}%の値を除き、単発の外れ値の影響を減らします。",
   "Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low).": "精度＝ランキングを支える記録の充実度。クエスト・武器ごとに1件目の記録が60%、2件目が25%、3件目が15%として計算します。各バーの後ろの点はその武器の精度です（緑＝高、黄＝中、赤＝低）。",
   "{w}: accuracy {p} %": "{w}：精度 {p}%",
   "Active filters:": "適用中のフィルター：",
-  "<b>Realistic</b> – up to 3 runs per quest and weapon (different runners), so more runs are used": "<b>実戦向け</b> – クエスト・武器ごとに最大3記録（別ランナー）を使用。より多くの記録で集計",
+  "<b>Realistic</b> – up to 3 runs per quest and weapon, so more runs are used": "<b>実戦向け</b> – クエスト・武器ごとに最大3記録を使用。より多くの記録で集計",
   "<b>Maximum performance</b> – only the fastest run per quest and weapon": "<b>最大パフォーマンス</b> – クエスト・武器ごとの最速記録のみ",
   "<b>No Heroics</b> – runs without the Heroics damage buff": "<b>火事場なし</b> – 火事場（攻撃力アップ）なしの記録",
   "<b>Heroics only</b> – only runs with the Heroics damage buff": "<b>火事場のみ</b> – 火事場ありの記録だけ",
@@ -2624,7 +2624,7 @@ function wsBase() {
   }).filter(x => x.ratio);
   return (wsCache = { runs: state.runs, updates: state.updates, hero, items, byGame });
 }
-/* "Top 3" / "Best": per quest and weapon keep only the n fastest runs (one per YouTube channel; runs without channel count separately) */
+/* "Realistic" / "Maximum performance": per quest and weapon keep only the n fastest runs (several runs of the same runner allowed) */
 function limitRuns(list, n) {
   if (!n) return list;
   const groups = new Map();
@@ -2636,15 +2636,7 @@ function limitRuns(list, n) {
   const out = [];
   for (const g of groups.values()) {
     g.sort((a, b) => a.r.sec - b.r.sec);
-    const seen = new Set();
-    let taken = 0;
-    for (const x of g) {
-      const ch = (x.r.channelFull || "").toLowerCase();
-      if (ch && seen.has(ch)) continue;
-      if (ch) seen.add(ch);
-      out.push(x);
-      if (++taken >= n) break;
-    }
+    out.push(...g.slice(0, n));
   }
   return out;
 }
@@ -2795,7 +2787,7 @@ function renderStrengthView() {
   // the filters behind this ranking, each with a short explanation
   const scope = byUpdate ? tr("{g}, title update {u}", { g: esc(gname(state.game)), u: esc(sel.label) }) : esc(gname(sel.key));
   const fl = [scope, top3
-    ? tr("<b>Realistic</b> – up to 3 runs per quest and weapon (different runners), so more runs are used")
+    ? tr("<b>Realistic</b> – up to 3 runs per quest and weapon, so more runs are used")
     : tr("<b>Maximum performance</b> – only the fastest run per quest and weapon")];
   if (!noHeroSkill) fl.push(tr(state.wsHero === "no" ? "<b>No Heroics</b> – runs without the Heroics damage buff"
     : state.wsHero === "only" ? "<b>Heroics only</b> – only runs with the Heroics damage buff" : "<b>All runs</b> – with and without Heroics"));
@@ -2858,6 +2850,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V78", when: "15.10.2026 12:30", items: [
+    "Weapon Strength „Realistic“: the 3 fastest runs per quest and weapon count, even if several are by the same runner." ] },
   { v: "V77", when: "15.10.2026 11:50", items: [
     "Weapon Strength: fairer Accuracy – per quest and weapon the 1st run counts most (60 %), the 2nd 25 %, the 3rd 15 %; a weakly covered weapon lowers the overall value.",
     "Weapon Strength: a small coloured dot after every bar (and in the tier list and sheet) shows the accuracy of each weapon." ] },
