@@ -618,6 +618,58 @@
   .ws-cols button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
   .ws-cols button[aria-pressed="true"] small { color: var(--on-gold); opacity: .8; }
   /* tier list */
+  /* desktop: tier list on the left, filters + formulas right next to it */
+  /* "Exclusive" label (Weapon Strength) */
+  .excl { display: inline-block; font: 700 11px/1 "Barlow", "Noto Sans JP", sans-serif; font-style: normal; letter-spacing: .08em; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 999px; background: linear-gradient(90deg, #ef7b5f, #edbc60); color: #102f37; vertical-align: middle;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25); white-space: nowrap; }
+  h2 .excl { font-size: 12px; margin-left: 6px; position: relative; top: -3px; }
+  .views button { position: relative; }
+  .views button .excl { position: absolute; top: 6px; right: 6px; font-size: 9px; padding: 3px 6px; }
+  /* phone: quantity/quality box above the chart (side column dissolves, the box moves first) */
+  @media (max-width: 760px) {
+    .ws-split { display: flex; flex-direction: column; }
+    .ws-side { display: contents; }
+    .ws-split .ws-qq { order: -1; }
+    .views button .excl { display: none; }
+  }
+  /* tier list image: buttons + off-screen layout that always uses the desktop arrangement */
+  .ws-tier-h { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+  .shot-btns { display: inline-flex; gap: 6px; margin-left: auto; }
+  .shot-btn { padding: 5px 12px; border: 1px solid var(--gold); border-radius: 999px; background: none; color: var(--gold); cursor: pointer;
+    font: 700 14px/1 "Barlow Condensed", sans-serif; }
+  .shot-btn:hover:not(:disabled) { background: var(--gold); color: var(--on-gold); }
+  .ws-shot { position: fixed; left: -12000px; top: 0; width: 1040px; padding: 22px 26px 16px; color: var(--paper); }
+  .ws-shot .ws-split { display: grid !important; grid-template-columns: 470px 1fr !important; gap: 24px; align-items: start; }
+  .ws-shot .ws-side { display: block !important; }
+  .ws-shot .ws-split-bars { grid-template-columns: 560px 1fr !important; }
+  .ws-shot .wsb { grid-template-columns: 30px 34px 1fr 56px 52px !important; gap: 8px !important; }
+  .ws-shot .wsb .nm .wn { display: none !important; }
+  .ws-shot .ws-qq { order: 0 !important; margin-bottom: 14px; }
+  .ws-shot .ws-qq input { pointer-events: none; }
+  .ws-shot .tier { grid-template-columns: 64px 1fr !important; min-height: 58px !important; }
+  .ws-shot .tier-l { font-size: 30px !important; }
+  .ws-shot .tchip .wi.th { width: 34px !important; height: 34px !important; }
+  .shot-range { position: relative; display: block; height: 16px; margin: 0 8px; }
+  .shot-range::before, .shot-range i { content: ""; position: absolute; left: 0; top: 6px; height: 4px; border-radius: 2px; }
+  .shot-range::before { right: 0; background: var(--ink-3); }
+  .shot-range i { background: var(--gold); }
+  .shot-range b { position: absolute; top: 0; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--gold); }
+  .shot-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .shot-head img { width: 48px; height: 48px; object-fit: contain; }
+  .shot-head strong { display: block; font: 700 30px/1 "Barlow Condensed", sans-serif; }
+  .shot-head span { display: block; margin-top: 4px; font: 600 15px/1.2 "Barlow", "Noto Sans JP", sans-serif; color: var(--gold); }
+  .shot-foot { margin-top: 12px; text-align: right; font-size: 13px; color: var(--muted); }
+  /* side column: quantity/quality box, filters and formulas next to the ranking */
+  @media (min-width: 761px) {
+    .ws-split { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(250px, 1fr); gap: 22px; align-items: start; }
+    .ws-split .tiers { max-width: 470px; }
+    .ws-side .ws-filters { margin-top: 0; }
+    .ws-side .ws-qq { max-width: none; }
+    .ws-split .wsb { grid-template-columns: 30px 34px 1fr 52px 50px; gap: 8px; }
+    .ws-split .wsb .nm .wn { display: none; }
+  }
+  @media (min-width: 1300px) { .ws-split .wsb { grid-template-columns: 30px 140px 1fr 52px 50px; } .ws-split .wsb .nm .wn { display: inline; } }
   .tiers { display: grid; gap: 4px; padding: 4px; background: var(--ink-2); border-radius: 8px; }
   .tier { display: grid; grid-template-columns: 64px 1fr; gap: 4px; min-height: 58px; }
   .tier-l { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 4px; color: #fff;
@@ -1090,7 +1142,7 @@
     <button role="tab" data-view="newest" aria-selected="false"><img class="vicon" src="icons/UI/newest-runs.png" alt="" onerror="this.remove()"><strong>Newest Runs</strong><span>The latest recorded runs</span></button>
    </div></div>
    <div class="vcat"><span class="vcap" aria-hidden="true">Analysis</span><div class="vgroup">
-    <button role="tab" data-view="strength" aria-selected="false"><img class="vicon" src="icons/UI/weapon-strength.png" alt="" onerror="this.remove()"><strong>Weapon Strength</strong><span>Average ratio per title update</span></button>
+    <button role="tab" data-view="strength" aria-selected="false"><img class="vicon" src="icons/UI/weapon-strength.png" alt="" onerror="this.remove()"><strong>Weapon Strength</strong><span>Average ratio per title update</span><em class="excl">Exclusive</em></button>
    </div></div>
    <div class="vcat"><span class="vcap" aria-hidden="true">Community</span><div class="vgroup">
     <button role="tab" data-view="hof" aria-selected="false"><img class="vicon" src="icons/UI/hall-of-fame.png" alt="" onerror="this.remove()"><strong>Hall of Fame</strong><span>Medal table and most active runners</span></button>
@@ -1449,6 +1501,8 @@ const JA = {
   "Ratio": "レシオ", "quest average": "クエスト平均", "time": "タイム",
   "with automatic weapon tier lists": "武器ティア表を自動作成",
   "Quantity": "量", "Quality": "質",
+  "Save image": "画像を保存", "Weapon ranking": "武器ランキング", "Share": "共有", "Weapon tier list": "武器ティア表",
+  "The image could not be created. Please try again.": "画像を作成できませんでした。もう一度お試しください。", "Exclusive": "ここだけ",
   "No quests with at least {n} weapons yet – move the slider to the left.": "{n}武器以上に記録があるクエストはまだありません。スライダーを左に動かしてください。", "run": "記録", "runs": "記録", "Recommended: 10": "おすすめ：10", "min. {n} weapons per quest": "1クエストにつき最低{n}武器",
   "Left: every quest counts (more runs). Right: only quests where many weapons have a run (higher accuracy). The curve is highest where many runs and a high accuracy come together.": "左：すべてのクエストを集計（記録が多い）。右：多くの武器に記録があるクエストのみ（精度が高い）。曲線は記録数と精度のバランスが最も良い位置で最も高くなります。",
   "Peak = best balance of runs and accuracy (here: {n})": "山の頂点＝記録数と精度のバランスが最良（ここでは{n}）",
@@ -2777,6 +2831,66 @@ function wsStats(all, minW) {
   const mean = accs.reduce((a, b) => a + b, 0) / accs.length;
   return { mine, qW, wAcc, acc: nq ? 0.8 * mean + 0.2 * Math.min(...accs) : 0, fill: nq ? raw / (nq * WEAPONS.length) : 0 };
 }
+/* ---------- tier list as image (JPEG): tier list left, info right – same layout as the desktop view ----------
+   html2canvas is loaded only when needed. */
+let h2cPromise = null;
+function loadH2C() {
+  if (window.html2canvas) return Promise.resolve();
+  return h2cPromise ||= new Promise((ok, fail) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    sc.onload = ok; sc.onerror = () => { h2cPromise = null; fail(new Error("html2canvas")); };
+    document.head.appendChild(sc);
+  });
+}
+async function tierShot(share, btn, label, kind = "Weapon tier list") {
+  const split = document.querySelector("#wsChart .ws-split");
+  if (!split) return;
+  const old = btn.textContent;
+  btn.disabled = true; btn.textContent = "…";
+  let box;
+  try {
+    await loadH2C();
+    const bg = getComputedStyle(document.body).backgroundColor;
+    box = document.createElement("div");
+    box.className = "ws-shot";
+    box.style.background = bg;
+    box.innerHTML = `<div class="shot-head"><img src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><div><strong>MH Speedrun Leaderboards</strong>` +
+      `<span>${esc(tr(kind))} · ${esc(label)}</span></div></div>`;
+    const clone = split.cloneNode(true);
+    clone.querySelectorAll("details").forEach(d => d.remove());
+    // html2canvas cannot draw range inputs: replace the slider with a drawn track + knob
+    clone.querySelectorAll('input[type="range"]').forEach(inp => {
+      const pct = (inp.value - inp.min) / (inp.max - inp.min) * 100;
+      const d = document.createElement("span");
+      d.className = "shot-range";
+      d.innerHTML = `<i style="width:${pct}%"></i><b style="left:${pct}%"></b>`;
+      inp.replaceWith(d);
+    });
+    box.appendChild(clone);
+    box.insertAdjacentHTML("beforeend", `<div class="shot-foot">foxinvictus.github.io/mh-time-attack</div>`);
+    document.body.appendChild(box);
+    await Promise.all([...box.querySelectorAll("img")].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+    const canvas = await window.html2canvas(box, { backgroundColor: bg, scale: 2, useCORS: true, logging: false });
+    const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.92));
+    const name = ((kind === "Weapon ranking" ? "mh-weapon-ranking-" : "mh-tier-list-") + label).replace(/[^\w.-]+/g, "-").toLowerCase() + ".jpg";
+    const file = new File([blob], name, { type: "image/jpeg" });
+    if (share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: "MH Speedrun Leaderboards", text: tr(kind) + " · " + label + " – https://foxinvictus.github.io/mh-time-attack/" });
+    } else {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }
+    gcEvent((kind === "Weapon ranking" ? "ranking" : "tier") + "-image-" + (share ? "share" : "save"), kind + " image");
+  } catch (e) {
+    if (e && e.name !== "AbortError") alert(tr("The image could not be created. Please try again."));
+  } finally {
+    box?.remove();
+    btn.disabled = false; btn.textContent = old;
+  }
+}
 /* curve over the slider: balance of quantity (runs) and quality (accuracy) for every slider position.
    High where many runs AND a high accuracy come together. */
 function wsCurve(all) {
@@ -2825,10 +2939,10 @@ function renderStrengthView() {
   const noHeroSkill = state.wsMode === "obt" || (byUpdate && heroUntracked(state.game) === "beta");   // betas have no Heroics skill
   const heroTxt = noHeroSkill ? "" : state.wsHero === "no" ? tr(" Runs without Heroics only.") : state.wsHero === "only" ? tr(" Heroics runs only.") : "";
   title.innerHTML = byUpdate
-    ? `<h2>${tr("Weapon Strength · {g}", { g: esc(gname(state.game)) })}</h2><p>${tr("Average ratio of every weapon after each title update. Click a column to see its ranking.")}</p>`
+    ? `<h2>${tr("Weapon Strength · {g}", { g: esc(gname(state.game)) })} <em class="excl">${tr("Exclusive")}</em></h2><p>${tr("Average ratio of every weapon after each title update. Click a column to see its ranking.")}</p>`
     : state.wsMode === "obt"
-    ? `<h2>${tr("Weapon Strength · open betas")}</h2><p>${tr("Average ratio of every weapon per open beta test (OBT). Click a column to see its ranking.")}</p>`
-    : `<h2>${tr("Weapon Strength · all titles")}</h2><p>${tr("Average ratio of every weapon per game (without open betas). Click a column to see its ranking.")}</p>`;
+    ? `<h2>${tr("Weapon Strength · open betas")} <em class="excl">${tr("Exclusive")}</em></h2><p>${tr("Average ratio of every weapon per open beta test (OBT). Click a column to see its ranking.")}</p>`
+    : `<h2>${tr("Weapon Strength · all titles")} <em class="excl">${tr("Exclusive")}</em></h2><p>${tr("Average ratio of every weapon per game (without open betas). Click a column to see its ranking.")}</p>`;
 
   // values
   const cell = {};   // cell[colKey][weapon] = { v, n }
@@ -2944,26 +3058,31 @@ function renderStrengthView() {
     `<span class="qq-track">${wsCurve(colAll[sel.key])}<input type="range" id="wsQQ" min="4" max="14" step="1" value="${state.wsMinW}"><i class="qq-mark" title="${esc(tr("Recommended: 10"))}"><b>10</b></i></span>` +
     `<span class="qq-side ${acc.cls}" title="${accTitle}"><strong>${Math.round(colAcc[sel.key] * 100)} %</strong><small>${tr(acc.label)}</small><span class="qq-l">${tr("Quality")}</span></span>` +
     `<small class="qq-v" id="wsQQv">${tr("min. {n} weapons per quest", { n: state.wsMinW })}</small></label>`;
+  const shotBtns = `<span class="shot-btns"><button type="button" class="shot-btn" data-shot="save">⤓ ${tr("Save image")}</button>` +
+    (navigator.canShare ? `<button type="button" class="shot-btn" data-shot="share">↗ ${tr("Share")}</button>` : "") + `</span>`;
   if (disp === "tier") {
     const tiers = TIERS.map(t => ({ ...t, list: rows.filter(o => tierOf(o.x.v) === t) }));
     chartEl.innerHTML = colPick + (rows.length
-      ? `<h3>${tr("Tier list · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}</h3>` + stats +
-        `<div class="tiers">` + tiers.map(t => `<div class="tier"><div class="tier-l${t.dark ? " dark" : ""}" style="background:${t.c}">${t.l}<small>${t.min ? "≥ " + fmtRatio(t.min) : "< " + fmtRatio(TIERS[TIERS.length - 2].min)}</small></div>` +
+      ? `<h3 class="ws-tier-h">${tr("Tier list · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}` +
+        shotBtns + `</h3>` +
+        `<div class="ws-split"><div class="tiers">` + tiers.map(t => `<div class="tier"><div class="tier-l${t.dark ? " dark" : ""}" style="background:${t.c}">${t.l}<small>${t.min ? "≥ " + fmtRatio(t.min) : "< " + fmtRatio(TIERS[TIERS.length - 2].min)}</small></div>` +
           `<div class="tier-c">${t.list.map(o => `<span class="tchip" title="${esc(`${o.en}: ${fmtRatio(o.x.v)} (${trn(o.x.n, "{n} run", "{n} runs")})`)}">${weaponIcon(o.k, "th")}<span class="tv">${fmtRatio(o.x.v)}${accDot(wAcc[sel.key][o.k], o.en)}</span></span>`).join("")}</div></div>`).join("") + `</div>` +
-        filterLine
+        `<div class="ws-side">${stats}${filterLine}</div></div>`
       : stats + `<p class="status">${tr(state.wsMinW > 4 ? "No quests with at least {n} weapons yet – move the slider to the left." : "No runs in {x} yet.", { x: esc(sel.label), n: state.wsMinW })}</p>`);
   } else
   chartEl.innerHTML = colPick + (rows.length
-    ? `<h3>${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}${p ? `<small>${tr("arrows: change vs. {p}", { p: esc(p.label) })}</small>` : ""}</h3>` + stats +
-      rows.map((o, i) => {
+    ? `<h3 class="ws-tier-h">${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}${p ? `<small>${tr("arrows: change vs. {p}", { p: esc(p.label) })}</small>` : ""}` + shotBtns + `</h3>` +
+      `<div class="ws-split ws-split-bars"><div class="ws-main">` + rows.map((o, i) => {
         const t = tint(o.k, Math.min(1, 0.3 + strength(o.x.v)));   // ranking bars: stronger colours than the table
         return `<div class="wsb"><span class="pos">${MEDALS[i + 1] ? medalImg(i + 1) : "#" + (i + 1)}</span><span class="nm">${weaponIcon(o.k, "small")}<span class="wn">${o.en}</span></span>` +
           `<span class="track"><span class="fill" style="display:block;width:${pc(o.x.v)}%;background:${t.bg}"></span>` +
           (top3 && o.x.hi > o.x.lo ? `<span class="rng" style="left:${pc(o.x.lo)}%;width:${(pc(o.x.hi) - pc(o.x.lo)).toFixed(1)}%" title="${esc(tr("Counted runs: ratio {a} to {b}", { a: fmtRatio(o.x.lo), b: fmtRatio(o.x.hi) }))}"></span>` : "") + `</span>` +
           `<span class="val">${fmtRatio(o.x.v)}${accDot(wAcc[sel.key][o.k], o.en)}</span><span class="dl">${arrow(delta(sel, o.k))}</span></div>`;
-      }).join("") + filterLine
+      }).join("") + `</div><div class="ws-side">${stats}${filterLine}</div></div>`
     : stats + `<p class="status">${tr(state.wsMinW > 4 ? "No quests with at least {n} weapons yet – move the slider to the left." : "No runs in {x} yet.", { x: esc(sel.label), n: state.wsMinW })}</p>`);
   chartEl.querySelectorAll(".ws-cols button").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
+  chartEl.querySelectorAll(".shot-btn").forEach(b => b.onclick = () => tierShot(b.dataset.shot === "share", b,
+    (byUpdate ? gname(state.game) + " · " + sel.label : gname(sel.key)), disp === "tier" ? "Weapon tier list" : "Weapon ranking"));
   const qq = document.getElementById("wsQQ");
   if (qq) {
     qq.oninput = () => { document.getElementById("wsQQv").textContent = tr("min. {n} weapons per quest", { n: qq.value }); };
@@ -2999,6 +3118,17 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V94", when: "15.10.2026 17:45", items: [
+    "Bar chart: „Save image“ / „Share“ as for the tier list – ranking left, filters and formulas right." ] },
+  { v: "V93", when: "15.10.2026 17:45", items: [
+    "Tier list: „Save image“ downloads the tier list as a JPEG (tier list left, filters and formulas right); on phones „Share“ opens the share menu." ] },
+  { v: "V92", when: "15.10.2026 17:40", items: [
+    "Weapon Strength gets an „Exclusive“ label (view tile and title).",
+    "Mobile: the quantity/quality box sits above the bar chart / tier list again." ] },
+  { v: "V91", when: "15.10.2026 17:35", items: [
+    "Desktop and tablet: tier list and bar chart are narrower; the quantity/quality box, filters and formulas sit right next to them." ] },
+  { v: "V90", when: "15.10.2026 17:25", items: [
+    "Desktop: the tier list is narrower, with the active filters and formulas right next to it – less scrolling." ] },
   { v: "V89", when: "15.10.2026 16:55", items: [
     "Fix: Weapon Strength – the Quantity ↔ Quality slider stays visible even when no quest matches, so it can always be moved back.",
     "The pinned bar at the top now also shows the logo of the selected game." ] },
