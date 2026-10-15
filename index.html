@@ -742,6 +742,7 @@
   .ws-ex { margin-top: 6px; }
   .ws-ex summary { cursor: pointer; color: var(--gold); font-size: 13px; font-weight: 600; }
   .ws-ex p { display: block; font-size: 13px; margin: 4px 0; }
+  .ws-ex p.ex2 { margin-top: 10px; font-weight: 600; color: var(--gold); }
   .ws-formula p.leg { display: block; font-size: 12px; color: var(--muted); }
   @media (max-width: 600px) { .ws-formula .f { font-size: 13px; white-space: normal; } .ws-formula { padding: 8px 10px; } }
   .acc-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 5px; vertical-align: middle;
@@ -1502,6 +1503,8 @@ const JA = {
   "Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.": "極端な値を除外：各武器の上下{p}%の値を除き、単発の外れ値の影響を減らします。",
   "Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low).": "精度＝ランキングを支える記録の充実度。クエスト・武器ごとに1件目の記録が60%、2件目が25%、3件目が15%として計算します。各バーの後ろの点はその武器の精度です（緑＝高、黄＝中、赤＝低）。",
   "{w}: accuracy {p} %": "{w}：精度 {p}%",
+  "d = damping per quest: if a weapon has only 1 or 2 of its top-3 runs in a quest, its value there is pulled 40 % or 15 % towards 1.00 – so a single lucky (or bad) run cannot carry a weapon into S tier (or F tier).": "d＝クエストごとの補正：武器のトップ3記録が1件または2件しかない場合、その値を1.00へ40%または15%近づけます。1回の好記録（または不調な記録）だけでSティア（Fティア）になることはありません。",
+  "Few runs: if a weapon has only 1 or 2 runs in a quest, its value there is pulled 40 % or 15 % towards the average (1.00).": "記録が少ない場合：あるクエストで武器の記録が1件または2件しかないとき、その値を平均（1.00）へ40%または15%近づけます。",
   "Ratio": "レシオ", "quest average": "クエスト平均", "time": "タイム", "quest average of place k": "クエスト内k位の平均",
   "Same place: each weapon's 1st run is compared with the quest's average 1st-place time, the 2nd with the 2nd, the 3rd with the 3rd – so having more or fewer runs gives no advantage.": "同順位比較：各武器の1位の記録はクエスト内の1位タイムの平均と、2位は2位、3位は3位と比較します。記録の多い・少ないで有利不利は生じません。", "all weapons": "全武器",
   "Normalised: the average of all weapons is always 1.00 – above 1.00 = stronger than average.": "正規化：全武器の平均は常に1.00です。1.00より上＝平均より強い。",
@@ -1514,6 +1517,10 @@ const JA = {
   "Peak = best balance of runs and accuracy (here: {n})": "山の頂点＝記録数と精度のバランスが最良（ここでは{n}）",
   "<b>Quality {n}/14</b> – only quests where at least {n} weapons have a run": "<b>質 {n}/14</b> – {n}武器以上に記録があるクエストのみ",
   "Example": "計算例",
+  "Example 2 – one run vs. three runs in the same quest (average times of place 1 / 2 / 3: 300 / 320 / 340 s):": "例2 – 同じクエストで記録1件の武器と3件の武器（1位／2位／3位の平均タイム：300／320／340秒）：",
+  "LBG, 1 run (250 s): 300 ÷ 250 = 1.20 → damped 40 %: 0.6 · 1.20 + 0.4 · 1.00 = <b>1.12</b>": "ライト、記録1件（250秒）：300 ÷ 250 = 1.20 → 40%補正：0.6 · 1.20 + 0.4 · 1.00 = <b>1.12</b>",
+  "GS, 3 runs (270 / 290 / 310 s): 300 ÷ 270, 320 ÷ 290, 340 ÷ 310 = 1.11 / 1.10 / 1.10 → full top 3, not damped: <b>1.10</b>": "大剣、記録3件（270／290／310秒）：300 ÷ 270、320 ÷ 290、340 ÷ 310 = 1.11／1.10／1.10 → トップ3がそろっているため補正なし：<b>1.10</b>",
+  "Old way (only best times as reference, no damping): LBG 1.20 vs. GS 1.04 – the single lucky run looked much stronger than three consistent runs. Now: LBG 1.12 vs. GS 1.10.": "従来の方法（最速タイムのみ基準、補正なし）：ライト1.20、大剣1.04 – 1回の好記録が、安定した3件の記録よりはるかに強く見えていました。現在：ライト1.12、大剣1.10。",
   "Quest A: only 4 of 14 weapons have a run, Dual Blades ratio 1.80 → weight (4 ÷ 14)² ≈ 0.08.": "クエストA：14武器中4武器のみ記録あり、双剣のレシオ1.80 → 重み (4 ÷ 14)² ≈ 0.08。",
   "Quests B–J: all 14 weapons, Dual Blades ratio 1.00 → weight 1 each.": "クエストB〜J：全14武器に記録あり、双剣のレシオ1.00 → 重みは各1。",
   "Weighted: (0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · simple average: (1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>": "重み付き：(0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · 単純平均：(1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>",
@@ -1676,14 +1683,17 @@ const tierOf = v => TIERS.find(t => v >= t.min);
 function wsFormula() {
   const w = `w<sub>q</sub>`;
   return `<div class="ws-formula">` +
-    `<p><span class="f">${tr("Ratio")} = R ÷ Ø R<sub>${tr("all weapons")}</sub></span><span class="f">R = Σ ${w}·r ÷ Σ ${w}</span></p>` +
+    `<p><span class="f">${tr("Ratio")} = V ÷ Ø V<sub>${tr("all weapons")}</sub></span><span class="f">V = Σ ${w}·v<sub>q</sub> ÷ Σ ${w}</span></p>` +
+    `<p><span class="f">v<sub>q</sub> = (1 − d)·Ø r<sub>k</sub> + d · 1.00</span><span class="f">d = 40 % (1 run) · 15 % (2 runs) · 0 (3 runs)</span></p>` +
     `<p><span class="f">${w} = (n<sub>q</sub> ÷ 14)²</span><span class="f">r<sub>k</sub> = ${tr("quest average of place k")} ÷ ${tr("time")}</span></p>` +
     `<p><span class="f">${tr("Accuracy")} = Σ ${w}·(0.6·a<sub>1</sub> + 0.25·a<sub>2</sub> + 0.15·a<sub>3</sub>) ÷ Σ ${w}</span></p>` +
     `<p class="leg">${tr("n<sub>q</sub> = weapons with a run in quest q · a<sub>1–3</sub> = 1st / 2nd / 3rd run exists (1 or 0)")}</p>` +
     `<p class="leg">${tr("Same place: each weapon's 1st run is compared with the quest's average 1st-place time, the 2nd with the 2nd, the 3rd with the 3rd – so having more or fewer runs gives no advantage.")}</p>` +
+    `<p class="leg">${tr("d = damping per quest: if a weapon has only 1 or 2 of its top-3 runs in a quest, its value there is pulled 40 % or 15 % towards 1.00 – so a single lucky (or bad) run cannot carry a weapon into S tier (or F tier).")}</p>` +
     `<p class="leg">${tr("Normalised: the average of all weapons is always 1.00 – above 1.00 = stronger than average.")}</p>` +
     `<details class="ws-ex"><summary>${tr("Example")}</summary>` +
-    `<p>${tr("Quest A: only 4 of 14 weapons have a run, Dual Blades ratio 1.80 → weight (4 ÷ 14)² ≈ 0.08.")}</p><p>${tr("Quests B–J: all 14 weapons, Dual Blades ratio 1.00 → weight 1 each.")}</p><p>${tr("Weighted: (0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · simple average: (1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>")}</p><p class="leg">${tr("Other leaderboards usually use the simple average, so one thinly covered quest can push a weapon up several places. The weighting used here keeps the ranking realistic.")}</p></details></div>`;
+    `<p>${tr("Quest A: only 4 of 14 weapons have a run, Dual Blades ratio 1.80 → weight (4 ÷ 14)² ≈ 0.08.")}</p><p>${tr("Quests B–J: all 14 weapons, Dual Blades ratio 1.00 → weight 1 each.")}</p><p>${tr("Weighted: (0.08 · 1.80 + 9 · 1.00) ÷ 9.08 ≈ <b>1.01</b> · simple average: (1.80 + 9 · 1.00) ÷ 10 = <b>1.08</b>")}</p><p class="ex2">${tr("Example 2 – one run vs. three runs in the same quest (average times of place 1 / 2 / 3: 300 / 320 / 340 s):")}</p><p>${tr("LBG, 1 run (250 s): 300 ÷ 250 = 1.20 → damped 40 %: 0.6 · 1.20 + 0.4 · 1.00 = <b>1.12</b>")}</p><p>${tr("GS, 3 runs (270 / 290 / 310 s): 300 ÷ 270, 320 ÷ 290, 340 ÷ 310 = 1.11 / 1.10 / 1.10 → full top 3, not damped: <b>1.10</b>")}</p><p class="leg">${tr("Old way (only best times as reference, no damping): LBG 1.20 vs. GS 1.04 – the single lucky run looked much stronger than three consistent runs. Now: LBG 1.12 vs. GS 1.10.")}</p>` +
+    `<p class="leg">${tr("Other leaderboards usually use the simple average, so one thinly covered quest can push a weapon up several places. The weighting used here keeps the ranking realistic.")}</p></details></div>`;
 }
 /* Weapon Strength accuracy (share of filled ranking slots) -> label + colour class */
 const accOf = a => a >= 0.7 ? { label: "High", cls: "acc-hi" } : a >= 0.4 ? { label: "Medium", cls: "acc-mid" } : { label: "Low", cls: "acc-lo" };
@@ -2798,6 +2808,19 @@ function trimmedMeanW(items, pct) {
   const ws = keep.reduce((a, x) => a + x.w, 0);
   return ws ? keep.reduce((a, x) => a + x.v * x.w, 0) / ws : keep.reduce((a, x) => a + x.v, 0) / keep.length;
 }
+/* weighted trimmed mean + damping: every weapon gets WS_PRIOR "average runs" (ratio 1.00) added,
+   so a value based on only a few (or thinly covered) runs is pulled towards 1.00 */
+const WS_PRIOR = 3;
+/* missing top-3 runs in a quest pull the weapon's quest value towards 1.00: same shares as the accuracy (60 / 25 / 15 %) */
+const WS_DAMP = { 1: 0.40, 2: 0.15, 3: 0 };
+function dampedMean(items, pct) {
+  const v = [...items].sort((a, b) => a.v - b.v), n = v.length;
+  if (!n) return null;
+  const k = Math.floor(Math.floor(n * 2 * pct / 100) / 2);
+  const keep = v.slice(k, n - k);
+  const W = keep.reduce((a, x) => a + x.w, 0), S = keep.reduce((a, x) => a + x.v * x.w, 0);
+  return (S + WS_PRIOR * 1) / (W + WS_PRIOR);
+}
 function trimmedMean(vals, pct) {
   const v = [...vals].sort((a, b) => a - b), n = v.length;
   if (!n) return null;
@@ -2888,10 +2911,23 @@ async function tierShot(share, btn, label, kind = "Weapon tier list") {
       d.innerHTML = `<i style="width:${pct}%"></i><b style="left:${pct}%"></b>`;
       inp.replaceWith(d);
     });
+    // lazy images (e.g. lower bars that were never scrolled into view) must load now, or they stay empty in the image
+    clone.querySelectorAll('img[loading="lazy"]').forEach(im => { im.loading = "eager"; const src = im.getAttribute("src"); im.removeAttribute("src"); im.setAttribute("src", src); });
     box.appendChild(clone);
     box.insertAdjacentHTML("beforeend", `<div class="shot-foot">foxinvictus.github.io/mh-time-attack</div>`);
     document.body.appendChild(box);
-    await Promise.all([...box.querySelectorAll("img")].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+    await Promise.all([...box.querySelectorAll("img")].map(im => im.complete ? 0 : new Promise(r => {
+      im.addEventListener("load", r, { once: true }); im.addEventListener("error", () => setTimeout(r, 300), { once: true }); setTimeout(r, 4000);
+    })));
+    await new Promise(r => setTimeout(r, 150));   // let fallback badges (missing icons) settle
+    // left (tier list / bars) and right (info) column about the same height: stretch the shorter left side
+    const main = clone.firstElementChild, side = clone.lastElementChild;
+    const hs = side.getBoundingClientRect().height, hm = main.getBoundingClientRect().height;
+    if (hs > hm + 8) {
+      main.style.height = hs + "px";
+      if (main.classList.contains("tiers")) { main.style.gridAutoRows = "1fr"; }
+      else { main.style.display = "flex"; main.style.flexDirection = "column"; main.style.justifyContent = "space-between"; }
+    }
     const canvas = await window.html2canvas(box, { backgroundColor: bg, scale: 2, useCORS: true, logging: false });
     const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.92));
     const name = ((kind === "Weapon ranking" ? "mh-weapon-ranking-" : "mh-tier-list-") + label).replace(/[^\w.-]+/g, "-").toLowerCase() + ".jpg";
@@ -2978,8 +3014,18 @@ function renderStrengthView() {
     colAcc[c.key] = st.acc;
     cell[c.key] = {};
     for (const [k] of WEAPONS) {
-      const list = mine.filter(x => x.r.weapon === k), vals = list.map(x => x.ratio);
-      cell[c.key][k] = vals.length ? { v: trimmedMeanW(list.map(x => ({ v: x.ratio, w: qW[x.r.quest] })), state.trim), n: vals.length, ...trimmedRange(vals, state.trim) } : null;
+      const list = mine.filter(x => x.r.weapon === k);
+      // one value per quest: average of the weapon's runs there; missing top-3 runs pull it towards 1.00
+      // (1 run → 40 % damped, 2 runs → 15 %, 3 runs → not damped; "Maximum performance" has only 1 place → never damped)
+      const byQ = {};
+      list.forEach(x => (byQ[x.r.quest] = byQ[x.r.quest] || []).push(x.ratio));
+      const qv = Object.keys(byQ).map(q => {
+        const a = byQ[q], m = a.reduce((s, v) => s + v, 0) / a.length;
+        const d = state.wsRuns === "top3" ? (WS_DAMP[a.length] || 0) : 0;
+        return { v: (1 - d) * m + d * 1, w: qW[q] };
+      });
+      const vals = qv.map(x => x.v);
+      cell[c.key][k] = list.length ? { v: trimmedMeanW(qv, state.trim), n: list.length, ...trimmedRange(vals, state.trim) } : null;
     }
     // normalise: divide by the average of all weapons in this column, so the weapon average is exactly 1.00
     const vs = WEAPONS.map(([k]) => cell[c.key][k]).filter(Boolean);
@@ -2997,7 +3043,8 @@ function renderStrengthView() {
     tr("Ratio = average time of the same place (1st, 2nd, 3rd) of all weapons in the quest ÷ clear time, normalised so that the weapon average is 1.00 (higher = faster)."),
     tr("Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.", { p: state.trim }),
     tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low)."),
-    tr("Quests count by how many weapons have a run there: fully covered quests count fully, quests with only a few weapons count very little.")];
+    tr("Quests count by how many weapons have a run there: fully covered quests count fully, quests with only a few weapons count very little."),
+    tr("Few runs: if a weapon has only 1 or 2 runs in a quest, its value there is pulled 40 % or 15 % towards the average (1.00).")];
   if (byUpdate) hints.push(tr("Runs are assigned to a title update by their YouTube upload date.") +
     (unassigned ? " " + trn(unassigned, "{n} run without upload date is not counted here (but in “By title”).", "{n} runs without upload date are not counted here (but in “By title”).") : "") +
     (empty.length && cols.length < empty.length + cols.length ? " " + tr("No runs yet for: {list}.", { list: empty.map(c => c.label).join(", ") }) : ""));
@@ -3142,6 +3189,13 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V100", when: "15.10.2026 23:45", items: [
+    "Weapon Strength: new damping per quest – a weapon with only 1 or 2 of its top-3 runs in a quest is pulled 40 % or 15 % towards 1.00 there; with a full top 3 it is not damped at all. Formula, notes and example updated." ] },
+  { v: "V99", when: "15.10.2026 23:40", items: [
+    "Weapon Strength: second worked example – one run vs. three runs in the same quest." ] },
+  { v: "V98", when: "15.10.2026 23:35", items: [
+    "Weapon Strength: values based on only a few runs are pulled slightly towards 1.00 (three average runs are added to every weapon) – one lucky run no longer carries a weapon into S tier. Formula and notes updated.",
+    "Saved images: tier list / bars and the info column now have about the same height; all weapon icons are included." ] },
   { v: "V97", when: "15.10.2026 23:25", items: [
     "Weapon Strength (Realistic): every run is compared with the average of the same place – 1st with 1st, 2nd with 2nd, 3rd with 3rd. Weapons with only one or two runs per quest no longer get an unfair advantage." ] },
   { v: "V96", when: "15.10.2026 22:55", items: [
