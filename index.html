@@ -802,6 +802,11 @@
   .top-actions .submit-btn[hidden] { display: none; }
   dialog.submit { width: min(460px, calc(100vw - 32px)); }
   .sub-lead { margin: -6px 0 12px; font-size: 13px; color: var(--muted); }
+  .sub-how { margin: -6px 0 12px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+  .sub-how p { margin: 0 0 6px; }
+  .sub-how b { color: var(--paper); }
+  .sub-how ol { margin: 0 0 8px; padding-left: 22px; }
+  .sub-how li { margin: 1px 0; }
   #submitForm { display: grid; gap: 10px; }
   .sub-f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
   .sub-f select, .sub-f input { width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--ink-3);
@@ -1239,7 +1244,18 @@
     <h2 id="submitTitle" class="sub-title"><img src="icons/UI/submit-run.png" alt="" onerror="this.remove()"><span>Submit a run</span></h2>
     <button class="theme-btn about-x" id="submitClose" type="button" aria-label="Close">✕</button>
   </div>
-  <p class="sub-lead">New runs are collected automatically by a script. If you still found a missing run, I'm very grateful if you send it in! Every submission is checked by hand before it appears on the site.</p>
+  <div class="sub-how">
+    <p>New runs are found automatically by an API script that reads YouTube. A Python program then takes many snapshots of the HP bar in every video and decides on its own whether Heroics was active.</p>
+    <p>In very rare cases Heroics is not detected – an extra ratio check catches these suspiciously fast runs. If a run is still listed wrongly, please tell me on X: <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">@fox_invictus</a></p>
+    <p><b>Every run is checked by hand – in this order of priority:</b></p>
+    <ol>
+      <li>Weapons with no run yet in the quest</li>
+      <li>New best times</li>
+      <li>Remaining top-3 places without Heroics</li>
+      <li>Heroics runs (not used for the tier list)</li>
+    </ol>
+    <p><b>Runs submitted here are checked first.</b> Thank you for every missing run you send in!</p>
+  </div>
   <form id="submitForm" novalidate>
     <label class="sub-f"><span>Game</span><select id="sGame"></select></label>
     <label class="sub-f"><span>Quest</span><select id="sQuest"></select></label>
@@ -1540,7 +1556,15 @@ const JA = {
   "arrows: change vs. {p}": "矢印：{p}からの変化",
   "Submit a run": "記録を投稿", "Submit a missing run": "未掲載の記録を投稿", "Submit": "送信", "Game": "タイトル",
   "Clear time": "クリアタイム", "Video link": "動画リンク", "Note (optional)": "メモ（任意）",
-  "New runs are collected automatically by a script. If you still found a missing run, I'm very grateful if you send it in! Every submission is checked by hand before it appears on the site.": "新しい記録はスクリプトで自動的に集めています。それでも掲載されていない記録を見つけたら、ぜひ送ってください。とても助かります！ 投稿はすべて手動で確認してからサイトに掲載されます。",
+  "New runs are found automatically by an API script that reads YouTube. A Python program then takes many snapshots of the HP bar in every video and decides on its own whether Heroics was active.": "新しい記録は、YouTubeを読み取るAPIスクリプトで自動的に集めています。さらにPythonプログラムが各動画のHPバーを何度も撮影し、火事場が発動していたかを自動で判定します。",
+  "In very rare cases Heroics is not detected – an extra ratio check catches these suspiciously fast runs. If a run is still listed wrongly, please tell me on X:": "ごくまれに火事場を検出できないことがありますが、不自然に速い記録は追加の「レシオチェック」で見つけています。それでも誤った記録があれば、Xで教えてください：",
+  "Every run is checked by hand – in this order of priority:": "すべての記録は手動で確認しています。優先順位は次のとおりです：",
+  "Weapons with no run yet in the quest": "そのクエストでまだ記録がない武器",
+  "New best times": "新しい最速タイム",
+  "Remaining top-3 places without Heroics": "火事場なしトップ3の残りの枠",
+  "Heroics runs (not used for the tier list)": "火事場ありの記録（ティアリストには使われません）",
+  "Runs submitted here are checked first.": "ここから投稿された記録は優先して確認します。",
+  "Thank you for every missing run you send in!": "未掲載の記録を送っていただけると本当に助かります！",
   "ℹ️ Upload date and runner name are detected automatically from the video – you only need to enter the time and the link.": "ℹ️ 投稿日とランナー名は動画から自動で取得されます。入力が必要なのはタイムとリンクだけです。",
   "Sending…": "送信中…",
   "Thank you! Your run was submitted and will be checked soon.": "ありがとうございます！ 記録を受け付けました。近日中に確認します。",
@@ -2921,8 +2945,22 @@ async function tierShot(share, btn, label, kind = "Weapon tier list") {
       im.addEventListener("load", r, { once: true }); im.addEventListener("error", () => setTimeout(r, 300), { once: true }); setTimeout(r, 4000);
     })));
     await new Promise(r => setTimeout(r, 150));   // let fallback badges (missing icons) settle
-    // left (tier list / bars) and right (info) column about the same height: stretch the shorter left side
     const main = clone.firstElementChild, side = clone.lastElementChild;
+    // tier list only as wide as its fullest row needs – no empty gap in the middle of the image
+    if (main.classList.contains("tiers")) {
+      let row = 0, extra = 0;
+      main.querySelectorAll(".tier-c").forEach(tc => {
+        const ch = [...tc.children];
+        const w = ch.reduce((s, c) => s + c.getBoundingClientRect().width, 0) + Math.max(0, ch.length - 1) * 6 + 12;
+        row = Math.max(row, w);
+        extra = main.getBoundingClientRect().width - tc.getBoundingClientRect().width;   // label column, gaps, frame
+      });
+      const leftW = Math.ceil(Math.max(230, Math.min(470, extra + row + 4))), sideW = 540;
+      clone.style.setProperty("grid-template-columns", `${leftW}px ${sideW}px`, "important");
+      box.style.width = (leftW + 24 + sideW + 52) + "px";
+      await new Promise(r => setTimeout(r, 50));
+    }
+    // left (tier list / bars) and right (info) column about the same height: stretch the shorter left side
     const hs = side.getBoundingClientRect().height, hm = main.getBoundingClientRect().height;
     if (hs > hm + 8) {
       main.style.height = hs + "px";
@@ -3194,6 +3232,10 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V103", when: "16.10.2026 17:30", items: [
+    "Submit a run: short explanation of how runs are collected (API script, automatic Heroics detection via the HP bar, ratio check), the priority order of the manual review and that submitted runs are checked first." ] },
+  { v: "V102", when: "16.10.2026 00:05", items: [
+    "Weapon Strength: the saved / shared tier list image is now only as wide as the fullest tier row – no more empty space in the middle." ] },
   { v: "V101", when: "15.10.2026 23:55", items: [
     "Weapon Strength: the damping for quests with only 1 or 2 runs now pulls towards the weapon's own average instead of 1.00 – a weak weapon no longer gains just because few runs were submitted. Formula, notes and example updated." ] },
   { v: "V100", when: "15.10.2026 23:45", items: [
