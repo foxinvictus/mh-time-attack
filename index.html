@@ -816,6 +816,12 @@
   .sub-small { font-size: 12px; color: var(--muted); }
   /* voting */
   .top-actions .vote-btn[hidden] { display: none; }
+  /* report an issue */
+  .top-actions .issue-btn[hidden] { display: none; }
+  .bicon-emoji { font-size: 15px; line-height: 1; }
+  .sub-emoji { font-size: 30px; line-height: 1; flex: none; }
+  #issueForm { display: grid; gap: 10px; }
+  .qissue { border-style: dashed; border-color: var(--muted); color: var(--muted); margin-left: 6px; }
   .vote-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
   .vote-list li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px;
     background: var(--ink); border: 1px solid var(--ink-3); border-radius: 8px; }
@@ -1131,6 +1137,7 @@
   </div>
   <div class="top-actions">
     <button class="theme-btn submit-btn" id="submitBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/submit-run.png" alt="" onerror="this.remove()"><span>Submit a run</span></button>
+    <button class="theme-btn issue-btn" id="issueBtn" type="button" aria-haspopup="dialog" hidden><span class="bicon-emoji" aria-hidden="true">⚠️</span><span>Report an issue</span></button>
     <button class="theme-btn vote-btn" id="voteBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/vote.png" alt="" onerror="this.replaceWith('🗳️')"><span>Vote for the next game</span></button>
     <button class="theme-btn lang-btn" id="langBtn" type="button"></button>
     <button class="theme-btn" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.remove()"><span>Changelog</span></button>
@@ -1272,6 +1279,27 @@
     <p class="sub-hint">ℹ️ Upload date and runner name are detected automatically from the video – you only need to enter the time and the link.</p>
     <button class="sub-send" id="sSend" type="submit">Submit</button>
     <p class="sub-status" id="sStatus" aria-live="polite"></p>
+  </form>
+</dialog>
+<dialog class="about submit" id="issueDlg" aria-labelledby="issueTitle">
+  <div class="about-head">
+    <h2 id="issueTitle" class="sub-title"><span class="sub-emoji" aria-hidden="true">⚠️</span><span>Report an issue</span></h2>
+    <button class="theme-btn about-x" id="issueClose" type="button" aria-label="Close">✕</button>
+  </div>
+  <div class="sub-how">
+    <p>Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.</p>
+    <p>If something still doesn't add up with an existing run – wrong time, wrong quest, a turf war that shortens the hunt – I'm very grateful for every report!</p>
+  </div>
+  <form id="issueForm" novalidate>
+    <label class="sub-f"><span>Game</span><select id="iGame"></select></label>
+    <label class="sub-f"><span>Quest</span><select id="iQuest"></select></label>
+    <label class="sub-f"><span>Run</span><select id="iRun"></select></label>
+    <label class="sub-f"><span>Problem</span><select id="iProblem"></select></label>
+    <label class="sub-f"><span>Note (optional)</span><input id="iNote" type="text" maxlength="300" autocomplete="off"></label>
+    <input class="sub-hp" id="iHp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <p class="sub-hint">ℹ️ Reports are possible for Monster Hunter Wilds and newer games.</p>
+    <button class="sub-send" id="iSend" type="submit">Send report</button>
+    <p class="sub-status" id="iStatus" aria-live="polite"></p>
   </form>
 </dialog>
 <dialog class="about submit" id="voteDlg" aria-labelledby="voteTitle">
@@ -1567,6 +1595,22 @@ const JA = {
   "Thank you for every missing run you send in!": "未掲載の記録を送っていただけると本当に助かります！",
   "ℹ️ Upload date and runner name are detected automatically from the video – you only need to enter the time and the link.": "ℹ️ 投稿日とランナー名は動画から自動で取得されます。入力が必要なのはタイムとリンクだけです。",
   "Sending…": "送信中…",
+  "Report an issue": "問題を報告", "Run": "記録", "Problem": "問題", "Send report": "報告を送信",
+  "Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.": "記録は半自動で集めています。APIスクリプトがYouTubeの動画を読み取り、PythonプログラムがHPバーから火事場を判定し、さらに手動で抜き取り確認をしています。",
+  "If something still doesn't add up with an existing run – wrong time, wrong quest, a turf war that shortens the hunt – I'm very grateful for every report!": "それでも掲載中の記録におかしな点があれば（タイムの違い、クエストの違い、縄張り争いで狩猟が短くなっている など）、ぜひ教えてください！",
+  "ℹ️ Reports are possible for Monster Hunter Wilds and newer games.": "ℹ️ 報告できるのはモンスターハンターワイルズ以降のタイトルです。",
+  "Clear time doesn't match the video": "クリアタイムが動画と合わない",
+  "Wrong quest": "クエストが違う",
+  "Turf war / outside help shortens the hunt": "縄張り争い・外部要因で狩猟が短くなっている",
+  "Heroics label is wrong": "火事場の区分が違う",
+  "Wrong weapon": "武器が違う",
+  "Something else (please add a note)": "その他（メモに記入してください）",
+  "Please select a problem": "問題を選択してください", "Please select a run": "記録を選択してください",
+  "Please select a run.": "記録を選択してください。", "Please select a problem.": "問題を選択してください。",
+  "Please describe the problem in the note.": "メモに問題の内容を書いてください。",
+  "This run could not be found – maybe it was already changed.": "この記録が見つかりません。すでに修正済みの可能性があります。",
+  "This problem has already been reported – thank you!": "この問題はすでに報告されています。ありがとうございます！",
+  "Thank you! Your report was sent and will be checked soon.": "ありがとうございます！ 報告を受け付けました。近日中に確認します。",
   "Thank you! Your run was submitted and will be checked soon.": "ありがとうございます！ 記録を受け付けました。近日中に確認します。",
   "Please enter the time as mm:ss, e.g. 03:24.": "タイムは mm:ss の形式で入力してください（例：03:24）。",
   "Format mm:ss – milliseconds are not needed.": "形式は mm:ss です。ミリ秒は不要です。",
@@ -1627,7 +1671,7 @@ const qTitle = q => LANG === "ja" && q.jp ? `${qn(q)}\n${q.quest}` : q.quest;
 
 /* static texts in the HTML (header, view switcher, controls, dialogs, footer): translated in place,
    the English original is kept so switching back works */
-const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #submitDlg, #voteDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
+const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #submitDlg, #issueDlg, #voteDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
 const i18nOrig = new WeakMap();
 function translateStatic() {
   document.querySelectorAll(I18N_STATIC).forEach(root => {
@@ -2456,9 +2500,12 @@ function renderQuestView() {
     ? `<p class="hpline">${hpPair(q)}<span class="hpx">${tr("ΣHP = total monster HP, ΔHP = HP removed by the weapon alone")}</span></p>`
     : `<p class="hpline"><span class="hpx">${tr("ΣHP / ΔHP not entered yet")}</span></p>`;
   title.innerHTML = `<h2 class="with-micons">${monsterIcons(q, "title")}<span>${esc(qn(q))}</span></h2>${sub ? `<p>${sub}</p>` : ""}${hp}` +
-    (SUBMIT_URL ? `<button type="button" class="qsubmit" id="qSubmit"><img src="icons/UI/submit-run.png" alt="" onerror="this.replaceWith('＋ ')">${tr("Submit a missing run")}</button>` : "");
+    (SUBMIT_URL ? `<button type="button" class="qsubmit" id="qSubmit"><img src="icons/UI/submit-run.png" alt="" onerror="this.replaceWith('＋ ')">${tr("Submit a missing run")}</button>` : "") +
+    (SUBMIT_URL && issueGames().includes(q.game) ? `<button type="button" class="qsubmit qissue" id="qIssue">⚠️ ${tr("Report an issue")}</button>` : "");
   const qs = document.getElementById("qSubmit");
   if (qs) qs.onclick = () => openSubmit(q.game, q.quest);
+  const qi = document.getElementById("qIssue");
+  if (qi) qi.onclick = () => openIssue(q.game, q.quest);
 
   const board = weaponBoard(q);
   const hints = [];
@@ -3232,6 +3279,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V104", when: "17.10.2026 15:20", items: [
+    "New ⚠️ \"Report an issue\" button (top bar and in every quest): report a problem with an existing run – wrong time, wrong quest, turf war, wrong Heroics label or weapon. Available for Monster Hunter Wilds and newer games." ] },
   { v: "V103", when: "16.10.2026 17:30", items: [
     "Submit a run: short explanation of how runs are collected (API script, automatic Heroics detection via the HP bar, ratio check), the priority order of the manual review and that submitted runs are checked first." ] },
   { v: "V102", when: "16.10.2026 00:05", items: [
@@ -3592,6 +3641,100 @@ function fillSubmitQuests(sel) {
         say(tr("Thank you! Your run was submitted and will be checked soon."), "ok");
         document.getElementById("sTime").value = ""; document.getElementById("sLink").value = ""; document.getElementById("sNote").value = "";
         gcEvent("submit-run", "Run submitted");
+      } else say(tr(MSG[out.code] || "Something went wrong. Please try again later."), "err");
+    } catch (err) { say(tr("Something went wrong. Please try again later."), "err"); }
+    send.disabled = false;
+  };
+})();
+
+/* ---------- report an issue with an existing run ----------
+   Same web app as the submissions (meldungen.gs): POST {action:"issue"} → tab "Meldungen" in the Run-Finder spreadsheet.
+   Only Monster Hunter Wilds and newer games (base release on or after the Wilds base release; betas count with their game). */
+const ISSUE_PROBLEMS = [
+  ["time", "Clear time doesn't match the video"],
+  ["quest", "Wrong quest"],
+  ["turf", "Turf war / outside help shortens the hunt"],
+  ["heroics", "Heroics label is wrong"],
+  ["weapon", "Wrong weapon"],
+  ["other", "Something else (please add a note)"],
+];
+function issueGames() {
+  const base = g => (state.titleUpdates || []).find(t => t.game === g && /^base$/i.test(t.label))?.date || "";
+  const wilds = base("MHWs");
+  return state.games.filter(g => {
+    if (!wilds) return /^MHWs/.test(g);
+    const d = base(String(g).replace(/β/g, ""));
+    return d && d >= wilds;
+  });
+}
+function openIssue(game, quest) {
+  const dlg = document.getElementById("issueDlg"), ig = document.getElementById("iGame");
+  const games = issueGames();
+  ig.innerHTML = games.map(g => `<option value="${esc(g)}">${esc(gameName(g))}</option>`).join("");
+  ig.value = games.includes(game) ? game : games.includes(state.game) ? state.game : games[0] || "";
+  fillIssueQuests(quest || (ig.value === state.game ? state.quest : null));
+  document.getElementById("iProblem").innerHTML = `<option value="" disabled selected>${esc(tr("Please select a problem"))}</option>` +
+    ISSUE_PROBLEMS.map(([k, t]) => `<option value="${k}">${esc(tr(t))}</option>`).join("");
+  document.getElementById("iNote").value = "";
+  const st = document.getElementById("iStatus"); st.textContent = ""; st.className = "sub-status";
+  document.getElementById("iSend").disabled = false;
+  dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+}
+function fillIssueQuests(sel) {
+  const ig = document.getElementById("iGame"), iq = document.getElementById("iQuest");
+  iq.innerHTML = questsOf(ig.value).map(q => `<option value="${esc(q.quest)}">${esc(qn(q))}</option>`).join("");
+  if (sel && [...iq.options].some(o => o.value === sel)) iq.value = sel;
+  fillIssueRuns();
+}
+/* all runs of the quest (with and without Heroics), sorted by weapon, then time */
+function issueRunsOf(game, quest) {
+  const order = Object.fromEntries(WEAPONS.map(([k], i) => [k, i]));
+  return state.runs.filter(r => r.game === game && r.quest === quest)
+    .sort((a, b) => order[a.weapon] - order[b.weapon] || a.heroics - b.heroics || a.sec - b.sec);
+}
+function fillIssueRuns() {
+  const runs = issueRunsOf(document.getElementById("iGame").value, document.getElementById("iQuest").value);
+  document.getElementById("iRun").innerHTML = `<option value="" disabled selected>${esc(tr("Please select a run"))}</option>` +
+    runs.map((r, i) => `<option value="${i}">${esc(wn(r.weapon))} · ${esc(fmtSubmitTime(r.sec))} · ${esc(tr(r.heroics ? "Heroics" : "No Heroics"))}${r.channel ? " · " + esc(r.channel) : ""}</option>`).join("");
+}
+(function setupIssue() {
+  const dlg = document.getElementById("issueDlg"), form = document.getElementById("issueForm");
+  const st = document.getElementById("iStatus"), send = document.getElementById("iSend");
+  const btn = document.getElementById("issueBtn");
+  btn.hidden = !SUBMIT_URL;
+  btn.onclick = () => openIssue();
+  document.getElementById("issueClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => {
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
+  document.getElementById("iGame").onchange = () => fillIssueQuests();
+  document.getElementById("iQuest").onchange = fillIssueRuns;
+  const say = (msg, cls) => { st.textContent = msg; st.className = "sub-status " + (cls || ""); };
+  const MSG = {
+    run: "This run could not be found – maybe it was already changed.", dup: "This problem has already been reported – thank you!",
+    limit: "Too many submissions right now. Please try again later.", busy: "Too many submissions right now. Please try again later.",
+  };
+  form.onsubmit = async e => {
+    e.preventDefault();
+    if (!SUBMIT_URL) return;
+    const game = document.getElementById("iGame").value, quest = document.getElementById("iQuest").value;
+    const idx = document.getElementById("iRun").value, problem = document.getElementById("iProblem").value;
+    const note = document.getElementById("iNote").value.trim();
+    const run = issueRunsOf(game, quest)[+idx];
+    if (idx === "" || !run) { say(tr("Please select a run."), "err"); return; }
+    if (!problem) { say(tr("Please select a problem."), "err"); return; }
+    if (problem === "other" && !note) { say(tr("Please describe the problem in the note."), "err"); return; }
+    const data = { action: "issue", game, quest, weapon: run.weapon, time: fmtSubmitTime(run.sec), heroics: run.heroics,
+      video: run.video || "", channel: run.channelFull || "", problem, note, website: document.getElementById("iHp").value, lang: LANG };
+    send.disabled = true; say(tr("Sending…"));
+    try {
+      const out = await (await fetch(SUBMIT_URL, { method: "POST", body: JSON.stringify(data) })).json();   // text/plain: no CORS preflight
+      if (out.ok) {
+        say(tr("Thank you! Your report was sent and will be checked soon."), "ok");
+        document.getElementById("iNote").value = "";
+        gcEvent("report-issue", "Issue reported");
       } else say(tr(MSG[out.code] || "Something went wrong. Please try again later."), "err");
     } catch (err) { say(tr("Something went wrong. Please try again later."), "err"); }
     send.disabled = false;
