@@ -813,9 +813,19 @@
     background: var(--ink); color: var(--paper); font: 500 15px "Barlow", "Noto Sans JP", sans-serif; }
   .sub-f select:focus, .sub-f input:focus { outline: 2px solid var(--gold); outline-offset: 0; }
   .sub-f .seg { justify-self: start; }
+  .sub-f .seg.need { outline: 2px dashed var(--gold); outline-offset: 2px; }
+  .sub-f .seg.miss { outline: 2px solid var(--hero); outline-offset: 2px; }
+  .sub-small.sub-need { color: var(--gold); }
   .sub-small { font-size: 12px; color: var(--muted); }
   /* voting */
   .top-actions .vote-btn[hidden] { display: none; }
+  /* FAQ */
+  dialog.faq { width: min(560px, calc(100vw - 32px)); }
+  .faq-list { display: grid; gap: 8px; }
+  .faq-q { background: var(--ink); border: 1px solid var(--ink-3); border-radius: 8px; padding: 0 12px; }
+  .faq-q summary { cursor: pointer; padding: 10px 0; font: 700 17px/1.25 "Barlow Condensed", "Noto Sans JP", sans-serif; color: var(--paper); }
+  .faq-q[open] summary { color: var(--gold); }
+  .faq-q p { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--muted); }
   /* report an issue */
   .top-actions .issue-btn[hidden] { display: none; }
   .bicon-emoji { font-size: 15px; line-height: 1; }
@@ -1140,6 +1150,7 @@
     <button class="theme-btn issue-btn" id="issueBtn" type="button" aria-haspopup="dialog" hidden><span class="bicon-emoji" aria-hidden="true">⚠️</span><span>Report an issue</span></button>
     <button class="theme-btn vote-btn" id="voteBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/vote.png" alt="" onerror="this.replaceWith('🗳️')"><span>Vote for the next game</span></button>
     <button class="theme-btn lang-btn" id="langBtn" type="button"></button>
+    <button class="theme-btn" id="faqBtn" type="button" aria-haspopup="dialog"><img class="bicon" src="icons/UI/faq.png" alt="" onerror="this.replaceWith('❓')"><span>FAQ</span></button>
     <button class="theme-btn" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.remove()"><span>Changelog</span></button>
     <button class="theme-btn" id="themeBtn" type="button"><img class="bicon" src="icons/UI/light-mode.png" alt="" onerror="this.remove()"><span>Light mode</span></button>
     <button class="theme-btn" id="aboutBtn" type="button" aria-haspopup="dialog"><img class="bicon" src="icons/UI/support.png" alt="" onerror="this.remove()"><span>Contact / Support the project</span></button>
@@ -1268,7 +1279,8 @@
     <label class="sub-f"><span>Quest</span><select id="sQuest"></select></label>
     <label class="sub-f"><span>Weapon</span><select id="sWeapon"></select></label>
     <div class="sub-f"><span>Heroics</span>
-      <div class="seg" role="group" aria-label="Heroics" id="sHero"><button type="button" data-h="no" aria-pressed="true">No Heroics</button><button type="button" data-h="yes" aria-pressed="false">Heroics</button></div>
+      <div class="seg need" role="group" aria-label="Heroics" id="sHero"><button type="button" data-h="no" aria-pressed="false">No Heroics</button><button type="button" data-h="yes" aria-pressed="false">Heroics</button></div>
+      <small class="sub-small sub-need" id="sHeroHint">Please select: was Heroics active during the run?</small>
     </div>
     <p class="sub-rule">⚠️ The run must be faster than the current 3rd place for this weapon and category (with / without Heroics).</p>
     <p class="sub-third" id="sThird" hidden></p>
@@ -1280,6 +1292,17 @@
     <button class="sub-send" id="sSend" type="submit">Submit</button>
     <p class="sub-status" id="sStatus" aria-live="polite"></p>
   </form>
+</dialog>
+<dialog class="about submit faq" id="faqDlg" aria-labelledby="faqTitle">
+  <div class="about-head">
+    <h2 id="faqTitle" class="sub-title"><img src="icons/UI/faq.png" alt="" onerror="this.remove()"><span>FAQ</span></h2>
+    <button class="theme-btn about-x" id="faqClose" type="button" aria-label="Close">✕</button>
+  </div>
+  <div class="faq-list">
+    <details class="faq-q"><summary>Why are TA Wiki rule runs not listed separately?</summary><p>I've been running Monster Hunter leaderboards since 2021 and have always focused on freestyle rankings. This site won't get a separate TA Wiki section: checking every new video in detail against the full ruleset would take far too much time, and with the number of runs coming in every day it isn't technically feasible right now.</p></details>
+    <details class="faq-q"><summary>Why is a well-known or popular quest missing?</summary><p>The main goal of this site is a weapon tier list that is as realistic as possible. That only works with quests that get a lot of uploads on YouTube, including long after their release.</p><p>A YouTube API script tracks every quest of each game and checks two things: how many runs have been uploaded, and how well the different weapon types are represented. Some quests have plenty of runs, but certain weapons have none at all. This often happens with Gunlance, Hammer or Lance, or with ranged weapons without Heroics, since those are mostly played with Heroics.</p><p>Without enough weapon types, no meaningful ratio can be calculated. Such quests stay in a queue until there is enough data.</p></details>
+    <details class="faq-q"><summary>Why are some quests combined into one?</summary><p>If two or more quests share the same basic conditions (same map, same monster HP and same modifiers), they are merged into a single entry. More runs per quest give a more reliable DPS ratio.</p><p>One example is the Wilds Challenge Quests. The only difference to the regular quest is the HP roll: the Challenge Quest has one fixed HP value, while the regular quest has five possible rolls. Since the site always uses the middle roll for its calculations anyway, the HP in both quests matches exactly.</p></details>
+  </div>
 </dialog>
 <dialog class="about submit" id="issueDlg" aria-labelledby="issueTitle">
   <div class="about-head">
@@ -1595,6 +1618,18 @@ const JA = {
   "Thank you for every missing run you send in!": "未掲載の記録を送っていただけると本当に助かります！",
   "ℹ️ Upload date and runner name are detected automatically from the video – you only need to enter the time and the link.": "ℹ️ 投稿日とランナー名は動画から自動で取得されます。入力が必要なのはタイムとリンクだけです。",
   "Sending…": "送信中…",
+  "Please select: was Heroics active during the run?": "選択してください：このランで火事場は発動していましたか？",
+  "Please select Heroics or No Heroics.": "「火事場」か「火事場なし」を選択してください。",
+"FAQ": "よくある質問",
+  "Why are TA Wiki rule runs not listed separately?": "なぜTA Wikiルールの記録は分けて掲載されないのですか？",
+  "I've been running Monster Hunter leaderboards since 2021 and have always focused on freestyle rankings. This site won't get a separate TA Wiki section: checking every new video in detail against the full ruleset would take far too much time, and with the number of runs coming in every day it isn't technically feasible right now.": "私は2021年からモンハンのランキングを運営しており、ずっとフリースタイル（ルール無制限）のランキングに取り組んできました。このサイトにTA Wikiルール専用の部門を作る予定はありません。毎日届く大量の動画をすべてルールに沿って細かく確認するのは時間がかかりすぎ、現時点では技術的にも実現できないためです。",
+  "Why is a well-known or popular quest missing?": "有名・人気のクエストが載っていないのはなぜですか？",
+  "The main goal of this site is a weapon tier list that is as realistic as possible. That only works with quests that get a lot of uploads on YouTube, including long after their release.": "このサイトの一番の目的は、できるだけ現実に近い武器ティア表を作ることです。そのため、YouTubeへの投稿が多く、配信から時間が経っても投稿が続くクエストだけを対象にしています。",
+  "A YouTube API script tracks every quest of each game and checks two things: how many runs have been uploaded, and how well the different weapon types are represented. Some quests have plenty of runs, but certain weapons have none at all. This often happens with Gunlance, Hammer or Lance, or with ranged weapons without Heroics, since those are mostly played with Heroics.": "YouTube APIスクリプトで各タイトルの全クエストを追跡し、投稿された記録の数と、各武器種がどれだけそろっているかの2点を調べています。記録が多くても、一部の武器種には記録がまったくないクエストもあります。ガンランス、ハンマー、ランスや、火事場なしの遠距離武器（ほとんど火事場で運用されるため）によく見られます。",
+  "Without enough weapon types, no meaningful ratio can be calculated. Such quests stay in a queue until there is enough data.": "武器種が十分にそろっていないと、意味のあるレシオを計算できません。そうしたクエストは、十分なデータが集まるまで待機リストに入ります。",
+  "Why are some quests combined into one?": "なぜ複数のクエストが1つにまとめられているのですか？",
+  "If two or more quests share the same basic conditions (same map, same monster HP and same modifiers), they are merged into a single entry. More runs per quest give a more reliable DPS ratio.": "2つ以上のクエストの基本条件（同じマップ、同じモンスター体力、同じ補正）が同じ場合は、1つの項目にまとめています。1クエストあたりの記録が増えるほど、DPSレシオの信頼性が高まるためです。",
+  "One example is the Wilds Challenge Quests. The only difference to the regular quest is the HP roll: the Challenge Quest has one fixed HP value, while the regular quest has five possible rolls. Since the site always uses the middle roll for its calculations anyway, the HP in both quests matches exactly.": "例として、ワイルズのチャレンジクエストがあります。通常クエストとの違いは体力の振れ幅だけで、チャレンジクエストは体力が固定、通常クエストは5段階の体力があります。サイトでは計算に常に中間の体力を使っているので、この場合は両方のクエストの体力が完全に一致します。",
   "Report an issue": "問題を報告", "Run": "記録", "Problem": "問題", "Send report": "報告を送信",
   "Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.": "記録は半自動で集めています。APIスクリプトがYouTubeの動画を読み取り、PythonプログラムがHPバーから火事場を判定し、さらに手動で抜き取り確認をしています。",
   "If something still doesn't add up with an existing run – wrong time, wrong quest, a turf war that shortens the hunt – I'm very grateful for every report!": "それでも掲載中の記録におかしな点があれば（タイムの違い、クエストの違い、縄張り争いで狩猟が短くなっている など）、ぜひ教えてください！",
@@ -1671,7 +1706,7 @@ const qTitle = q => LANG === "ja" && q.jp ? `${qn(q)}\n${q.quest}` : q.quest;
 
 /* static texts in the HTML (header, view switcher, controls, dialogs, footer): translated in place,
    the English original is kept so switching back works */
-const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #submitDlg, #issueDlg, #voteDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
+const I18N_STATIC = "header .brand, header .top-actions, .viewbar, #quickbar,.board-head .controls, #aboutDlg, #submitDlg, #issueDlg, #faqDlg, #voteDlg, #infoDlg .info-head, #infoDlg .info-lead, footer";
 const i18nOrig = new WeakMap();
 function translateStatic() {
   document.querySelectorAll(I18N_STATIC).forEach(root => {
@@ -3279,6 +3314,10 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V106", when: "18.10.2026 18:15", items: [
+    "New FAQ button: why TA Wiki rule runs are not listed separately, why some popular quests are missing, and why some quests are combined into one." ] },
+  { v: "V105", when: "18.10.2026 18:05", items: [
+    "Submit a run: Heroics / No Heroics is no longer preselected – it has to be chosen actively before sending, so Heroics runs are not submitted as No Heroics by mistake." ] },
   { v: "V104", when: "17.10.2026 15:20", items: [
     "New ⚠️ \"Report an issue\" button (top bar and in every quest): report a problem with an existing run – wrong time, wrong quest, turf war, wrong Heroics label or weapon. Available for Monster Hunter Wilds and newer games." ] },
   { v: "V103", when: "16.10.2026 17:30", items: [
@@ -3569,6 +3608,11 @@ function openSubmit(game, quest, weapon) {
     WEAPONS.map(([k]) => `<option value="${k}">${esc(wn(k))}</option>`).join("");
   sw.value = weapon || "";
   const st = document.getElementById("sStatus"); st.textContent = ""; st.className = "sub-status";
+  // Heroics: no preselection – must be chosen every time
+  const hs = document.getElementById("sHero");
+  hs.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", "false"));
+  hs.classList.add("need"); hs.classList.remove("miss");
+  document.getElementById("sHeroHint").hidden = false;
   showSubmitThird();
   document.getElementById("sSend").disabled = false;
   dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
@@ -3578,8 +3622,9 @@ function showSubmitThird() {
   const el = document.getElementById("sThird");
   const game = document.getElementById("sGame").value, quest = document.getElementById("sQuest").value;
   const weapon = document.getElementById("sWeapon").value;
-  const hero = document.querySelector('#sHero button[aria-pressed="true"]')?.dataset.h === "yes";
-  if (!weapon || !quest) { el.hidden = true; return; }
+  const pick = document.querySelector('#sHero button[aria-pressed="true"]')?.dataset.h;
+  if (!weapon || !quest || !pick) { el.hidden = true; return; }
+  const hero = pick === "yes";
   const secs = state.runs.filter(r => r.game === game && r.quest === quest && r.weapon === weapon && r.heroics === hero)
     .map(r => r.sec).sort((a, b) => a - b);
   const cat = tr(hero ? "Heroics" : "No Heroics");
@@ -3609,12 +3654,13 @@ function fillSubmitQuests(sel) {
   document.getElementById("sGame").onchange = () => { fillSubmitQuests(); showSubmitThird(); };
   document.getElementById("sQuest").onchange = showSubmitThird;
   document.getElementById("sWeapon").onchange = showSubmitThird;
-  let hero = false;
+  // Heroics / No Heroics has no default: visitors must actively choose (many had sent Heroics runs as No Heroics)
   const heroSeg = document.getElementById("sHero");
   heroSeg.onclick = e => {
     const b = e.target.closest("button"); if (!b) return;
-    hero = b.dataset.h === "yes";
     heroSeg.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    heroSeg.classList.remove("need", "miss");
+    document.getElementById("sHeroHint").hidden = true;
     showSubmitThird();
   };
   const say = (msg, cls) => { st.textContent = msg; st.className = "sub-status " + (cls || ""); };
@@ -3630,6 +3676,9 @@ function fillSubmitQuests(sel) {
     if (!/^\d{1,2}\s*(?::|'|′|’|分)\s*[0-5]?\d(?:\s*(?:[.:"″”]|''|秒)\s*\d{0,3})?$/.test(time.normalize("NFKC"))) { say(tr(MSG.time), "err"); return; }
     if (!document.getElementById("sWeapon").value) { say(tr("Please select a weapon."), "err"); return; }
     if (!/(youtu\.be\/|youtube\.com\/(watch|shorts|live)|nicovideo\.jp\/watch\/|nico\.ms\/)/i.test(link)) { say(tr(MSG.link), "err"); return; }
+    const pick = heroSeg.querySelector('button[aria-pressed="true"]');
+    if (!pick) { heroSeg.classList.add("miss"); say(tr("Please select Heroics or No Heroics."), "err"); return; }
+    const hero = pick.dataset.h === "yes";
     const data = { game: document.getElementById("sGame").value, quest: document.getElementById("sQuest").value,
       weapon: document.getElementById("sWeapon").value, heroics: hero, time, link,
       note: document.getElementById("sNote").value.trim(), website: document.getElementById("sHp").value, lang: LANG };
@@ -3794,6 +3843,17 @@ const VOTE_GAMES = {
     } catch (err) { b.disabled = false; say(tr("Something went wrong. Please try again later."), "err"); }
   };
   document.getElementById("voteClose").onclick = () => dlg.close();
+  dlg.addEventListener("click", e => {
+    if (e.target !== dlg) return;
+    const r = dlg.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) dlg.close();
+  });
+})();
+
+(function setupFaq() {
+  const dlg = document.getElementById("faqDlg");
+  document.getElementById("faqBtn").onclick = () => dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+  document.getElementById("faqClose").onclick = () => dlg.close();
   dlg.addEventListener("click", e => {
     if (e.target !== dlg) return;
     const r = dlg.getBoundingClientRect();
