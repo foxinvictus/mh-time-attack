@@ -1,27 +1,43 @@
 # MH Speedrun Leaderboards
 
-Monster Hunter speedrun leaderboards for several games – best times per weapon and quest, collected by **Fox Invictus**.
+**Monster Hunter time attack (TA) leaderboards across several games – with automatic weapon tier lists.**
+Collected by **Fox Invictus**.
 
-**▶ Website:** https://foxinvictus.github.io/mh-time-attack/
+**▶ Website:** https://foxinvictus.github.io/mh-time-attack/ · [日本語](https://foxinvictus.github.io/mh-time-attack/#lang=ja)
+
+## Games
+
+Monster Hunter **Wilds**, **Rise / Sunbreak** and **World / Iceborne** – including their open betas.
 
 ## Features
 
-- **Mobile-friendly** – works on phones, tablets and desktop
-- **Several Monster Hunter games** – Wilds, Rise / Sunbreak, World / Iceborne and their open betas
-- **Overview, By quest, By weapon** – best time or Top 3 for all 14 weapons
-- **Newest Runs** – the latest recorded runs, filterable by weapon
-- **Calculated DPS** and **Ratio** – compare weapons across quests
+- **Mobile-first** – smooth on phones, tablets and desktop, no zooming or clunky tables
+- **Top 3 per quest and weapon** – all 14 weapons side by side
+- **Filter by weapon** – only see the clear times of your favourite weapon
 - **Separate Heroics rankings** – all runs, no Heroics or Heroics only
-- **Weapon Strength** – average ratio per title update, per game or per open beta
-- **Hall of Fame** – medal table and most active runners
-- **English & Japanese** interface (日本語)
-- Light and dark mode, shareable links for every view
+- **Automatic weapon tier list** – one per game and per title update, calculated purely from No-Heroics runs.
+  Shown as bar chart, tier list or table, with an image export
+- **Calculated DPS and ratio** – compare weapons across quests
+- **Newest runs** and **Hall of Fame** – latest records and most active runners
+- **Submit a run** – send in a missing run directly on the site
+- **Report an issue** – flag a wrong time, quest, weapon or Heroics label (Monster Hunter Wilds and newer)
+- **Vote for the next game** and **FAQ**
+- **English & Japanese** interface (日本語), light and dark mode, shareable links for every view
 
-## Runs
+## How runs are collected
 
-Runs are taken from public YouTube and Bilibili videos. Every time links to its video.
+- A **YouTube API script** regularly searches for new runs and reads weapon, time and Heroics from the video title
+- A **Python tool** checks Heroics semi-automatically by taking snapshots of the HP bar in each video
+- A **ratio check** flags suspiciously fast or slow runs
+- Everything is **reviewed by hand** before it appears on the site – submitted runs are checked first
 
-If you are a runner and want a run added, corrected or removed, please get in touch.
+Only freestyle runs are listed; there is no separate TA Wiki ruleset category.
+
+## Runners
+
+Runs are taken from public YouTube, Niconico and Bilibili videos, and every time links to its video.
+If you are a runner and want a run added, corrected or removed, use **Submit a run** / **Report an issue** on the site
+or get in touch.
 
 ## Contact
 
@@ -30,4 +46,5 @@ If you are a runner and want a run added, corrected or removed, please get in to
 
 ## Disclaimer
 
-Unofficial fan project. Monster Hunter is a trademark of CAPCOM CO., LTD. This project is not affiliated with or endorsed by Capcom. Game logos and monster icons belong to their respective owners.
+Unofficial fan project. Monster Hunter is a trademark of CAPCOM CO., LTD. This project is not affiliated with or
+endorsed by Capcom. Game logos and monster icons belong to their respective owners.
