@@ -679,6 +679,13 @@
   .shot-head img { width: 48px; height: 48px; object-fit: contain; }
   .shot-head strong { display: block; font: 700 30px/1 "Barlow Condensed", sans-serif; }
   .shot-head span { display: block; margin-top: 4px; font: 600 15px/1.2 "Barlow", "Noto Sans JP", sans-serif; color: var(--gold); }
+  /* game logo + label next to the title (saved image only) */
+  .shot-head .shot-logo { display: flex; align-items: center; gap: 10px; margin: 0 0 0 28px; }
+  .shot-head .shot-logo img { width: auto; height: 58px; }
+  .shot-head .shot-gname { display: none; margin: 0; font: 700 22px/1 "Barlow Condensed", sans-serif; color: var(--paper); }
+  .shot-head .shot-logo.nologo .shot-gname { display: block; }
+  .shot-head .shot-tag { margin: 0; padding: 4px 8px; border-radius: 4px; background: var(--gold); color: var(--on-gold);
+    font: 700 16px/1 "Barlow Condensed", sans-serif; letter-spacing: .03em; white-space: nowrap; }
   .shot-foot { margin-top: 12px; text-align: right; font-size: 13px; color: var(--muted); }
   /* side column: quantity/quality box, filters and formulas next to the ranking */
   @media (min-width: 761px) {
@@ -1651,6 +1658,7 @@ const JA = {
   "Why are some quests combined into one?": "なぜ複数のクエストが1つにまとめられているのですか？",
   "If two or more quests share the same basic conditions (same map, same monster HP and same modifiers), they are merged into a single entry. More runs per quest give a more reliable DPS ratio.": "2つ以上のクエストの基本条件（同じマップ、同じモンスター体力、同じ補正）が同じ場合は、1つの項目にまとめています。1クエストあたりの記録が増えるほど、DPSレシオの信頼性が高まるためです。",
   "One example is the Wilds Challenge Quests. The only difference to the regular quest is the HP roll: the Challenge Quest has one fixed HP value, while the regular quest has five possible rolls. Since the site always uses the middle roll for its calculations anyway, the HP in both quests matches exactly.": "例として、ワイルズのチャレンジクエストがあります。通常クエストとの違いは体力の振れ幅だけで、チャレンジクエストは体力が固定、通常クエストは5段階の体力があります。サイトでは計算に常に中間の体力を使っているので、この場合は両方のクエストの体力が完全に一致します。",
+  "All versions": "全バージョン",
   "Report an issue": "問題を報告", "Run": "記録", "Problem": "問題", "Send report": "報告を送信",
   "Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.": "記録は半自動で集めています。APIスクリプトがYouTubeの動画を読み取り、PythonプログラムがHPバーから火事場を判定し、さらに手動で抜き取り確認をしています。",
   "If something still doesn't add up with an existing run – wrong time, wrong quest, a turf war that shortens the hunt – I'm very grateful for every report!": "それでも掲載中の記録におかしな点があれば（タイムの違い、クエストの違い、縄張り争いで狩猟が短くなっている など）、ぜひ教えてください！",
@@ -3015,7 +3023,15 @@ function loadH2C() {
     document.head.appendChild(sc);
   });
 }
-async function tierShot(share, btn, label, kind = "Weapon tier list") {
+/* game logo + label (title update, "All versions" or "OBT") for the top of the saved image */
+function shotLogo(logo) {
+  if (!logo || !logo.game) return "";
+  const [first, ...next] = gameLogoSrcs(logo.game);
+  return `<span class="shot-logo"><img src="${esc(first)}" data-next="${esc(next.join("|"))}" data-fail="nologo" alt="" onerror="monsterIconError(this)">` +
+    `<span class="shot-gname">${esc(gameName(logo.game))}</span>` +
+    (logo.tag ? `<span class="shot-tag">${esc(logo.tag)}</span>` : "") + `</span>`;
+}
+async function tierShot(share, btn, label, kind = "Weapon tier list", logo = null) {
   const split = document.querySelector("#wsChart .ws-split");
   if (!split) return;
   const old = btn.textContent;
@@ -3028,7 +3044,7 @@ async function tierShot(share, btn, label, kind = "Weapon tier list") {
     box.className = "ws-shot";
     box.style.background = bg;
     box.innerHTML = `<div class="shot-head"><img src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><div><strong>MH Speedrun Leaderboards</strong>` +
-      `<span>${esc(tr(kind))} · ${esc(label)}</span></div></div>`;
+      `<span>${esc(tr(kind))} · ${esc(label)}</span></div>${shotLogo(logo)}</div>`;
     const clone = split.cloneNode(true);
     clone.querySelectorAll("details").forEach(d => d.remove());
     // html2canvas cannot draw range inputs: replace the slider with a drawn track + knob
@@ -3299,7 +3315,10 @@ function renderStrengthView() {
     : stats + `<p class="status">${tr(state.wsMinW > 4 ? "No quests with at least {n} weapons yet – move the slider to the left." : "No runs in {x} yet.", { x: esc(sel.label), n: state.wsMinW })}</p>`);
   chartEl.querySelectorAll(".ws-cols button").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
   chartEl.querySelectorAll(".shot-btn").forEach(b => b.onclick = () => tierShot(b.dataset.shot === "share", b,
-    (byUpdate ? gname(state.game) + " · " + sel.label : gname(sel.key)), disp === "tier" ? "Weapon tier list" : "Weapon ranking"));
+    (byUpdate ? gname(state.game) + " · " + sel.label : gname(sel.key)), disp === "tier" ? "Weapon tier list" : "Weapon ranking",
+    // logo in the image: game of the column + its label (title update / "All versions" / "OBT")
+    byUpdate ? { game: state.game, tag: /β/.test(state.game) ? "OBT" : sel.label }
+      : { game: sel.key, tag: state.wsMode === "obt" ? "OBT" : tr("All versions") }));
   const qq = document.getElementById("wsQQ");
   if (qq) {
     qq.oninput = () => { document.getElementById("wsQQv").textContent = tr("min. {n} weapons per quest", { n: qq.value }); };
@@ -3335,6 +3354,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V109", when: "21.10.2026 20:20", items: [
+    "Weapon Strength image: the saved / shared image now shows the game logo next to the title, with a label for the title update, \"All versions\" or \"OBT\"." ] },
   { v: "V108", when: "21.10.2026 11:05", items: [
     "Better page title and description for search engines (English + Japanese keywords) and link previews for X, Discord and Reddit." ] },
   { v: "V107", when: "21.10.2026 10:50", items: [
