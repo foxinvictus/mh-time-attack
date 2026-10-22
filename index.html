@@ -829,6 +829,8 @@
   .top-actions .submit-btn[hidden] { display: none; }
   dialog.submit { width: min(460px, calc(100vw - 32px)); }
   .sub-lead { margin: -6px 0 12px; font-size: 13px; color: var(--muted); }
+  .issue-faq { margin: -4px 0 12px; padding: 8px 10px; border: 1px solid var(--gold); border-radius: 8px; font-size: 13px; line-height: 1.45; color: var(--paper); }
+  .issue-faq button { margin-left: 4px; padding: 2px 10px; border: 0; border-radius: 4px; background: var(--gold); color: var(--on-gold); font: 700 13px/1.4 "Barlow", "Noto Sans JP", sans-serif; cursor: pointer; }
   .sub-how { margin: -6px 0 12px; font-size: 13px; line-height: 1.45; color: var(--muted); }
   .sub-how p { margin: 0 0 6px; }
   .sub-how b { color: var(--paper); }
@@ -1330,6 +1332,7 @@
     <details class="faq-q"><summary>Why are TA Wiki rule runs not listed separately?</summary><p>I've been running Monster Hunter leaderboards since 2021 and have always focused on freestyle rankings. This site won't get a separate TA Wiki section: checking every new video in detail against the full ruleset would take far too much time, and with the number of runs coming in every day it isn't technically feasible right now.</p></details>
     <details class="faq-q"><summary>Why is a well-known or popular quest missing?</summary><p>The main goal of this site is a weapon tier list that is as realistic as possible. That only works with quests that get a lot of uploads on YouTube, including long after their release.</p><p>A YouTube API script tracks every quest of each game and checks two things: how many runs have been uploaded, and how well the different weapon types are represented. Some quests have plenty of runs, but certain weapons have none at all. This often happens with Gunlance, Hammer or Lance, or with ranged weapons without Heroics, since those are mostly played with Heroics.</p><p>Without enough weapon types, no meaningful ratio can be calculated. Such quests stay in a queue until there is enough data.</p></details>
     <details class="faq-q"><summary>Why are some quests combined into one?</summary><p>If two or more quests share the same basic conditions (same map, same monster HP and same modifiers), they are merged into a single entry. More runs per quest give a more reliable DPS ratio.</p><p>One example is the Wilds Challenge Quests. The only difference to the regular quest is the HP roll: the Challenge Quest has one fixed HP value, while the regular quest has five possible rolls. Since the site always uses the middle roll for its calculations anyway, the HP in both quests matches exactly.</p></details>
+    <details class="faq-q"><summary>Why does the same runner sometimes appear more than once in a weapon's top 3?</summary><p>Many other leaderboards list each runner only once, with their personal best, no matter how strong their other clear times are.</p><p>On this site, the top priority is collecting as much data as possible for the Weapon Strength tier list. That's why the top 3 is sorted purely by clear time, and one runner can hold several spots. Otherwise, many spots would stay completely empty and the reference values would be much weaker.</p><p>This matters most for weapon types with only a few speedrunners, such as Hammer or Lance. There, every additional time from the same runner adds data and makes the Weapon Strength ranking more accurate.</p><p>This is nothing unusual: in athletics, the all-time lists of the best performances show the same athlete several times – Usain Bolt holds several of the fastest 100 m times ever. And in Japanese game centers, the in-store ranking of an arcade game often shows the same regular player in several spots.</p></details>
   </div>
 </dialog>
 <dialog class="about submit" id="issueDlg" aria-labelledby="issueTitle">
@@ -1337,9 +1340,10 @@
     <h2 id="issueTitle" class="sub-title"><span class="sub-emoji" aria-hidden="true">⚠️</span><span>Report an issue</span></h2>
     <button class="theme-btn about-x" id="issueClose" type="button" aria-label="Close">✕</button>
   </div>
+  <p class="issue-faq">📖 <span>Please read the FAQ first before reporting a run – many questions are already answered there.</span> <button type="button" id="issueFaq">Open FAQ</button></p>
   <div class="sub-how">
     <p>Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.</p>
-    <p>If something still doesn't add up with an existing run – wrong time, wrong quest, a turf war that shortens the hunt – I'm very grateful for every report!</p>
+    <p>If something still doesn't add up with an existing run – wrong time, wrong quest, NPC hunters or additional players in the quest – I'm very grateful for every report!</p>
   </div>
   <form id="issueForm" novalidate>
     <label class="sub-f"><span>Game</span><select id="iGame"></select></label>
@@ -1658,14 +1662,21 @@ const JA = {
   "Why are some quests combined into one?": "なぜ複数のクエストが1つにまとめられているのですか？",
   "If two or more quests share the same basic conditions (same map, same monster HP and same modifiers), they are merged into a single entry. More runs per quest give a more reliable DPS ratio.": "2つ以上のクエストの基本条件（同じマップ、同じモンスター体力、同じ補正）が同じ場合は、1つの項目にまとめています。1クエストあたりの記録が増えるほど、DPSレシオの信頼性が高まるためです。",
   "One example is the Wilds Challenge Quests. The only difference to the regular quest is the HP roll: the Challenge Quest has one fixed HP value, while the regular quest has five possible rolls. Since the site always uses the middle roll for its calculations anyway, the HP in both quests matches exactly.": "例として、ワイルズのチャレンジクエストがあります。通常クエストとの違いは体力の振れ幅だけで、チャレンジクエストは体力が固定、通常クエストは5段階の体力があります。サイトでは計算に常に中間の体力を使っているので、この場合は両方のクエストの体力が完全に一致します。",
+  "Why does the same runner sometimes appear more than once in a weapon's top 3?": "なぜ同じ走者が1つの武器のトップ3に複数回載ることがあるのですか？",
+  "Many other leaderboards list each runner only once, with their personal best, no matter how strong their other clear times are.": "多くのリーダーボードでは、他のクリアタイムがどれだけ速くても、1人の走者は自己ベストの1件だけが掲載されます。",
+  "On this site, the top priority is collecting as much data as possible for the Weapon Strength tier list. That's why the top 3 is sorted purely by clear time, and one runner can hold several spots. Otherwise, many spots would stay completely empty and the reference values would be much weaker.": "このサイトでは、武器の強さ（Weapon Strength）ティアリストのためにできるだけ多くのデータを集めることを最優先にしています。そのためトップ3は純粋にクリアタイム順で、1人の走者が複数の枠を占めることもあります。そうしなければ多くの枠が空いたままになり、基準となる値もずっと不正確になってしまいます。",
+  "This matters most for weapon types with only a few speedrunners, such as Hammer or Lance. There, every additional time from the same runner adds data and makes the Weapon Strength ranking more accurate.": "これは、ハンマーやランスのように走者が少ない武器種で特に重要です。同じ走者の記録でも1件増えるごとにデータが増え、武器の強さランキングがより正確になります。",
+  "This is nothing unusual: in athletics, the all-time lists of the best performances show the same athlete several times – Usain Bolt holds several of the fastest 100 m times ever. And in Japanese game centers, the in-store ranking of an arcade game often shows the same regular player in several spots.": "これは珍しいことではありません。陸上競技の歴代記録（パフォーマンス）リストでは同じ選手が何度も登場し、100m走の歴代最速タイムのうち複数をウサイン・ボルトが持っています。また、日本のゲームセンターのアーケードゲームの店内ランキングでも、同じ常連プレイヤーが複数の枠を占めていることがよくあります。",
   "All versions": "全バージョン",
   "Report an issue": "問題を報告", "Run": "記録", "Problem": "問題", "Send report": "報告を送信",
   "Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.": "記録は半自動で集めています。APIスクリプトがYouTubeの動画を読み取り、PythonプログラムがHPバーから火事場を判定し、さらに手動で抜き取り確認をしています。",
-  "If something still doesn't add up with an existing run – wrong time, wrong quest, a turf war that shortens the hunt – I'm very grateful for every report!": "それでも掲載中の記録におかしな点があれば（タイムの違い、クエストの違い、縄張り争いで狩猟が短くなっている など）、ぜひ教えてください！",
+  "If something still doesn't add up with an existing run – wrong time, wrong quest, NPC hunters or additional players in the quest – I'm very grateful for every report!": "それでも掲載中の記録におかしな点があれば（タイムの違い、クエストの違い、クエストにNPCハンターや他のプレイヤーが参加しているなど）、ぜひ教えてください！",
+  "Please read the FAQ first before reporting a run – many questions are already answered there.": "記録を報告する前に、まずFAQをお読みください。多くの質問にはすでに回答しています。",
+  "Open FAQ": "FAQを開く",
   "ℹ️ Reports are possible for Monster Hunter Wilds and newer games.": "ℹ️ 報告できるのはモンスターハンターワイルズ以降のタイトルです。",
   "Clear time doesn't match the video": "クリアタイムが動画と合わない",
   "Wrong quest": "クエストが違う",
-  "Turf war / outside help shortens the hunt": "縄張り争い・外部要因で狩猟が短くなっている",
+  "NPC hunters in quest or additional players": "クエストにNPCハンターや他のプレイヤーが参加している",
   "Heroics label is wrong": "火事場の区分が違う",
   "Wrong weapon": "武器が違う",
   "Something else (please add a note)": "その他（メモに記入してください）",
@@ -3354,6 +3365,10 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V110", when: "22.10.2026 11:00", items: [
+    "FAQ: new question on why the same runner can appear more than once in a weapon's top 3.",
+    "Report an issue: a note at the top asks to read the FAQ first, with a button that opens it.",
+    "Report an issue: the option \"Turf war\" is now \"NPC hunters in quest or additional players\"." ] },
   { v: "V109", when: "21.10.2026 20:20", items: [
     "Weapon Strength image: the saved / shared image now shows the game logo next to the title, with a label for the title update, \"All versions\" or \"OBT\"." ] },
   { v: "V108", when: "21.10.2026 11:05", items: [
@@ -3748,7 +3763,7 @@ function fillSubmitQuests(sel) {
 const ISSUE_PROBLEMS = [
   ["time", "Clear time doesn't match the video"],
   ["quest", "Wrong quest"],
-  ["turf", "Turf war / outside help shortens the hunt"],
+  ["turf", "NPC hunters in quest or additional players"],
   ["heroics", "Heroics label is wrong"],
   ["weapon", "Wrong weapon"],
   ["other", "Something else (please add a note)"],
@@ -3900,6 +3915,7 @@ const VOTE_GAMES = {
   const dlg = document.getElementById("faqDlg");
   document.getElementById("faqBtn").onclick = () => dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
   document.getElementById("faqClose").onclick = () => dlg.close();
+  document.getElementById("issueFaq").onclick = () => { document.getElementById("issueDlg").close(); document.getElementById("faqBtn").click(); };
   dlg.addEventListener("click", e => {
     if (e.target !== dlg) return;
     const r = dlg.getBoundingClientRect();
