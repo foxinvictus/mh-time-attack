@@ -874,6 +874,15 @@
   .vote-go:hover:not(:disabled) { background: var(--gold); color: var(--on-gold); }
   .vote-go:disabled { border-color: var(--ink-3); color: var(--muted); cursor: default; }
   .vote-dm { display: inline-block; margin-top: 10px; color: var(--gold); font-size: 14px; }
+  .sub-stats { margin: -6px 0 12px; }
+  .sub-stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .sub-stat { padding: 7px 4px 6px; background: var(--ink); border: 1px solid var(--ink-3); border-radius: 8px; text-align: center; }
+  .sub-stat b { display: block; font: 700 22px/1 "Barlow Condensed", sans-serif; color: var(--paper); font-variant-numeric: tabular-nums; }
+  .sub-stat span { display: block; margin-top: 3px; font: 500 11px/1.2 "Barlow", "Noto Sans JP", sans-serif; color: var(--muted); }
+  .sub-stat.st-queue { border-color: var(--gold); }
+  .sub-stat.st-queue b { color: var(--gold); }
+  .sub-stats p { margin: 6px 0 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
+  .sub-stats.loading p { margin: 0; }
   .sub-rule { margin: 0; font-size: 13px; color: var(--gold); }
   .sub-third { margin: -4px 0 0; font-size: 13px; color: var(--muted); }
   .sub-third strong { color: var(--paper); }
@@ -1292,6 +1301,7 @@
     <h2 id="submitTitle" class="sub-title"><img src="icons/UI/submit-run.png" alt="" onerror="this.remove()"><span>Submit a run</span></h2>
     <button class="theme-btn about-x" id="submitClose" type="button" aria-label="Close">✕</button>
   </div>
+  <div class="sub-stats" id="sStats" hidden></div>
   <div class="sub-how">
     <p>New runs are found automatically by an API script that reads YouTube. A Python program then takes many snapshots of the HP bar in every video and decides on its own whether Heroics was active.</p>
     <p>In very rare cases Heroics is not detected – an extra ratio check catches these suspiciously fast runs. If a run is still listed wrongly, please tell me on X: <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">@fox_invictus</a></p>
@@ -1708,6 +1718,9 @@ const JA = {
   "Tiers are set automatically by ratio (1.00 = quest average).": "ティアはレシオから自動で決まります（1.00＝クエスト平均）。",
   "The line in each bar spans the lowest to the highest ratio that still counts.": "各バーの線は、集計対象となる最低〜最高のレシオの範囲を示します。",
   "Counted runs: ratio {a} to {b}": "集計対象：レシオ {a}〜{b}",
+  "Loading submission numbers…": "投稿数を読み込み中…",
+  "Last 7 days": "7日間", "Added": "掲載", "Not added": "不掲載", "In queue": "確認待ち",
+  "Not added: usually a faster run was added in the meantime, or the run was already listed. In queue: not checked yet.": "不掲載：多くの場合、その間により速い記録が追加されたか、すでに掲載済みだった記録です。確認待ち：まだ確認していない記録です。",
 };
 let LANG = "en";
 /* "English text" (with {placeholders}) -> text in the active language */
@@ -3365,6 +3378,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V111", when: "26.10.2026 17:05", items: [
+    "Submit a run: the dialog now shows live submission numbers – last 7 days, total, added, not added and how many runs are still waiting in the queue." ] },
   { v: "V110", when: "22.10.2026 11:00", items: [
     "FAQ: new question on why the same runner can appear more than once in a weapon's top 3.",
     "Report an issue: a note at the top asks to read the FAQ first, with a button that opens it.",
@@ -3677,6 +3692,32 @@ function openSubmit(game, quest, weapon) {
   showSubmitThird();
   document.getElementById("sSend").disabled = false;
   dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+  loadSubmitStats();
+}
+/* submission numbers from the web app (GET ?action=stats, einreichungen.gs) – loaded once per page view */
+let submitStats = null;
+function renderSubmitStats() {
+  const el = document.getElementById("sStats");
+  if (!submitStats) { el.hidden = true; return; }
+  if (submitStats === "loading") {
+    el.className = "sub-stats loading"; el.innerHTML = `<p>${esc(tr("Loading submission numbers…"))}</p>`; el.hidden = false; return;
+  }
+  const s = submitStats, tile = (n, label, cls) => `<div class="sub-stat ${cls || ""}"><b>${n}</b><span>${esc(tr(label))}</span></div>`;
+  el.className = "sub-stats";
+  el.innerHTML = `<div class="sub-stats-grid">` + tile(s.week, "Last 7 days") + tile(s.total, "Total") +
+    tile(s.accepted, "Added") + tile(s.rejected, "Not added") + tile(s.pending, "In queue", "st-queue") + `</div>` +
+    `<p>${esc(tr("Not added: usually a faster run was added in the meantime, or the run was already listed. In queue: not checked yet."))}</p>`;
+  el.hidden = false;
+}
+async function loadSubmitStats() {
+  if (!SUBMIT_URL) return;
+  if (submitStats && submitStats !== "loading") { renderSubmitStats(); return; }
+  submitStats = "loading"; renderSubmitStats();
+  try {
+    const out = await (await fetch(SUBMIT_URL + "?action=stats")).json();
+    submitStats = out && out.ok && typeof out.total === "number" ? out : null;
+  } catch (err) { submitStats = null; }
+  renderSubmitStats();
 }
 /* current 3rd place of the chosen quest + weapon + category, so people know which time they have to beat */
 function showSubmitThird() {
