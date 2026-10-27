@@ -42,13 +42,14 @@
     --paper:    #f3ece0;   /* main text */
     --muted:    #9fb7bc;   /* secondary text */
     --hero:     #ef7b5f;   /* heroics marker */
+    --queue:    #6fb3e8;   /* submissions waiting in the queue */
     --on-gold:  #102f37;   /* text on gold buttons */
     --radius: 6px;
   }
   :root[data-theme="light"] {
     /* papyrus: warm parchment instead of white */
     --ink: #e6d7b5; --ink-2: #f0e4c8; --ink-3: #cdb88c;
-    --gold: #8a5a12; --gold-dim: #b07d34; --paper: #3a2a14; --muted: #6e5634; --hero: #a8381c; --on-gold: #fbf3df;
+    --gold: #8a5a12; --gold-dim: #b07d34; --paper: #3a2a14; --muted: #6e5634; --hero: #a8381c; --on-gold: #fbf3df; --queue: #2f6fa8;
   }
 
   * { box-sizing: border-box; }
@@ -103,7 +104,8 @@
   html[lang="ja"] body, html[lang="ja"] button, html[lang="ja"] select { font-family: "Barlow", "Noto Sans JP", sans-serif; }
   html[lang="ja"] h1, html[lang="ja"] h2, html[lang="ja"] h3, html[lang="ja"] strong, html[lang="ja"] .w-en,
   html[lang="ja"] .about-card strong { font-family: "Barlow Condensed", "Noto Sans JP", sans-serif; }
-  .lang-btn { font-family: "Noto Sans JP", "Barlow", sans-serif; }
+  .lang-btn { font-family: "Noto Sans JP", "Barlow", sans-serif; display: inline-flex; align-items: center; gap: 6px; }
+  .lang-btn .flag { width: 18px; height: 12px; flex: none; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
 
   .games {
     display: flex; gap: 4px; overflow-x: auto;
@@ -244,6 +246,10 @@
   .rank .uimedal { width: 26px; height: 26px; }
   .medals th .uimedal { width: 22px; height: 22px; }
   .newest .n-rank .uimedal { width: 24px; height: 24px; }
+  /* Newest Runs: Heroics / No Heroics tag on the top right of the medal */
+  .newest .nr { position: relative; display: inline-block; padding: 3px 6px 0 0; line-height: 24px; }
+  .newest .nr-tag { position: absolute; top: -2px; right: -5px; width: 14px; height: 14px; object-fit: contain;
+    filter: drop-shadow(0 0 1px rgba(0,0,0,.7)); pointer-events: none; }
   .hbadge .hicon { width: 22px; height: 22px; }
   .hicon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; display: inline-block; }
   .hmark.himg { background: none; padding: 0; }
@@ -446,9 +452,7 @@
     font: 700 16px/1 "Barlow Condensed", sans-serif; white-space: nowrap;
   }
   .quickbar button img { width: 20px; height: 20px; object-fit: contain; flex: none; }
-  .quickbar .qb-theme { padding: 5px; width: 32px; height: 32px; justify-content: center; flex: none; margin-left: auto; color: var(--muted); font-size: 16px; }
   .qb-views { margin-left: auto; }
-  .qb-views + .qb-theme { margin-left: 0; }
   .quickbar button:hover { border-color: var(--gold); }
   .quickbar button[aria-current="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
   @media (max-width: 760px) {
@@ -464,8 +468,6 @@
       font-size: 11px; white-space: normal; text-align: center; line-height: 1.05; }
     .quickbar button img { width: 22px; height: 22px; }
     .quickbar { position: fixed; }
-    .quickbar .qb-theme { position: absolute; top: calc(4px + env(safe-area-inset-top, 0px)); right: 8px; width: 28px; height: 28px; padding: 4px; flex-direction: row; border-radius: 999px; }
-    .quickbar .qb-theme img { width: 18px; height: 18px; }
   }
   /* Weapon Strength: once the filters scroll away, they stay pinned right under the quick bar */
   .ctl-slot { min-width: 0; }
@@ -786,6 +788,23 @@
   /* info + changelog */
   .theme-btn:hover { color: var(--paper); border-color: var(--muted); }
   .top-actions .theme-btn { display: inline-flex; align-items: center; gap: 6px; }
+  /* header: actions with text on the left, small tools on the right */
+  header .top-actions { justify-content: space-between; align-items: center; row-gap: 8px; }
+  .ta-main, .ta-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .ta-tools { margin-left: auto; }
+  .ta-tools .theme-btn { height: 30px; }
+  .ta-tools .ta-icon { width: 30px; padding: 0; justify-content: center; }
+  .ta-tools .ta-icon .bicon { margin: 0; }
+  .lang-btn span { font: 700 13px/1 "Barlow", sans-serif; letter-spacing: .04em; }
+  /* light / dark: floating button, bottom right */
+  .theme-fab { position: fixed; z-index: 60; right: calc(18px + env(safe-area-inset-right, 0px)); bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--gold); background: var(--ink-2); color: var(--gold);
+    display: grid; place-items: center; cursor: pointer; font-size: 24px; box-shadow: 0 4px 14px rgba(0,0,0,.35); transition: transform .15s ease; }
+  .theme-fab img { width: 30px; height: 30px; object-fit: contain; }
+  body { padding-bottom: 80px; }   /* room so the floating button never hides the end of the page */
+  .theme-fab:hover { transform: scale(1.07); }
+  .theme-fab:focus-visible { outline: 2px solid var(--paper); outline-offset: 2px; }
+  @media (max-width: 760px) { .theme-fab { width: 50px; height: 50px; right: calc(14px + env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); } }
   .bicon { width: 18px; height: 18px; object-fit: contain; flex: none; margin-left: -4px; }
   .about-icon { width: 36px; height: 36px; object-fit: contain; flex: none; border-radius: 6px; }
   .about-card > div { flex: 1; min-width: 0; }
@@ -883,6 +902,83 @@
   .sub-stat.st-queue b { color: var(--gold); }
   .sub-stats p { margin: 6px 0 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
   .sub-stats.loading p { margin: 0; }
+  /* Newest Runs: activity bar (last 7 days) */
+  .nbar { margin: 10px 0 4px; max-width: 560px; font-size: 13px; color: var(--muted); }
+  .nbar:empty { display: none; }
+  .nb-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; }
+  .nb-head b { color: var(--paper); font-variant-numeric: tabular-nums; }
+  .nb-pill { padding: 1px 8px; border: 1px solid var(--ink-3); border-radius: 999px; font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; cursor: default; }
+  .nb-que { background: var(--queue); }
+  .nb-track { display: flex; height: 6px; margin: 6px 0 4px; background: var(--ink-2); border-radius: 3px; overflow: hidden; }
+  .nb-track i { display: block; height: 100%; }
+  .nb-sub { background: var(--gold); }
+  .nb-man { background: var(--muted); opacity: .55; }
+  .nb-leg { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .nb-dot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; vertical-align: 0; }
+  /* ---------- UI style picker + "Glossy" style (classic glass look: shiny bars with a moving highlight, gel buttons) ----------
+     data-style="glossy" on <html>; without it everything stays flat (standard). */
+  .ta-style { position: relative; }
+  .style-menu { position: absolute; z-index: 70; top: calc(100% + 6px); right: 0; width: 230px; padding: 6px; display: grid; gap: 4px;
+    background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+  .style-menu[hidden] { display: none; }
+  .style-menu .sm-cap { padding: 4px 8px 2px; font: 600 11px/1 "Barlow", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .style-opt { display: grid; grid-template-columns: 1fr 64px; align-items: center; gap: 10px; padding: 8px; border: 1px solid transparent; border-radius: 8px;
+    background: none; color: var(--paper); cursor: pointer; text-align: left; font: 600 14px/1.2 "Barlow", "Noto Sans JP", sans-serif; }
+  .style-opt small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+  .style-opt:hover { background: var(--ink); }
+  .style-opt[aria-checked="true"] { border-color: var(--gold); }
+  .style-opt[aria-checked="true"] > span:first-child::before { content: "✓ "; color: var(--gold); }
+  .sm-prev { position: relative; height: 12px; border-radius: 3px; background: var(--ink); overflow: hidden; }
+  .sm-prev i { position: absolute; inset: 0 35% 0 0; background: #2fb34a; border-radius: 3px; }
+  .sm-prev.gl { border: 1px solid rgba(0,0,0,.35); box-shadow: inset 0 1px 2px rgba(0,0,0,.35); }
+  .sm-prev.gl i { background-image: linear-gradient(to bottom, rgba(255,255,255,.55), rgba(255,255,255,.2) 48%, rgba(0,0,0,.08) 52%, rgba(255,255,255,.15)); }
+
+  /* glossy: bar tracks */
+  :root[data-style="glossy"] .wsb .track, :root[data-style="glossy"] .vote-bar, :root[data-style="glossy"] .nb-track, :root[data-style="glossy"] .sm-prev.gl {
+    border-radius: 3px; border: 1px solid rgba(0,0,0,.45);
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.14), rgba(255,255,255,.04) 50%, rgba(0,0,0,.10) 51%, rgba(255,255,255,.08));
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.08); }
+  :root[data-style="glossy"][data-theme="light"] .wsb .track, :root[data-style="glossy"][data-theme="light"] .vote-bar, :root[data-style="glossy"][data-theme="light"] .nb-track {
+    background-color: #e3e3e3; border-color: #8f8f8f;
+    background-image: linear-gradient(to bottom, #f4f4f4, #e6e6e6 50%, #d6d6d6 51%, #e9e9e9); box-shadow: inset 0 1px 2px rgba(0,0,0,.2); }
+  :root[data-style="glossy"] .nb-track { height: 9px; }
+  :root[data-style="glossy"] .vote-bar { height: 10px; }
+  /* glossy: bar fills – glass highlight on top of the bar colour */
+  :root[data-style="glossy"] .wsb .fill, :root[data-style="glossy"] .bar, :root[data-style="glossy"] .vote-bar i, :root[data-style="glossy"] .nb-track i { position: relative; overflow: hidden; border-radius: 2px; }
+  :root[data-style="glossy"] .bar { position: absolute; }
+  :root[data-style="glossy"] .wsb .fill::after, :root[data-style="glossy"] .bar::after, :root[data-style="glossy"] .vote-bar i::after, :root[data-style="glossy"] .nb-track i::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(to bottom, rgba(255,255,255,.55) 0%, rgba(255,255,255,.22) 46%, rgba(0,0,0,.10) 52%, rgba(255,255,255,.14) 100%);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.55); }
+  /* the moving shine that runs through the bar */
+  :root[data-style="glossy"]:not(.shot) .wsb .fill::before, :root[data-style="glossy"]:not(.shot) .bar::before, :root[data-style="glossy"]:not(.shot) .vote-bar i::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: -45%; width: 45%; pointer-events: none; z-index: 1;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.55) 50%, transparent);
+    animation: gl-shine 2.8s ease-in-out infinite; }
+  :root[data-style="glossy"]:not(.shot) .wsb:nth-child(3n+2) .fill::before { animation-delay: .5s; }
+  :root[data-style="glossy"]:not(.shot) .wsb:nth-child(3n) .fill::before { animation-delay: 1s; }
+  @keyframes gl-shine { 0% { transform: translateX(0); } 70%, 100% { transform: translateX(330%); } }
+  @media (prefers-reduced-motion: reduce) { :root[data-style="glossy"] .wsb .fill::before, :root[data-style="glossy"] .bar::before, :root[data-style="glossy"] .vote-bar i::before { animation: none; display: none; } }
+
+  /* glossy: buttons (gel look, slightly squarer corners, blue glow on hover) */
+  :root[data-style="glossy"] .theme-btn, :root[data-style="glossy"] .seg, :root[data-style="glossy"] .shot-btn, :root[data-style="glossy"] .vote-go, :root[data-style="glossy"] .sub-send, :root[data-style="glossy"] .qsubmit, :root[data-style="glossy"] .wf-btn, :root[data-style="glossy"] .wf-all, :root[data-style="glossy"] .quickbar button, :root[data-style="glossy"] .nb-pill, :root[data-style="glossy"] .issue-faq button {
+    border-radius: 4px;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.20), rgba(255,255,255,.07) 49%, rgba(0,0,0,.10) 51%, rgba(255,255,255,.05));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 1px 2px rgba(0,0,0,.3); }
+  :root[data-style="glossy"] .seg button { border-radius: 3px; }
+  :root[data-style="glossy"] .seg button[aria-pressed="true"], :root[data-style="glossy"] .views button[aria-selected="true"], :root[data-style="glossy"] .quickbar button[aria-current="true"] {
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.55), rgba(255,255,255,.18) 48%, rgba(0,0,0,.08) 52%, rgba(255,255,255,.20));
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.6); }
+  :root[data-style="glossy"] .vgroup { border-radius: 6px; border-color: rgba(0,0,0,.45);
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.10), rgba(255,255,255,.03) 50%, rgba(0,0,0,.08) 51%, rgba(255,255,255,.03)); }
+  :root[data-style="glossy"] .theme-btn:hover, :root[data-style="glossy"] .seg button:not([aria-pressed="true"]):hover, :root[data-style="glossy"] .views button:not([aria-selected="true"]):hover,
+  :root[data-style="glossy"] .quickbar button:not([aria-current="true"]):hover, :root[data-style="glossy"] .wf-btn:hover, :root[data-style="glossy"] .shot-btn:hover, :root[data-style="glossy"] .vote-go:hover:not(:disabled) {
+    border-color: #3c9be8; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 0 7px rgba(70,170,255,.55); }
+  /* glossy: the light / dark button becomes a glass orb */
+  :root[data-style="glossy"] .theme-fab { border: 1px solid rgba(0,0,0,.5);
+    background-image: radial-gradient(ellipse 70% 45% at 50% 22%, rgba(255,255,255,.65), rgba(255,255,255,0) 70%),
+      radial-gradient(circle at 50% 100%, rgba(120,200,255,.45), rgba(0,0,0,0) 60%);
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.18), 0 0 0 2px var(--gold), 0 4px 14px rgba(0,0,0,.4); }
   .sub-rule { margin: 0; font-size: 13px; color: var(--gold); }
   .sub-third { margin: -4px 0 0; font-size: 13px; color: var(--muted); }
   .sub-third strong { color: var(--paper); }
@@ -1185,14 +1281,25 @@
     <button class="gscroll gr" type="button" tabindex="-1" aria-hidden="true">›</button>
   </div>
   <div class="top-actions">
+    <div class="ta-main">
     <button class="theme-btn submit-btn" id="submitBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/submit-run.png" alt="" onerror="this.remove()"><span>Submit a run</span></button>
     <button class="theme-btn issue-btn" id="issueBtn" type="button" aria-haspopup="dialog" hidden><span class="bicon-emoji" aria-hidden="true">⚠️</span><span>Report an issue</span></button>
-    <button class="theme-btn vote-btn" id="voteBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/vote.png" alt="" onerror="this.replaceWith('🗳️')"><span>Vote for the next game</span></button>
+    <button class="theme-btn vote-btn" id="voteBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/vote.png" alt="" onerror="this.replaceWith('🗳️')"><span>Vote next game</span></button>
+    </div>
+    <div class="ta-tools">
     <button class="theme-btn lang-btn" id="langBtn" type="button"></button>
+    <span class="ta-style">
+      <button class="theme-btn" id="styleBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="styleMenu" title="Design style"><img class="bicon" src="icons/UI/ui-design.png" alt="" onerror="this.replaceWith('🎨')"><span>UI</span></button>
+      <div class="style-menu" id="styleMenu" role="menu" aria-label="Design style" hidden>
+        <div class="sm-cap">Design style</div>
+        <button class="style-opt" type="button" role="menuitemradio" data-style="flat" aria-checked="true"><span>Flat<small>Standard</small></span><span class="sm-prev"><i></i></span></button>
+        <button class="style-opt" type="button" role="menuitemradio" data-style="glossy" aria-checked="false"><span>Glossy<small>Classic glass look</small></span><span class="sm-prev gl"><i></i></span></button>
+      </div>
+    </span>
     <button class="theme-btn" id="faqBtn" type="button" aria-haspopup="dialog"><img class="bicon" src="icons/UI/faq.png" alt="" onerror="this.replaceWith('❓')"><span>FAQ</span></button>
-    <button class="theme-btn" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.remove()"><span>Changelog</span></button>
-    <button class="theme-btn" id="themeBtn" type="button"><img class="bicon" src="icons/UI/light-mode.png" alt="" onerror="this.remove()"><span>Light mode</span></button>
-    <button class="theme-btn" id="aboutBtn" type="button" aria-haspopup="dialog"><img class="bicon" src="icons/UI/support.png" alt="" onerror="this.remove()"><span>Contact / Support the project</span></button>
+    <button class="theme-btn ta-icon" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog" aria-label="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.replaceWith('📜')"></button>
+    <button class="theme-btn ta-icon" id="aboutBtn" type="button" aria-haspopup="dialog" title="Contact / Support the project" aria-label="Contact / Support the project"><img class="bicon" src="icons/UI/support.png" alt="" onerror="this.replaceWith('♥')"></button>
+    </div>
   </div>
 </header>
 
@@ -1223,8 +1330,9 @@
   <button data-view="strength"><img src="icons/UI/weapon-strength.png" alt="" onerror="this.remove()"><span>Weapon Strength</span></button>
   <button data-view="hof"><img src="icons/UI/hall-of-fame.png" alt="" onerror="this.remove()"><span>Hall of Fame</span></button>
   </div>
-  <button class="qb-theme" id="qbTheme" type="button"></button>
 </nav>
+<!-- light / dark: big floating button, always reachable -->
+<button class="theme-fab" id="themeBtn" type="button"></button>
 
 <main>
   <aside class="side" aria-label="List">
@@ -1436,14 +1544,14 @@ const WEAPONS = [
   ["SnS", "Sword & Shield", "片手剣"],
   ["DB",  "Dual Blades",    "双剣"],
   ["LA",  "Lance",          "ランス"],
-  ["GL",  "Gunlance",       "ガンランス"],
+  ["GL",  "Gunlance",       "ガンス"],
   ["HA",  "Hammer",         "ハンマー"],
   ["HH",  "Hunting Horn",   "狩猟笛"],
-  ["SA",  "Switch Axe",     "スラッシュアックス"],
-  ["CB",  "Charge Blade",   "チャージアックス"],
+  ["SA",  "Switch Axe",     "スラアク"],
+  ["CB",  "Charge Blade",   "チャアク"],
   ["IG",  "Insect Glaive",  "操虫棍"],
-  ["LBG", "Light Bowgun",   "ライトボウガン"],
-  ["HBG", "Heavy Bowgun",   "ヘビィボウガン"],
+  ["LBG", "Light Bowgun",   "ライト"],
+  ["HBG", "Heavy Bowgun",   "ヘビィ"],
   ["Bow", "Bow",            "弓"],
 ];
 const W = Object.fromEntries(WEAPONS.map(([k, en, jp], i) => [k, { k, en, jp, i }]));
@@ -1463,6 +1571,7 @@ const JA = {
   "Changelog": "更新履歴", "Info & changelog": "情報と更新履歴",
   "Contact / Support the project": "連絡・プロジェクト支援",
   "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる",
+  "Design style": "デザイン", "Flat": "フラット", "Standard": "標準", "Glossy": "グロッシー", "Classic glass look": "クラシックなガラス風",
   "Leaderboards": "ランキング", "Analysis": "分析", "Community": "コミュニティ",
   "Overview": "一覧", "Every quest and weapon in one table": "全クエスト・全武器をひとつの表で",
   "By quest": "クエスト別", "Pick a quest, compare all 14 weapons": "クエストを選び、14武器を比較",
@@ -1564,8 +1673,8 @@ const JA = {
   "all weapons": "全武器", "{w} only": "{w}のみ", "Period": "期間", "All weapons": "全武器",
   // newest runs
   "Newest runs": "新着記録", " of the selected weapons": "（選択した武器のみ）",
-  "The {n} most recently recorded runs{sel}. Rank = place of the run among all runs of that weapon in the quest. Stronger colour = higher ratio.":
-    "最近登録された{n}件の記録{sel}。順位 = そのクエストにおける同じ武器の全記録の中での順位。色が濃いほどレシオが高い。",
+  "The {n} most recently recorded runs{sel}. Rank = place of the run among all runs of that weapon in the quest, counted separately for Heroics and No Heroics (small icon on the medal). Stronger colour = higher ratio.":
+    "最近登録された{n}件の記録{sel}。順位 = そのクエストにおける同じ武器の記録の中での順位（火事場あり・なしは別々に集計。メダル右上の小さなアイコンで表示）。色が濃いほどレシオが高い。",
   "Weapons: {list}": "武器：{list}", "Show only certain weapons": "特定の武器だけを表示", "Show all weapons": "全武器を表示",
   "No runs for the selected weapons yet.": "選択した武器の記録はまだありません。", "No runs recorded yet.": "記録はまだありません。",
   "Date": "日付", "Video": "動画", "Channel": "チャンネル", "Rank": "順位",
@@ -1667,7 +1776,7 @@ const JA = {
   "I've been running Monster Hunter leaderboards since 2021 and have always focused on freestyle rankings. This site won't get a separate TA Wiki section: checking every new video in detail against the full ruleset would take far too much time, and with the number of runs coming in every day it isn't technically feasible right now.": "私は2021年からモンハンのランキングを運営しており、ずっとフリースタイル（ルール無制限）のランキングに取り組んできました。このサイトにTA Wikiルール専用の部門を作る予定はありません。毎日届く大量の動画をすべてルールに沿って細かく確認するのは時間がかかりすぎ、現時点では技術的にも実現できないためです。",
   "Why is a well-known or popular quest missing?": "有名・人気のクエストが載っていないのはなぜですか？",
   "The main goal of this site is a weapon tier list that is as realistic as possible. That only works with quests that get a lot of uploads on YouTube, including long after their release.": "このサイトの一番の目的は、できるだけ現実に近い武器ティア表を作ることです。そのため、YouTubeへの投稿が多く、配信から時間が経っても投稿が続くクエストだけを対象にしています。",
-  "A YouTube API script tracks every quest of each game and checks two things: how many runs have been uploaded, and how well the different weapon types are represented. Some quests have plenty of runs, but certain weapons have none at all. This often happens with Gunlance, Hammer or Lance, or with ranged weapons without Heroics, since those are mostly played with Heroics.": "YouTube APIスクリプトで各タイトルの全クエストを追跡し、投稿された記録の数と、各武器種がどれだけそろっているかの2点を調べています。記録が多くても、一部の武器種には記録がまったくないクエストもあります。ガンランス、ハンマー、ランスや、火事場なしの遠距離武器（ほとんど火事場で運用されるため）によく見られます。",
+  "A YouTube API script tracks every quest of each game and checks two things: how many runs have been uploaded, and how well the different weapon types are represented. Some quests have plenty of runs, but certain weapons have none at all. This often happens with Gunlance, Hammer or Lance, or with ranged weapons without Heroics, since those are mostly played with Heroics.": "YouTube APIスクリプトで各タイトルの全クエストを追跡し、投稿された記録の数と、各武器種がどれだけそろっているかの2点を調べています。記録が多くても、一部の武器種には記録がまったくないクエストもあります。ガンス、ハンマー、ランスや、火事場なしの遠距離武器（ほとんど火事場で運用されるため）によく見られます。",
   "Without enough weapon types, no meaningful ratio can be calculated. Such quests stay in a queue until there is enough data.": "武器種が十分にそろっていないと、意味のあるレシオを計算できません。そうしたクエストは、十分なデータが集まるまで待機リストに入ります。",
   "Why are some quests combined into one?": "なぜ複数のクエストが1つにまとめられているのですか？",
   "If two or more quests share the same basic conditions (same map, same monster HP and same modifiers), they are merged into a single entry. More runs per quest give a more reliable DPS ratio.": "2つ以上のクエストの基本条件（同じマップ、同じモンスター体力、同じ補正）が同じ場合は、1つの項目にまとめています。1クエストあたりの記録が増えるほど、DPSレシオの信頼性が高まるためです。",
@@ -1700,7 +1809,7 @@ const JA = {
   "Please enter the time as mm:ss, e.g. 03:24.": "タイムは mm:ss の形式で入力してください（例：03:24）。",
   "Format mm:ss – milliseconds are not needed.": "形式は mm:ss です。ミリ秒は不要です。",
   "Please select a weapon": "武器を選択してください",
-  "Vote for the next game": "次のタイトルに投票", "Vote": "投票", "Voted ✓": "投票済み ✓", "{n} votes": "{n}票", "{n} vote": "{n}票",
+  "Vote for the next game": "次のタイトルに投票", "Vote next game": "次のタイトル投票", "Vote": "投票", "Voted ✓": "投票済み ✓", "{n} votes": "{n}票", "{n} vote": "{n}票",
   "Loading votes…": "投票状況を読み込み中…", "No games to vote for right now.": "現在、投票できるタイトルはありません。",
   "Thanks for your vote!": "投票ありがとうございます！", "DM on X: @fox_invictus ↗": "XでDM：@fox_invictus ↗",
   "Which game should be added next? Vote for it – you can vote for several games.": "次に追加してほしいタイトルに投票してください。複数のタイトルに投票できます。",
@@ -1719,8 +1828,12 @@ const JA = {
   "The line in each bar spans the lowest to the highest ratio that still counts.": "各バーの線は、集計対象となる最低〜最高のレシオの範囲を示します。",
   "Counted runs: ratio {a} to {b}": "集計対象：レシオ {a}〜{b}",
   "Loading submission numbers…": "投稿数を読み込み中…",
-  "Last 7 days": "7日間", "Added": "掲載", "Not added": "不掲載", "In queue": "確認待ち",
-  "Not added: usually a faster run was added in the meantime, or the run was already listed. In queue: not checked yet.": "不掲載：多くの場合、その間により速い記録が追加されたか、すでに掲載済みだった記録です。確認待ち：まだ確認していない記録です。",
+  "Last 7 days": "7日間", "Added": "掲載", "Declined": "見送り", "In queue": "確認待ち",
+  "Added in the last 7 days: <b>{n}</b>": "直近7日間に追加：<b>{n}</b>件",
+  "{a} submitted by visitors": "訪問者からの投稿 {a}件", "{a} added manually": "手動で追加 {a}件",
+  "{a} in queue": "確認待ち {a}件", "{n} declined": "見送り {n}件",
+  "Submitted in the last 7 days, checked but not added – usually a faster run was added in the meantime, or the run was already listed.": "直近7日間に投稿され、確認のうえ見送った記録です。多くの場合、その間により速い記録が追加されたか、すでに掲載済みでした。",
+  "Declined: checked but not added – usually a faster run was added in the meantime, or the run was already listed. In queue: not checked yet.": "見送り：確認のうえ掲載しなかった記録です。多くの場合、その間により速い記録が追加されたか、すでに掲載済みでした。確認待ち：まだ確認していない記録です。",
 };
 let LANG = "en";
 /* "English text" (with {placeholders}) -> text in the active language */
@@ -1734,7 +1847,7 @@ const trn = (n, one, many, vars = {}) => tr(n === 1 ? one : many, { n, ...vars }
 /* weapon name in the active language */
 const wn = k => LANG === "ja" ? W[k].jp : W[k].en;
 /* narrow places (Weapon Strength): the common short forms of the long Japanese names */
-const JA_SHORT = { SA: "スラアク", CB: "チャアク", LBG: "ライト", HBG: "ヘビィ" };
+const JA_SHORT = {};   // all Japanese weapon names are the short common forms now (WEAPONS list)
 const wnShort = k => LANG === "ja" ? JA_SHORT[k] || W[k].jp : W[k].en;
 /* game names: English from the "Spiele" tab, Japanese from this list */
 const GAME_JA = {
@@ -1781,12 +1894,15 @@ function translateStatic() {
   });
 }
 const TAGLINE_EN = "Mobile-friendly speedrun records for several Monster Hunter games – with <b>calculated DPS</b>, <b>title-update split</b> and <b>separate Heroics rankings</b>. Fully customisable.";
+/* small inline flags for the language button (flag emojis are not shown on Windows) */
+const FLAG_JP = `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>`;
+const FLAG_GB = `<svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="fgS"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="fgT"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#fgS)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#fgT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg>`;
 function setLang(l, rerender = true) {
   LANG = l === "ja" ? "ja" : "en";
   try { localStorage.setItem("mhlb-lang", LANG); } catch (e) {}
   document.documentElement.lang = LANG;
   const b = document.getElementById("langBtn");
-  b.textContent = LANG === "ja" ? "English" : "日本語";
+  b.innerHTML = LANG === "ja" ? FLAG_GB + "<span>EN</span>" : FLAG_JP + "<span>JP</span>";
   b.lang = LANG === "ja" ? "en" : "ja";
   b.title = LANG === "ja" ? "Switch to English" : "日本語に切り替え";
   document.getElementById("tagline").innerHTML = LANG === "ja" ? JA.TAGLINE : TAGLINE_EN;
@@ -2056,6 +2172,7 @@ async function load() {
         sec: toSeconds(r["Zeit"]), date: toISO(r["Datum"]) || r["Datum"],
         heroics: /^(ja|yes|y|true|x)$/i.test(r["Heroics"]), video: r["Video"], note: r["Notiz"],
         channel: shortChannel(r["Kanal"]), channelFull: String(r["Kanal"] || "").trim(),
+        added: String(r["Hinzugefügt"] || "").trim(), source: String(r["Quelle"] || "").trim(),
       }))
       .filter(r => r.game && r.quest && W[r.weapon] && !isNaN(r.sec));
 
@@ -2856,7 +2973,8 @@ function renderNewestView() {
   const title = document.getElementById("boardTitle");
   const tableEl = document.getElementById("table");
   const sel = state.newestW;
-  title.innerHTML = `<h2>${tr("Newest runs")}</h2><p>${tr("The {n} most recently recorded runs{sel}. Rank = place of the run among all runs of that weapon in the quest. Stronger colour = higher ratio.", { n: NEWEST_MAX, sel: sel.length ? tr(" of the selected weapons") : "" })}</p>` +
+  title.innerHTML = `<h2>${tr("Newest runs")}</h2><p>${tr("The {n} most recently recorded runs{sel}. Rank = place of the run among all runs of that weapon in the quest, counted separately for Heroics and No Heroics (small icon on the medal). Stronger colour = higher ratio.", { n: NEWEST_MAX, sel: sel.length ? tr(" of the selected weapons") : "" })}</p>` +
+    `<div class="nbar" id="newBar"></div>` +
     `<details class="wfilter" id="wfilter"${state.wfOpen ? " open" : ""}><summary>${sel.length ? tr("Weapons: {list}", { list: sel.map(k => esc(k)).join(", ") }) : tr("Show only certain weapons")}</summary>` +
     `<div class="wf-grid">${WEAPONS.map(([k]) => `<button type="button" class="wf-btn" data-w="${k}" aria-pressed="${sel.includes(k)}" title="${esc(wn(k))}">${weaponIcon(k, "small")}<span>${k}</span></button>`).join("")}</div>` +
     `<button type="button" class="wf-all" id="wfAll"${sel.length ? "" : " disabled"}>${tr("Show all weapons")}</button></details>`;
@@ -2868,6 +2986,8 @@ function renderNewestView() {
     render();
   });
   document.getElementById("wfAll").onclick = () => { state.newestW = []; render(); };
+  renderNewBar();
+  loadSubmitStats();
   setNote([]);
   const qByName = new Map(questsOf(state.game).map(q => [q.quest, q]));
   const boards = new Map();
@@ -2883,11 +3003,15 @@ function renderNewestView() {
   let html = `<table class="newest"><thead><tr><th scope="col">${tr("Date")}</th><th scope="col">${tr("Quest")}</th><th scope="col">${tr("Weapon")}</th><th scope="col">${tr("Time")}</th><th scope="col" class="n-watch"><span class="sr-only">${tr("Video")}</span></th><th scope="col" class="n-ch">${tr("Channel")}</th><th scope="col">${tr("Rank")}</th></tr></thead><tbody>`;
   for (const { r } of runs) {
     const q = qByName.get(r.quest), board = boardOf(q);
-    const all = board.lists[r.weapon] || [];
+    // rank within the same category: Heroics and No Heroics are counted separately
+    const all = (board.lists[r.weapon] || []).filter(x => x.heroics === r.heroics);
     const place = all.indexOf(r) + 1;
     const ratio = board.avg && r.sec ? board.avg / r.sec : null;
     const t = tint(r.weapon, strength(ratio));
-    const medal = MEDALS[place] ? medalImg(place, tr("Rank {n}", { n: place })) : place ? `#${place}` : "";
+    const cat = tr(r.heroics ? "Heroics" : "No Heroics");
+    const medal = place ? `<span class="nr" title="${esc(tr("Rank {n}", { n: place }) + " · " + cat)}">` +
+      (MEDALS[place] ? medalImg(place) : `#${place}`) +
+      `<img class="nr-tag" src="${UI_DIR}${r.heroics ? "heroics" : "no-heroics"}.png" alt="" onerror="this.remove()"></span>` : "";
     const qp = qparts(q), what = `${wn(r.weapon)} ${qn(q)}`;
     html += `<tr>
       <td class="n-date">${relDate(r.date)}${r.channel ? `<span class="n-ch-m">${channelTag(r)}</span>` : ""}</td>
@@ -2903,6 +3027,33 @@ function renderNewestView() {
   tableEl.innerHTML = html;
   tableEl.querySelectorAll(".qbtn").forEach(b => b.onclick = () => { state.view = "quest"; state.quest = b.dataset.q; render(); });
   tableEl.querySelectorAll(".wbtn").forEach(b => b.onclick = () => { state.view = "weapon"; state.weapon = b.dataset.w; render(); });
+}
+
+/* small activity bar above Newest Runs (current game only): runs added in the last 7 days, split into submitted by
+   visitors / added manually (Runs columns "Hinzugefügt" + "Quelle"), plus submissions still in the queue (blue part of
+   the bar) and submissions of the last 7 days that were not added (web app, GET ?action=stats → games[game]).
+   Nothing at all for this game → the bar is hidden. */
+function renderNewBar() {
+  const el = document.getElementById("newBar");
+  if (!el) return;
+  const since = Date.now() - 7 * 864e5;
+  let sub = 0, man = 0;
+  for (const r of state.runs) {
+    if (r.game !== state.game) continue;
+    const m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/.exec(r.added || "");
+    if (!m || new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0)).getTime() < since) continue;
+    if (/^einreichung/i.test(r.source)) sub++; else man++;
+  }
+  const s = submitStats && submitStats !== "loading" && submitStats.games ? submitStats.games[state.game] || {} : {};
+  const queue = +s.pending || 0, notAdded = +s.rejectedWeek || 0, tot = sub + man, all = tot + queue;
+  if (!all && !notAdded) { el.innerHTML = ""; return; }
+  const seg = (n, cls) => n ? `<i class="${cls}" style="width:${n / all * 100}%"></i>` : "";
+  const leg = (n, cls, label) => n ? `<span><i class="nb-dot ${cls}"></i>${tr(label, { a: n })}</span>` : "";
+  el.innerHTML = `<div class="nb-head"><span>${tr("Added in the last 7 days: <b>{n}</b>", { n: tot })}</span>` +
+      (notAdded ? `<span class="nb-pill" title="${esc(tr("Submitted in the last 7 days, checked but not added – usually a faster run was added in the meantime, or the run was already listed."))}">✗ ${tr("{n} declined", { n: notAdded })}</span>` : "") + `</div>` +
+    (all ? `<div class="nb-track" role="img" aria-label="${esc([sub && tr("{a} submitted by visitors", { a: sub }), man && tr("{a} added manually", { a: man }), queue && tr("{a} in queue", { a: queue })].filter(Boolean).join(", "))}">` +
+      seg(sub, "nb-sub") + seg(man, "nb-man") + seg(queue, "nb-que") + `</div>` +
+      `<div class="nb-leg">${leg(sub, "nb-sub", "{a} submitted by visitors")}${leg(man, "nb-man", "{a} added manually")}${leg(queue, "nb-que", "{a} in queue")}</div>` : "");
 }
 
 /* Desktop: size the rows so the whole board fits the window without scrolling.
@@ -3110,7 +3261,8 @@ async function tierShot(share, btn, label, kind = "Weapon tier list", logo = nul
       if (main.classList.contains("tiers")) { main.style.gridAutoRows = "1fr"; }
       else { main.style.display = "flex"; main.style.flexDirection = "column"; main.style.justifyContent = "space-between"; }
     }
-    const canvas = await window.html2canvas(box, { backgroundColor: bg, scale: 2, useCORS: true, logging: false });
+    const canvas = await window.html2canvas(box, { backgroundColor: bg, scale: 2, useCORS: true, logging: false,
+      onclone: d => d.documentElement.classList.add("shot") });   // "shot": no moving shine in the saved image
     const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.92));
     const name = ((kind === "Weapon ranking" ? "mh-weapon-ranking-" : "mh-tier-list-") + label).replace(/[^\w.-]+/g, "-").toLowerCase() + ".jpg";
     const file = new File([blob], name, { type: "image/jpeg" });
@@ -3378,6 +3530,23 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V118", when: "27.10.2026 19:35", items: [
+    "The \"UI\" button now has its own icon." ] },
+  { v: "V117", when: "27.10.2026 19:50", items: [
+    "New \"UI\" button: choose the design style – Flat (standard) or Glossy, a classic glass look with shiny bars (with a moving highlight) and gel buttons." ] },
+  { v: "V116", when: "27.10.2026 19:35", items: [
+    "Tidier top bar: Submit a run, Report an issue and Vote next game with text on the left – language (flag + JP / EN), FAQ, changelog and contact as small buttons on the right.",
+    "Light / dark mode is now a big floating button in the bottom right corner, always within reach." ] },
+  { v: "V115", when: "27.10.2026 19:20", items: [
+    "Shorter button name: \"Vote next game\".",
+    "Language button now shows a small flag (Japan / United Kingdom).",
+    "Japanese: all weapon names now use the short common forms (ガンス, スラアク, チャアク, ライト, ヘビィ)." ] },
+  { v: "V114", when: "27.10.2026 19:10", items: [
+    "Newest Runs: the rank is now counted separately for Heroics and No Heroics (no more 4th–6th places from mixing both) – a small Heroics / No Heroics icon on the top right of the medal shows the category." ] },
+  { v: "V113", when: "27.10.2026 19:00", items: [
+    "Submissions that were checked but not added are now called \"Declined\" (Submit a run dialog and Newest Runs bar)." ] },
+  { v: "V112", when: "27.10.2026 18:55", items: [
+    "Newest Runs: a small bar shows, for the selected game, how many runs were added in the last 7 days – split into runs submitted by visitors and runs added manually – plus the submissions still waiting in the queue (blue) and how many were not added. Hidden when there was no activity." ] },
   { v: "V111", when: "26.10.2026 17:05", items: [
     "Submit a run: the dialog now shows live submission numbers – last 7 days, total, added, not added and how many runs are still waiting in the queue." ] },
   { v: "V110", when: "22.10.2026 11:00", items: [
@@ -3705,19 +3874,21 @@ function renderSubmitStats() {
   const s = submitStats, tile = (n, label, cls) => `<div class="sub-stat ${cls || ""}"><b>${n}</b><span>${esc(tr(label))}</span></div>`;
   el.className = "sub-stats";
   el.innerHTML = `<div class="sub-stats-grid">` + tile(s.week, "Last 7 days") + tile(s.total, "Total") +
-    tile(s.accepted, "Added") + tile(s.rejected, "Not added") + tile(s.pending, "In queue", "st-queue") + `</div>` +
-    `<p>${esc(tr("Not added: usually a faster run was added in the meantime, or the run was already listed. In queue: not checked yet."))}</p>`;
+    tile(s.accepted, "Added") + tile(s.rejected, "Declined") + tile(s.pending, "In queue", "st-queue") + `</div>` +
+    `<p>${esc(tr("Declined: checked but not added – usually a faster run was added in the meantime, or the run was already listed. In queue: not checked yet."))}</p>`;
   el.hidden = false;
 }
 async function loadSubmitStats() {
   if (!SUBMIT_URL) return;
-  if (submitStats && submitStats !== "loading") { renderSubmitStats(); return; }
+  if (submitStats === "loading" || submitStats === false) return;          // on its way / failed once (no retry loop)
+  if (submitStats) { renderSubmitStats(); return; }
   submitStats = "loading"; renderSubmitStats();
   try {
     const out = await (await fetch(SUBMIT_URL + "?action=stats")).json();
-    submitStats = out && out.ok && typeof out.total === "number" ? out : null;
-  } catch (err) { submitStats = null; }
+    submitStats = out && out.ok && typeof out.total === "number" ? out : false;
+  } catch (err) { submitStats = false; }
   renderSubmitStats();
+  renderNewBar();
 }
 /* current 3rd place of the chosen quest + weapon + category, so people know which time they have to beat */
 function showSubmitThird() {
@@ -3981,12 +4152,9 @@ const themeBtn = document.getElementById("themeBtn");
 /* the button shows the mode it switches to, with that mode's icon */
 function themeLabel() {
   const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
-  themeBtn.innerHTML = `<img class="bicon" src="icons/UI/${next}-mode.png" alt="" onerror="this.remove()"><span>${tr(next === "dark" ? "Dark mode" : "Light mode")}</span>`;
-  const qt = document.getElementById("qbTheme");
-  if (qt) {
-    qt.innerHTML = `<img src="icons/UI/${next}-mode.png" alt="" onerror="this.replaceWith(document.createTextNode('${next === "dark" ? "☾" : "☀"}'))">`;
-    qt.title = qt.ariaLabel = tr(next === "dark" ? "Dark mode" : "Light mode");
-  }
+  themeBtn.innerHTML = `<img src="icons/UI/${next}-mode.png" alt="" onerror="this.replaceWith(document.createTextNode('${next === "dark" ? "☾" : "☀"}'))">`;
+  themeBtn.title = tr(next === "dark" ? "Dark mode" : "Light mode");
+  themeBtn.setAttribute("aria-label", themeBtn.title);
 }
 function setTheme(t) {
   document.documentElement.dataset.theme = t;
@@ -3995,8 +4163,28 @@ function setTheme(t) {
   if (state.games && state.games.length) render();
 }
 themeBtn.onclick = () => setTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light");
-document.getElementById("qbTheme").addEventListener("click", e => { e.stopPropagation(); themeBtn.onclick(); });
 try { setTheme(localStorage.getItem("mhlb-theme") || "dark"); } catch (e) { setTheme("dark"); }
+
+/* UI style: "flat" (standard) or "glossy" – small menu behind the "UI" button, choice remembered in this browser */
+function setUiStyle(st) {
+  st = st === "glossy" ? "glossy" : "flat";
+  if (st === "glossy") document.documentElement.dataset.style = "glossy"; else delete document.documentElement.dataset.style;
+  document.querySelectorAll(".style-opt").forEach(b => b.setAttribute("aria-checked", String(b.dataset.style === st)));
+  try { localStorage.setItem("mhlb-style", st); } catch (e) {}
+}
+(function setupStyleMenu() {
+  const btn = document.getElementById("styleBtn"), menu = document.getElementById("styleMenu");
+  const open = on => { menu.hidden = !on; btn.setAttribute("aria-expanded", String(on)); };
+  btn.onclick = e => { e.stopPropagation(); open(menu.hidden); };
+  menu.onclick = e => {
+    const o = e.target.closest(".style-opt"); if (!o) return;
+    setUiStyle(o.dataset.style); gcEvent("style-" + o.dataset.style, "UI style: " + o.dataset.style); open(false);
+  };
+  document.addEventListener("click", e => { if (!menu.hidden && !menu.contains(e.target)) open(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !menu.hidden) { open(false); btn.focus(); } });
+  let saved = "flat"; try { saved = localStorage.getItem("mhlb-style") || "flat"; } catch (e) {}
+  setUiStyle(saved);
+})();
 
 /* language: "lang=ja" in the link wins, otherwise the last choice in this browser, otherwise English */
 document.getElementById("langBtn").onclick = () => { setLang(LANG === "ja" ? "en" : "ja"); gcEvent("lang-" + LANG, "Language: " + LANG); };
