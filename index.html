@@ -917,8 +917,9 @@
   .nb-dot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; vertical-align: 0; }
   /* ---------- UI style picker + "Glossy" style (classic glass look: shiny bars with a moving highlight, gel buttons) ----------
      data-style="glossy" on <html>; without it everything stays flat (standard). */
-  .ta-style { position: relative; }
-  .style-menu { position: absolute; z-index: 70; top: calc(100% + 6px); right: 0; width: 230px; padding: 6px; display: grid; gap: 4px;
+  .ta-tools { position: relative; }
+  .ta-style { position: static; }
+  .style-menu { position: absolute; z-index: 70; top: calc(100% + 6px); right: 0; width: min(240px, calc(100vw - 32px)); padding: 6px; display: grid; gap: 4px;
     background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
   .style-menu[hidden] { display: none; }
   .style-menu .sm-cap { padding: 4px 8px 2px; font: 600 11px/1 "Barlow", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
@@ -1283,8 +1284,8 @@
   <div class="top-actions">
     <div class="ta-main">
     <button class="theme-btn submit-btn" id="submitBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/submit-run.png" alt="" onerror="this.remove()"><span>Submit a run</span></button>
-    <button class="theme-btn issue-btn" id="issueBtn" type="button" aria-haspopup="dialog" hidden><span class="bicon-emoji" aria-hidden="true">⚠️</span><span>Report an issue</span></button>
-    <button class="theme-btn vote-btn" id="voteBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/vote.png" alt="" onerror="this.replaceWith('🗳️')"><span>Vote next game</span></button>
+    <button class="theme-btn issue-btn" id="issueBtn" type="button" aria-haspopup="dialog" hidden><span class="bicon-emoji" aria-hidden="true">⚠️</span><span>Report</span></button>
+    <button class="theme-btn vote-btn" id="voteBtn" type="button" aria-haspopup="dialog" hidden><img class="bicon" src="icons/UI/vote.png" alt="" onerror="this.replaceWith('🗳️')"><span>Vote</span></button>
     </div>
     <div class="ta-tools">
     <button class="theme-btn lang-btn" id="langBtn" type="button"></button>
@@ -1298,7 +1299,7 @@
     </span>
     <button class="theme-btn" id="faqBtn" type="button" aria-haspopup="dialog"><img class="bicon" src="icons/UI/faq.png" alt="" onerror="this.replaceWith('❓')"><span>FAQ</span></button>
     <button class="theme-btn ta-icon" id="infoBtn" type="button" aria-haspopup="dialog" title="Info &amp; changelog" aria-label="Info &amp; changelog"><img class="bicon" src="icons/UI/changelog.png" alt="" onerror="this.replaceWith('📜')"></button>
-    <button class="theme-btn ta-icon" id="aboutBtn" type="button" aria-haspopup="dialog" title="Contact / Support the project" aria-label="Contact / Support the project"><img class="bicon" src="icons/UI/support.png" alt="" onerror="this.replaceWith('♥')"></button>
+    <button class="theme-btn" id="aboutBtn" type="button" aria-haspopup="dialog"><img class="bicon" src="icons/UI/support.png" alt="" onerror="this.replaceWith('♥')"><span>Contact / Support the project</span></button>
     </div>
   </div>
 </header>
@@ -1809,7 +1810,7 @@ const JA = {
   "Please enter the time as mm:ss, e.g. 03:24.": "タイムは mm:ss の形式で入力してください（例：03:24）。",
   "Format mm:ss – milliseconds are not needed.": "形式は mm:ss です。ミリ秒は不要です。",
   "Please select a weapon": "武器を選択してください",
-  "Vote for the next game": "次のタイトルに投票", "Vote next game": "次のタイトル投票", "Vote": "投票", "Voted ✓": "投票済み ✓", "{n} votes": "{n}票", "{n} vote": "{n}票",
+  "Vote for the next game": "次のタイトルに投票", "Vote next game": "次のタイトル投票", "Report": "報告", "Vote": "投票", "Voted ✓": "投票済み ✓", "{n} votes": "{n}票", "{n} vote": "{n}票",
   "Loading votes…": "投票状況を読み込み中…", "No games to vote for right now.": "現在、投票できるタイトルはありません。",
   "Thanks for your vote!": "投票ありがとうございます！", "DM on X: @fox_invictus ↗": "XでDM：@fox_invictus ↗",
   "Which game should be added next? Vote for it – you can vote for several games.": "次に追加してほしいタイトルに投票してください。複数のタイトルに投票できます。",
@@ -3530,6 +3531,9 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V119", when: "27.10.2026 19:55", items: [
+    "Shorter buttons \"Report\" and \"Vote\"; \"Contact / Support the project\" is shown with its full name again.",
+    "Fixed: on phones the design style menu (UI button) was cut off at the left edge." ] },
   { v: "V118", when: "27.10.2026 19:35", items: [
     "The \"UI\" button now has its own icon." ] },
   { v: "V117", when: "27.10.2026 19:50", items: [
