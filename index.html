@@ -958,6 +958,10 @@
     animation: gl-shine 2.8s ease-in-out infinite; }
   :root[data-style="glossy"]:not(.shot) .wsb:nth-child(3n+2) .fill::before { animation-delay: .5s; }
   :root[data-style="glossy"]:not(.shot) .wsb:nth-child(3n) .fill::before { animation-delay: 1s; }
+  /* image export (html2canvas draws the overlay wrongly): no overlay / inner shadows there – the gloss is baked into the
+     bar background instead (tierShot → glossForShot) */
+  :root[data-style="glossy"].shot .wsb .fill::after, :root[data-style="glossy"].shot .wsb .fill::before { display: none; }
+  :root[data-style="glossy"].shot .wsb .track, :root[data-style="glossy"].shot .wsb .fill { box-shadow: none; }
   @keyframes gl-shine { 0% { transform: translateX(0); } 70%, 100% { transform: translateX(330%); } }
   @media (prefers-reduced-motion: reduce) { :root[data-style="glossy"] .wsb .fill::before, :root[data-style="glossy"] .bar::before, :root[data-style="glossy"] .vote-bar i::before { animation: none; display: none; } }
 
@@ -2969,12 +2973,12 @@ function renderHallOfFame() {
 }
 
 /* ---------- view 4: newest runs ---------- */
-const NEWEST_MAX = 60;
+const NEWEST_MAX = 20;
 function renderNewestView() {
   const title = document.getElementById("boardTitle");
   const tableEl = document.getElementById("table");
   const sel = state.newestW;
-  title.innerHTML = `<h2>${tr("Newest runs")}</h2><p>${tr("The {n} most recently recorded runs{sel}. Rank = place of the run among all runs of that weapon in the quest, counted separately for Heroics and No Heroics (small icon on the medal). Stronger colour = higher ratio.", { n: NEWEST_MAX, sel: sel.length ? tr(" of the selected weapons") : "" })}</p>` +
+  title.innerHTML = `<h2>${tr("Newest runs")}</h2>` +
     `<div class="nbar" id="newBar"></div>` +
     `<details class="wfilter" id="wfilter"${state.wfOpen ? " open" : ""}><summary>${sel.length ? tr("Weapons: {list}", { list: sel.map(k => esc(k)).join(", ") }) : tr("Show only certain weapons")}</summary>` +
     `<div class="wf-grid">${WEAPONS.map(([k]) => `<button type="button" class="wf-btn" data-w="${k}" aria-pressed="${sel.includes(k)}" title="${esc(wn(k))}">${weaponIcon(k, "small")}<span>${k}</span></button>`).join("")}</div>` +
@@ -3207,6 +3211,30 @@ function shotLogo(logo) {
     `<span class="shot-gname">${esc(gameName(logo.game))}</span>` +
     (logo.tag ? `<span class="shot-tag">${esc(logo.tag)}</span>` : "") + `</span>`;
 }
+/* Glossy style in the saved image: html2canvas draws the glass overlay (pseudo element) and half-transparent gradients
+   wrongly, so the clone gets the same look with solid colours: each bar colour is lightened / darkened in JS and
+   used as a plain gradient (top highlight, sharp middle edge, darker lower half). */
+const rgbaOf = str => { const m = String(str).match(/rgba?\(([^)]+)\)/); if (!m) return null;
+  const v = m[1].split(/[\s,\/]+/).filter(Boolean).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
+const mixRgb = (c, t, f) => `rgb(${[c.r + (t.r - c.r) * f, c.g + (t.g - c.g) * f, c.b + (t.b - c.b) * f].map(Math.round).join(",")})`;
+function glossForShot(d) {
+  if (d.documentElement.dataset.style !== "glossy") return;
+  const W = { r: 255, g: 255, b: 255 }, B = { r: 0, g: 0, b: 0 };
+  d.querySelectorAll(".wsb .fill").forEach(el => {
+    let c = rgbaOf(getComputedStyle(el).backgroundColor);
+    if (!c) return;
+    if (c.a < 1) {                                                         // half-transparent colour: put it on the track colour first
+      const u = rgbaOf(getComputedStyle(el.parentElement).backgroundColor) || rgbaOf(getComputedStyle(d.body).backgroundColor) || W;
+      c = { r: u.r + (c.r - u.r) * c.a, g: u.g + (c.g - u.g) * c.a, b: u.b + (c.b - u.b) * c.a, a: 1 };
+    }
+    el.style.background = `linear-gradient(to bottom, ${mixRgb(c, W, .45)} 0%, ${mixRgb(c, W, .18)} 46%, ${mixRgb(c, B, .06)} 54%, ${mixRgb(c, W, .08)} 100%)`;
+    el.style.border = `1px solid ${mixRgb(c, B, .3)}`; el.style.boxSizing = "border-box";
+  });
+  d.querySelectorAll(".wsb .track").forEach(el => {
+    const u = rgbaOf(getComputedStyle(el).backgroundColor); if (!u) return;
+    el.style.background = `linear-gradient(to bottom, ${mixRgb(u, W, .12)}, ${mixRgb(u, W, .04)} 50%, ${mixRgb(u, B, .1)} 51%, ${mixRgb(u, W, .06)})`;
+  });
+}
 async function tierShot(share, btn, label, kind = "Weapon tier list", logo = null) {
   const split = document.querySelector("#wsChart .ws-split");
   if (!split) return;
@@ -3262,8 +3290,11 @@ async function tierShot(share, btn, label, kind = "Weapon tier list", logo = nul
       if (main.classList.contains("tiers")) { main.style.gridAutoRows = "1fr"; }
       else { main.style.display = "flex"; main.style.flexDirection = "column"; main.style.justifyContent = "space-between"; }
     }
+    // "shot" also on the live page while capturing: html2canvas takes ::before/::after from the live page, not the clone
+    document.documentElement.classList.add("shot");
     const canvas = await window.html2canvas(box, { backgroundColor: bg, scale: 2, useCORS: true, logging: false,
-      onclone: d => d.documentElement.classList.add("shot") });   // "shot": no moving shine in the saved image
+      onclone: d => { d.documentElement.classList.add("shot"); glossForShot(d); } });
+    document.documentElement.classList.remove("shot");   // "shot": no moving shine / overlay in the saved image
     const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.92));
     const name = ((kind === "Weapon ranking" ? "mh-weapon-ranking-" : "mh-tier-list-") + label).replace(/[^\w.-]+/g, "-").toLowerCase() + ".jpg";
     const file = new File([blob], name, { type: "image/jpeg" });
@@ -3279,6 +3310,7 @@ async function tierShot(share, btn, label, kind = "Weapon tier list", logo = nul
   } catch (e) {
     if (e && e.name !== "AbortError") alert(tr("The image could not be created. Please try again."));
   } finally {
+    document.documentElement.classList.remove("shot");
     box?.remove();
     btn.disabled = false; btn.textContent = old;
   }
@@ -3531,6 +3563,10 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V121", when: "27.10.2026 20:15", items: [
+    "Fixed: in the Glossy style the saved Weapon Strength image showed washed-out grey bars – the bars now keep their colours and the glass look." ] },
+  { v: "V120", when: "27.10.2026 20:00", items: [
+    "Newest Runs: simpler – the explanation text is gone and the list shows the 20 newest runs." ] },
   { v: "V119", when: "27.10.2026 19:55", items: [
     "Shorter buttons \"Report\" and \"Vote\"; \"Contact / Support the project\" is shown with its full name again.",
     "Fixed: on phones the design style menu (UI button) was cut off at the left edge." ] },
