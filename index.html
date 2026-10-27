@@ -903,17 +903,18 @@
   .sub-stats p { margin: 6px 0 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
   .sub-stats.loading p { margin: 0; }
   /* Newest Runs: activity bar (last 7 days) */
-  .nbar { margin: 10px 0 4px; max-width: 560px; font-size: 13px; color: var(--muted); }
+  .nbar { margin: 10px 0 6px; font-size: 14px; color: var(--muted); }
+  body[data-view="newest"] .board-title { flex: 1 1 100%; }   /* title block full width, so the activity bar spans like the table */
   .nbar:empty { display: none; }
   .nb-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 10px; }
   .nb-head b { color: var(--paper); font-variant-numeric: tabular-nums; }
-  .nb-pill { padding: 1px 8px; border: 1px solid var(--ink-3); border-radius: 999px; font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; cursor: default; }
+  .nb-pill { font-style: italic; white-space: nowrap; font-variant-numeric: tabular-nums; cursor: help; }   /* plain text, no frame */
   .nb-que { background: var(--queue); }
-  .nb-track { display: flex; height: 6px; margin: 6px 0 4px; background: var(--ink-2); border-radius: 3px; overflow: hidden; }
+  .nb-track { display: flex; height: 12px; margin: 6px 0 5px; background: var(--ink-2); border-radius: 4px; overflow: hidden; }
   .nb-track i { display: block; height: 100%; }
   .nb-sub { background: var(--gold); }
   .nb-man { background: var(--muted); opacity: .55; }
-  .nb-leg { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .nb-leg { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: 13px; font-variant-numeric: tabular-nums; }
   .nb-dot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; vertical-align: 0; }
   /* ---------- UI style picker + "Glossy" style (classic glass look: shiny bars with a moving highlight, gel buttons) ----------
      data-style="glossy" on <html>; without it everything stays flat (standard). */
@@ -942,7 +943,7 @@
   :root[data-style="glossy"][data-theme="light"] .wsb .track, :root[data-style="glossy"][data-theme="light"] .vote-bar, :root[data-style="glossy"][data-theme="light"] .nb-track {
     background-color: #e3e3e3; border-color: #8f8f8f;
     background-image: linear-gradient(to bottom, #f4f4f4, #e6e6e6 50%, #d6d6d6 51%, #e9e9e9); box-shadow: inset 0 1px 2px rgba(0,0,0,.2); }
-  :root[data-style="glossy"] .nb-track { height: 9px; }
+  :root[data-style="glossy"] .nb-track { height: 14px; }
   :root[data-style="glossy"] .vote-bar { height: 10px; }
   /* glossy: bar fills – glass highlight on top of the bar colour */
   :root[data-style="glossy"] .wsb .fill, :root[data-style="glossy"] .bar, :root[data-style="glossy"] .vote-bar i, :root[data-style="glossy"] .nb-track i { position: relative; overflow: hidden; border-radius: 2px; }
@@ -966,7 +967,7 @@
   @media (prefers-reduced-motion: reduce) { :root[data-style="glossy"] .wsb .fill::before, :root[data-style="glossy"] .bar::before, :root[data-style="glossy"] .vote-bar i::before { animation: none; display: none; } }
 
   /* glossy: buttons (gel look, slightly squarer corners, blue glow on hover) */
-  :root[data-style="glossy"] .theme-btn, :root[data-style="glossy"] .seg, :root[data-style="glossy"] .shot-btn, :root[data-style="glossy"] .vote-go, :root[data-style="glossy"] .sub-send, :root[data-style="glossy"] .qsubmit, :root[data-style="glossy"] .wf-btn, :root[data-style="glossy"] .wf-all, :root[data-style="glossy"] .quickbar button, :root[data-style="glossy"] .nb-pill, :root[data-style="glossy"] .issue-faq button {
+  :root[data-style="glossy"] .theme-btn, :root[data-style="glossy"] .seg, :root[data-style="glossy"] .shot-btn, :root[data-style="glossy"] .vote-go, :root[data-style="glossy"] .sub-send, :root[data-style="glossy"] .qsubmit, :root[data-style="glossy"] .wf-btn, :root[data-style="glossy"] .wf-all, :root[data-style="glossy"] .quickbar button, :root[data-style="glossy"] .issue-faq button {
     border-radius: 4px;
     background-image: linear-gradient(to bottom, rgba(255,255,255,.20), rgba(255,255,255,.07) 49%, rgba(0,0,0,.10) 51%, rgba(255,255,255,.05));
     box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 1px 2px rgba(0,0,0,.3); }
@@ -3563,6 +3564,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V122", when: "27.10.2026 20:25", items: [
+    "Newest Runs: the activity bar is bigger and spans the full width like the table; \"declined\" is plain italic text now." ] },
   { v: "V121", when: "27.10.2026 20:15", items: [
     "Fixed: in the Glossy style the saved Weapon Strength image showed washed-out grey bars – the bars now keep their colours and the glass look." ] },
   { v: "V120", when: "27.10.2026 20:00", items: [
