@@ -999,14 +999,25 @@
   /* Newest Runs: upload activity chart (Steam-Charts style) */
   .cal { margin: 2px 0 8px; min-width: 0; max-width: 100%; }
   body[data-view="newest"] .board-title { min-width: 0; }
-  .cal-tog { padding: 0; border: 0; background: none; color: var(--gold); cursor: pointer; font: 600 14px/1.4 "Barlow", "Noto Sans JP", sans-serif; }
-  .cal-tog:hover { text-decoration: underline; }
+  /* toggle: a gold pill – noticeable, but calmer than the main buttons */
+  .cal-tog { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px 5px 10px; border: 1px solid var(--gold); border-radius: 999px;
+    background: color-mix(in srgb, var(--gold) 12%, transparent); color: var(--gold); cursor: pointer; font: 700 14px/1.2 "Barlow", "Noto Sans JP", sans-serif;
+    transition: background .15s ease, box-shadow .15s ease; }
+  .cal-tog:hover { background: color-mix(in srgb, var(--gold) 22%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 18%, transparent); }
+  .cal-tog .ct-i { font-size: 16px; line-height: 1; }
+  .cal-tog .ct-a { font-size: 11px; opacity: .8; }
+  :root[data-style="glossy"] .cal-tog { border-radius: 4px; background-image: linear-gradient(to bottom, rgba(255,255,255,.22), rgba(255,255,255,.06) 49%, rgba(0,0,0,.08) 51%, rgba(255,255,255,.05)); }
+  /* what the chart counts: only record-breaking runs */
+  .cal-panel .ch-scope { margin: 4px 0 2px; padding: 5px 9px; border-left: 3px solid var(--gold); border-radius: 0 4px 4px 0;
+    background: color-mix(in srgb, var(--gold) 10%, transparent); font-size: 12px; line-height: 1.4; color: var(--muted); }
+  .ch-scope b { color: var(--gold); margin-right: 2px; }
+  @media (max-width: 760px) { .cal-panel .ch-scope { font-size: 11px; padding: 4px 7px; } }
   .cal-panel { margin-top: 8px; padding: 10px 14px; background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: 10px; --ch-line: #a3cf06; }
   :root[data-theme="light"] .cal-panel { --ch-line: #5f8a00; }
   .ch-stats { display: grid; grid-template-columns: repeat(3, max-content); gap: 4px 30px; margin-bottom: 8px; }
   .ch-info { cursor: help; }
   .ch-wf-i { display: inline-flex; flex-wrap: wrap; gap: 2px; flex: none; }
-  .ch-wf { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 4px 10px; border: 1px dashed var(--gold); border-radius: 6px;
+  .cal-panel .ch-wf { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 4px 10px; border: 1px dashed var(--gold); border-radius: 6px;
     font-size: 13px; font-weight: 600; color: var(--gold); }
   .ch-wf img, .ch-wf svg { width: 18px; height: 18px; flex: none; }
   .cal-panel.filtered { border-color: var(--gold); }
@@ -1917,7 +1928,9 @@ const JA = {
   "Upload activity": "投稿アクティビティ", "loading archive…": "アーカイブを読み込み中…", "Title update": "アップデート",
   "runs in the last 7 days": "直近7日間の記録", "busiest day · {d}": "最多の日 · {d}", "busiest day": "最多の日", "runs since release": "発売以降の記録",
   "Zoom": "期間", "All": "全期間", "From": "開始", "To": "終了", "Runs per day · up to yesterday": "1日あたりの記録数 · 昨日まで", "Runs per week · up to the last full week": "1週間あたりの記録数 · 先週まで",
-  "Click to move the visible range": "クリックで表示期間を移動", "Weapon filter active: only {list}": "武器フィルター有効：{list}のみ", "Quest release": "クエスト配信", "New quest: {q}": "新クエスト：{q}",
+  "Click to move the visible range": "クリックで表示期間を移動",
+  "Only record-breaking runs": "記録更新のみ",
+  "Counts only runs that beat an earlier top-3 time – not the total number of speedrun videos uploaded.": "トップ3の記録を更新した走りのみを集計。スピードラン動画の総投稿数ではありません。", "Weapon filter active: only {list}": "武器フィルター有効：{list}のみ", "Quest release": "クエスト配信", "New quest: {q}": "新クエスト：{q}",
   "Uploads per weekday · since release ({d})": "曜日別の投稿割合 · 発売日（{d}）以降",
   "Upload date of the video. Includes runs that have since dropped out of the top 3.": "動画の投稿日で集計しています。現在はトップ3から外れた記録も含みます。", "{n} declined": "見送り {n}件",
   "Submitted in the last 7 days, checked but not added – usually a faster run was added in the meantime, or the run was already listed.": "直近7日間に投稿され、確認のうえ見送った記録です。多くの場合、その間により速い記録が追加されたか、すでに掲載済みでした。",
@@ -3216,7 +3229,7 @@ function renderCal() {
   const box = document.getElementById("calBox");
   if (!box) return;
   const g = state.game, today = isoDay(new Date()), rel = gameRelease(g) || today;
-  const head = `<button type="button" class="cal-tog" id="calTog" aria-expanded="${calOpen}">📈 ${tr("Upload activity")} <span aria-hidden="true">${calOpen ? "▴" : "▾"}</span></button>`;
+  const head = `<button type="button" class="cal-tog" id="calTog" aria-expanded="${calOpen}"><span class="ct-i" aria-hidden="true">📈</span>${tr("Upload activity")}<span class="ct-a" aria-hidden="true">${calOpen ? "▴" : "▾"}</span></button>`;
   if (!calOpen) { box.innerHTML = head; document.getElementById("calTog").onclick = toggleCal; return; }
   if (!calArchive) loadCalArchive();
   // uploads per day since release: site runs + archive, same Heroics filter as the list
@@ -3295,6 +3308,7 @@ function renderCal() {
     `<div class="ch-box"><div class="ch-bar"><span>${tr("Zoom")}</span>` +
       CH_SPANS.map(([k]) => `<button type="button" class="ch-zoom" data-span="${k}" aria-pressed="${k === spanKey}">${k === "All" ? tr("All") : k}</button>`).join("") +
       `<span class="ch-range">${tr("From")} <span>${fmtDate(from < rel ? rel : from)}</span> ${tr("To")} <span>${fmtDate(to)}</span></span></div>` +
+    `<p class="ch-scope"><b>⚠️ ${tr("Only record-breaking runs")}</b> ${tr("Counts only runs that beat an earlier top-3 time – not the total number of speedrun videos uploaded.")}</p>` +
     `<div class="ch-main" id="chMain"><svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">${grid}${tuLines}<path class="ch-area" d="${area}"/><path class="ch-line" d="${line}"/></svg>` +
       `${yl}${xl.join("")}${tuLabels}${qDots}<span class="ch-x" id="chX" hidden></span><span class="ch-dot" id="chDot" hidden></span><div class="ch-tip" id="chTip" hidden></div></div>` +
     `<div class="ch-nav" id="chNav" title="${esc(tr("Click to move the visible range"))}"><svg viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path class="ch-area" d="${nArea}"/><path class="ch-line" d="${nLine}" style="stroke-width:1"/></svg>` +
@@ -3839,6 +3853,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V131", when: "30.10.2026 18:10", items: [
+    "Upload activity: the button is easier to spot, and a clear note in the chart explains that it only counts record-breaking runs (runs that beat an earlier top-3 time) – not the total number of speedrun videos uploaded." ] },
   { v: "V130", when: "30.10.2026 12:50", items: [
     "New version system: versions 1.0 / 2.0 / 3.x for bigger steps (major = milestone, minor = new feature, patch = fixes); every single change keeps its own build number. Shown as \"Version 3.7 · Build 130\" under the title, and the changelog is grouped by version." ] },
   { v: "V129", when: "30.10.2026 12:35", items: [
