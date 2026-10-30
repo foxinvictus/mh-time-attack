@@ -78,6 +78,10 @@
   .h1-txt { display: inline-flex; flex-direction: column; gap: .12em; }
   /* exclusive feature, small under the title */
   .h1-sub { font: 600 clamp(12px, 1.3vw, 15px)/1.2 "Barlow", "Noto Sans JP", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+  /* version under the subtitle, taken automatically from the newest changelog entry; click = changelog */
+  .h1-ver { align-self: flex-start; padding: 0; border: 0; background: none; cursor: pointer; font: 500 12px/1.2 "Barlow", "Noto Sans JP", sans-serif;
+    letter-spacing: .03em; color: var(--muted); }
+  .h1-ver:hover { color: var(--paper); text-decoration: underline; }
   /* phone: the title wraps to two lines, so the logo spans both */
   @media (max-width: 600px) { .brand-logo { width: 2.8em; height: 2.8em; } .h1-sub { font-size: 11px; letter-spacing: .04em; } }
   .by { color: var(--muted); font-size: 15px; }
@@ -818,7 +822,14 @@
   .info-lead { color: var(--muted); font-size: 14px; margin: 8px 0 14px; }
   .changelog { list-style: none; margin: 0; padding: 0; }
   .changelog li { border-top: 1px solid var(--ink-3); padding: 10px 0; display: grid; grid-template-columns: 54px 1fr; column-gap: 12px; }
-  .changelog .v { font: 700 20px/1.1 "Barlow Condensed", sans-serif; color: var(--gold); }
+  .changelog .v { font: 700 17px/1.2 "Barlow Condensed", sans-serif; color: var(--muted); }
+  /* version header above its builds */
+  .changelog li.rel { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; padding: 16px 0 6px; border-top: 2px solid var(--ink-3); }
+  .changelog li.rel.major { border-top-color: var(--gold); }
+  .changelog .rv { font: 700 24px/1 "Barlow Condensed", sans-serif; color: var(--gold); }
+  .changelog li.rel.major .rv { font-size: 30px; }
+  .changelog .rt { font: 700 17px/1.2 "Barlow Condensed", "Noto Sans JP", sans-serif; color: var(--paper); }
+  .changelog .rb { margin-left: auto; font-size: 12px; color: var(--muted); }
   .changelog .when { font-size: 12px; color: var(--muted); }
   .changelog ul { margin: 4px 0 0; padding-left: 18px; font-size: 14px; }
   .changelog ul li { display: list-item; border: 0; padding: 1px 0; }
@@ -985,6 +996,68 @@
     background-image: radial-gradient(ellipse 70% 45% at 50% 22%, rgba(255,255,255,.65), rgba(255,255,255,0) 70%),
       radial-gradient(circle at 50% 100%, rgba(120,200,255,.45), rgba(0,0,0,0) 60%);
     box-shadow: inset 0 0 0 2px rgba(255,255,255,.18), 0 0 0 2px var(--gold), 0 4px 14px rgba(0,0,0,.4); }
+  /* Newest Runs: upload activity chart (Steam-Charts style) */
+  .cal { margin: 2px 0 8px; min-width: 0; max-width: 100%; }
+  body[data-view="newest"] .board-title { min-width: 0; }
+  .cal-tog { padding: 0; border: 0; background: none; color: var(--gold); cursor: pointer; font: 600 14px/1.4 "Barlow", "Noto Sans JP", sans-serif; }
+  .cal-tog:hover { text-decoration: underline; }
+  .cal-panel { margin-top: 8px; padding: 10px 14px; background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: 10px; --ch-line: #a3cf06; }
+  :root[data-theme="light"] .cal-panel { --ch-line: #5f8a00; }
+  .ch-stats { display: grid; grid-template-columns: repeat(3, max-content); gap: 4px 30px; margin-bottom: 8px; }
+  .ch-info { cursor: help; }
+  .ch-wf-i { display: inline-flex; flex-wrap: wrap; gap: 2px; flex: none; }
+  .ch-wf { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; padding: 4px 10px; border: 1px dashed var(--gold); border-radius: 6px;
+    font-size: 13px; font-weight: 600; color: var(--gold); }
+  .ch-wf img, .ch-wf svg { width: 18px; height: 18px; flex: none; }
+  .cal-panel.filtered { border-color: var(--gold); }
+  @media (min-width: 900px) { .cal-panel { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 18px; align-items: end; } .cal-panel .cal-wd { margin-top: 0; } }
+  .ch-stat b { display: block; font: 300 26px/1 "Barlow", sans-serif; color: var(--paper); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+  .ch-stat span { display: block; margin-top: 2px; font-size: 12px; line-height: 1.25; color: var(--muted); }
+  .ch-box { padding: 6px 10px 6px; background: var(--ink); border: 1px solid var(--ink-3); border-radius: 6px; }
+  .ch-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 4px; margin-bottom: 2px; font-size: 13px; color: var(--muted); }
+  .ch-zoom { padding: 2px 8px; border: 1px solid transparent; border-radius: 3px; background: none; color: var(--muted); cursor: pointer; font: 500 13px/1.4 "Barlow", sans-serif; }
+  .ch-zoom:hover { color: var(--paper); }
+  .ch-zoom[aria-pressed="true"] { border-color: var(--muted); color: var(--paper); background: var(--ink-2); }
+  .ch-range { margin-left: auto; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .ch-range span { padding: 0 6px; border: 1px solid var(--ink-3); border-radius: 3px; color: var(--paper); font-variant-numeric: tabular-nums; }
+  .ch-main { position: relative; height: clamp(80px, 16vh, 130px); margin: 16px 34px 20px 0; touch-action: pan-y; }
+  .ch-main svg, .ch-nav svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .ch-grid { stroke: var(--ink-3); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .ch-line { fill: none; stroke: var(--ch-line); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .ch-area { fill: var(--ch-line); opacity: .12; }
+  .ch-tu { stroke: var(--paper); stroke-width: 1; stroke-dasharray: 4 4; opacity: .55; vector-effect: non-scaling-stroke; }
+  .ch-yl { position: absolute; right: -34px; transform: translateY(-50%); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .ch-xl { position: absolute; top: calc(100% + 6px); transform: translateX(-50%); font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .ch-tul { position: absolute; top: -13px; transform: translateX(-50%); font: 700 10px/1 "Barlow", sans-serif; color: var(--paper); opacity: .8; white-space: nowrap; }
+  .ch-q { position: absolute; bottom: -4px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #3d8bfd; box-shadow: 0 0 0 1.5px var(--ink); cursor: help; z-index: 1; }
+  .ch-x { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--muted); opacity: .6; pointer-events: none; }
+  .ch-dot { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--ch-line); box-shadow: 0 0 0 2px var(--ink); pointer-events: none; }
+  .ch-tip { position: absolute; top: 4px; padding: 5px 8px; background: var(--ink-2); border: 1px solid var(--ink-3); border-radius: 4px; font-size: 12px;
+    color: var(--paper); white-space: nowrap; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,.3); z-index: 2; }
+  .ch-tip small { display: block; color: var(--muted); }
+  .ch-nav { position: relative; height: 26px; margin: 4px 34px 0 0; border-top: 1px solid var(--ink-3); cursor: pointer; }
+  .ch-nav .ch-area { opacity: .35; }
+  .ch-win { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--paper) 10%, transparent); border-left: 2px solid var(--muted); border-right: 2px solid var(--muted); pointer-events: none; }
+  .ch-yr { position: absolute; bottom: 2px; padding-left: 3px; border-left: 1px solid var(--ink-3); font-size: 10px; color: var(--muted); pointer-events: none; }
+  .ch-leg { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .ch-leg i { display: inline-block; vertical-align: middle; margin-right: 5px; }
+  .ch-leg .l-tu { width: 14px; border-top: 1px dashed var(--paper); }
+  .ch-leg .l-q { width: 8px; height: 8px; border-radius: 50%; background: #3d8bfd; }
+  @media (max-width: 760px) { .cal-panel { padding: 8px 10px; } .ch-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 12px; } .ch-range { display: none; } .ch-main { height: 100px; } .cal-wd h4 { font-size: 12px; } .ch-leg { font-size: 11px; gap: 0 12px; } .wd-b { height: 26px; } .wd-p { font-size: 12px; } .ch-stat b { font-size: 21px; } .ch-stat span { font-size: 11px; }
+    .ch-main { margin-right: 28px; } .ch-nav { margin-right: 28px; } .ch-yl { right: -28px; } .ch-range { margin-left: 0; } }
+  .cal-wd { margin-top: 10px; max-width: 420px; }
+  .cal-wd h4 { margin: 0 0 4px; font: 600 13px/1.3 "Barlow", "Noto Sans JP", sans-serif; color: var(--paper); }
+  .wd-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; }
+  .wd-c { display: grid; justify-items: center; gap: 3px; }
+  .wd-p { font: 700 14px/1 "Barlow Condensed", sans-serif; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .wd-b { display: flex; align-items: flex-end; width: 100%; max-width: 34px; height: clamp(28px, 5vh, 44px); background: var(--ink); border-radius: 4px; overflow: hidden; }
+  .wd-b i { display: block; width: 100%; background: color-mix(in srgb, var(--gold) 55%, var(--ink)); border-radius: 4px 4px 0 0; transition: height .4s ease; }
+  .wd-c.top .wd-b i { background: var(--gold); }
+  .wd-c.top .wd-p { color: var(--gold); }
+  .wd-n { font-size: 12px; color: var(--muted); }
+  .cal-note { margin: 6px 0 0; font-size: 11px; color: var(--muted); }
+  :root[data-style="glossy"] .wd-b { border: 1px solid rgba(0,0,0,.4); box-shadow: inset 0 1px 2px rgba(0,0,0,.4); }
+  :root[data-style="glossy"] .wd-b i { position: relative; background-image: linear-gradient(to right, rgba(255,255,255,.45), rgba(255,255,255,.15) 48%, rgba(0,0,0,.08) 52%, rgba(255,255,255,.12)); }
   .sub-rule { margin: 0; font-size: 13px; color: var(--gold); }
   .sub-third { margin: -4px 0 0; font-size: 13px; color: var(--muted); }
   .sub-third strong { color: var(--paper); }
@@ -1276,7 +1349,7 @@
 
 <header>
   <div class="brand">
-    <h1><img class="brand-logo" src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><span class="h1-txt">MH Speedrun Leaderboards<small class="h1-sub">with automatic weapon tier lists</small></span></h1>
+    <h1><img class="brand-logo" src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><span class="h1-txt">MH Speedrun Leaderboards<small class="h1-sub">with automatic weapon tier lists</small><button type="button" class="h1-ver" id="siteVer" hidden></button></span></h1>
     <span class="by">collected by <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">Fox Invictus</a></span>
     <p class="tagline" id="tagline"></p>
     <a class="intro-link" id="introLink" href="https://youtu.be/axVBnouN450" target="_blank" rel="noopener"><img class="intro-yt" src="icons/watch/youtube.png" alt="" onerror="this.remove()"><span id="introText">Quick tour</span><small id="introLen">(1 min)</small></a>
@@ -1576,7 +1649,10 @@ const JA = {
   "collected by": "収集：",
   "Changelog": "更新履歴", "Info & changelog": "情報と更新履歴",
   "Contact / Support the project": "連絡・プロジェクト支援",
-  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる",
+  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Build {n}": "ビルド {n}", "Builds": "ビルド",
+  "Community: submit a run & vote": "コミュニティ：記録投稿と投票", "Realistic Weapon Strength & image export": "現実的な武器の強さと画像保存",
+  "Fixes": "修正", "Search engines & game logo in images": "検索エンジン対応と画像のタイトルロゴ",
+  "FAQ addition": "FAQの追加", "Submission numbers": "投稿数の表示", "New top bar & Glossy style": "新しいトップバーとグロッシー表示",
   "Design style": "デザイン", "Flat": "フラット", "Standard": "標準", "Glossy": "グロッシー", "Classic glass look": "クラシックなガラス風",
   "Leaderboards": "ランキング", "Analysis": "分析", "Community": "コミュニティ",
   "Overview": "一覧", "Every quest and weapon in one table": "全クエスト・全武器をひとつの表で",
@@ -1837,7 +1913,13 @@ const JA = {
   "Last 7 days": "7日間", "Added": "掲載", "Declined": "見送り", "In queue": "確認待ち",
   "Added in the last 7 days: <b>{n}</b>": "直近7日間に追加：<b>{n}</b>件",
   "{a} submitted by visitors": "訪問者からの投稿 {a}件", "{a} added manually": "手動で追加 {a}件",
-  "{a} in queue": "確認待ち {a}件", "{n} declined": "見送り {n}件",
+  "{a} in queue": "確認待ち {a}件",
+  "Upload activity": "投稿アクティビティ", "loading archive…": "アーカイブを読み込み中…", "Title update": "アップデート",
+  "runs in the last 7 days": "直近7日間の記録", "busiest day · {d}": "最多の日 · {d}", "busiest day": "最多の日", "runs since release": "発売以降の記録",
+  "Zoom": "期間", "All": "全期間", "From": "開始", "To": "終了", "Runs per day · up to yesterday": "1日あたりの記録数 · 昨日まで", "Runs per week · up to the last full week": "1週間あたりの記録数 · 先週まで",
+  "Click to move the visible range": "クリックで表示期間を移動", "Weapon filter active: only {list}": "武器フィルター有効：{list}のみ", "Quest release": "クエスト配信", "New quest: {q}": "新クエスト：{q}",
+  "Uploads per weekday · since release ({d})": "曜日別の投稿割合 · 発売日（{d}）以降",
+  "Upload date of the video. Includes runs that have since dropped out of the top 3.": "動画の投稿日で集計しています。現在はトップ3から外れた記録も含みます。", "{n} declined": "見送り {n}件",
   "Submitted in the last 7 days, checked but not added – usually a faster run was added in the meantime, or the run was already listed.": "直近7日間に投稿され、確認のうえ見送った記録です。多くの場合、その間により速い記録が追加されたか、すでに掲載済みでした。",
   "Declined: checked but not added – usually a faster run was added in the meantime, or the run was already listed. In queue: not checked yet.": "見送り：確認のうえ掲載しなかった記録です。多くの場合、その間により速い記録が追加されたか、すでに掲載済みでした。確認待ち：まだ確認していない記録です。",
 };
@@ -1903,6 +1985,14 @@ const TAGLINE_EN = "Mobile-friendly speedrun records for several Monster Hunter 
 /* small inline flags for the language button (flag emojis are not shown on Windows) */
 const FLAG_JP = `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>`;
 const FLAG_GB = `<svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="fgS"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="fgT"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#fgS)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#fgT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg>`;
+/* "Version 129" under the subtitle: number of the newest CHANGELOG entry (updates itself with every new entry) */
+function siteVerLabel() {
+  const el = document.getElementById("siteVer");
+  let v = "", b = 0; try { b = buildNo(CHANGELOG[0]); v = releaseOf(b).ver; } catch (e) { return; }   // CHANGELOG not defined yet
+  el.textContent = tr("Version {v}", { v }) + " · " + tr("Build {n}", { n: b }); el.hidden = false;
+  try { renderChangelog(); } catch (e) {}
+  el.title = tr("Changelog");
+}
 function setLang(l, rerender = true) {
   LANG = l === "ja" ? "ja" : "en";
   try { localStorage.setItem("mhlb-lang", LANG); } catch (e) {}
@@ -1918,6 +2008,7 @@ function setLang(l, rerender = true) {
   document.getElementById("introLen").textContent = LANG === "ja" ? "（1分）" : "(1 min)";
   translateStatic();
   if (typeof themeLabel === "function") themeLabel();
+  siteVerLabel();
   if (rerender && state.games && state.games.length) selectGame(state.game, state.quest);
 }
 
@@ -2980,7 +3071,7 @@ function renderNewestView() {
   const tableEl = document.getElementById("table");
   const sel = state.newestW;
   title.innerHTML = `<h2>${tr("Newest runs")}</h2>` +
-    `<div class="nbar" id="newBar"></div>` +
+    `<div class="nbar" id="newBar"></div><div class="cal" id="calBox"></div>` +
     `<details class="wfilter" id="wfilter"${state.wfOpen ? " open" : ""}><summary>${sel.length ? tr("Weapons: {list}", { list: sel.map(k => esc(k)).join(", ") }) : tr("Show only certain weapons")}</summary>` +
     `<div class="wf-grid">${WEAPONS.map(([k]) => `<button type="button" class="wf-btn" data-w="${k}" aria-pressed="${sel.includes(k)}" title="${esc(wn(k))}">${weaponIcon(k, "small")}<span>${k}</span></button>`).join("")}</div>` +
     `<button type="button" class="wf-all" id="wfAll"${sel.length ? "" : " disabled"}>${tr("Show all weapons")}</button></details>`;
@@ -2993,6 +3084,7 @@ function renderNewestView() {
   });
   document.getElementById("wfAll").onclick = () => { state.newestW = []; render(); };
   renderNewBar();
+  renderCal();
   loadSubmitStats();
   setNote([]);
   const qByName = new Map(questsOf(state.game).map(q => [q.quest, q]));
@@ -3060,6 +3152,189 @@ function renderNewBar() {
     (all ? `<div class="nb-track" role="img" aria-label="${esc([sub && tr("{a} submitted by visitors", { a: sub }), man && tr("{a} added manually", { a: man }), queue && tr("{a} in queue", { a: queue })].filter(Boolean).join(", "))}">` +
       seg(sub, "nb-sub") + seg(man, "nb-man") + seg(queue, "nb-que") + `</div>` +
       `<div class="nb-leg">${leg(sub, "nb-sub", "{a} submitted by visitors")}${leg(man, "nb-man", "{a} added manually")}${leg(queue, "nb-que", "{a} in queue")}</div>` : "");
+}
+
+/* ---------- upload activity (Newest Runs, optional) ----------
+   Line chart of uploads per day / week for the selected game (Steam-Charts style: numbers on top, zoom, overview with
+   the visible range below), only from the game's release to today. Counts the runs on the site plus "Archiv Runs" (runs that have left the top 3; Ratio-Check removals are left
+   out). The archive is loaded only when the calendar is opened. Below: share of uploads per weekday (since release). */
+let calArchive = null;          // null = not loaded, "loading", or a list of runs
+let calOpen = false;
+try { calOpen = localStorage.getItem("mhlb-cal") === "1"; } catch (e) {}
+const CAL_WD_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], CAL_WD_JA = ["月", "火", "水", "木", "金", "土", "日"];
+const CAL_MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const wdIdx = iso => { const [y, m, d] = iso.split("-").map(Number); return (new Date(y, m - 1, d).getDay() + 6) % 7; };   // 0 = Monday
+function gameRelease(g) {
+  const base = (state.titleUpdates || []).find(t => t.game === g && /^base$/i.test(t.label))?.date;
+  if (base) return base;
+  const qs = state.quests.filter(q => q.game === g && q.release).map(q => q.release).sort();
+  if (qs.length) return qs[0];
+  return state.runs.filter(r => r.game === g && r.date).map(r => r.date).sort()[0] || "";
+}
+async function loadCalArchive() {
+  if (calArchive) return;
+  calArchive = "loading";
+  try {
+    const rows = await loadTable("Archiv Runs");
+    calArchive = rows.filter(r => !/ratio-check/i.test(String(r["Notiz"] || "")))
+      .map(r => ({ game: String(r["Spiel"] || "").trim(), weapon: String(r["Waffe"] || "").trim(), date: toISO(r["Datum"]),
+        heroics: /^(ja|yes|y|true|x)$/i.test(r["Heroics"]) }))
+      .filter(r => r.game && W[r.weapon] && r.date);
+  } catch (e) { calArchive = []; }
+  renderCal();
+}
+const CH_SPANS = [["7d", 7], ["1m", 30], ["3m", 91], ["6m", 182], ["1y", 365], ["All", 0]];
+const monShort = (m, y) => LANG === "ja" ? `${y}/${m + 1}` : `${CAL_MON_EN[m]} '${String(y).slice(2)}`;
+const dayShort = iso => { const [y, m, d] = iso.split("-").map(Number); return LANG === "ja" ? `${m}/${d}` : `${d} ${CAL_MON_EN[m - 1]}`; };
+const addDays = (iso, n) => { const [y, m, d] = iso.split("-").map(Number); return isoDay(new Date(y, m - 1, d + n)); };
+const dayDiff = (a, b) => { const p = s => { const [y, m, d] = s.split("-").map(Number); return Date.UTC(y, m - 1, d); }; return Math.round((p(b) - p(a)) / 864e5); };
+/* smooth line through the points without overshooting below 0 (monotone cubic) */
+function smoothPath(pts) {
+  if (pts.length < 2) return pts.length ? `M${pts[0][0]},${pts[0][1]}` : "";
+  const n = pts.length, dx = [], m = [], t = [];
+  for (let i = 0; i < n - 1; i++) { dx[i] = pts[i + 1][0] - pts[i][0]; m[i] = (pts[i + 1][1] - pts[i][1]) / (dx[i] || 1); }
+  t[0] = m[0]; t[n - 1] = m[n - 2];
+  for (let i = 1; i < n - 1; i++) t[i] = m[i - 1] * m[i] <= 0 ? 0 : (m[i - 1] + m[i]) / 2;
+  for (let i = 0; i < n - 1; i++) { if (!m[i]) { t[i] = t[i + 1] = 0; continue; }
+    const a = t[i] / m[i], b = t[i + 1] / m[i], h = a * a + b * b; if (h > 9) { const k = 3 / Math.sqrt(h); t[i] = k * a * m[i]; t[i + 1] = k * b * m[i]; } }
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) { const h = dx[i] / 3;
+    d += `C${(pts[i][0] + h).toFixed(1)},${(pts[i][1] + t[i] * h).toFixed(1)} ${(pts[i + 1][0] - h).toFixed(1)},${(pts[i + 1][1] - t[i + 1] * h).toFixed(1)} ${pts[i + 1][0].toFixed(1)},${pts[i + 1][1].toFixed(1)}`; }
+  return d;
+}
+/* buckets (one per day, or per week for long ranges) between two dates */
+function chBuckets(per, from, to, step) {
+  const out = [];
+  for (let d = from; d <= to; d = addDays(d, step)) {
+    let n = 0; for (let k = 0; k < step; k++) { const x = addDays(d, k); if (x > to) break; n += per[x] || 0; }
+    out.push({ d, n, end: addDays(d, step - 1) > to ? to : addDays(d, step - 1) });
+  }
+  return out;
+}
+function renderCal() {
+  const box = document.getElementById("calBox");
+  if (!box) return;
+  const g = state.game, today = isoDay(new Date()), rel = gameRelease(g) || today;
+  const head = `<button type="button" class="cal-tog" id="calTog" aria-expanded="${calOpen}">📈 ${tr("Upload activity")} <span aria-hidden="true">${calOpen ? "▴" : "▾"}</span></button>`;
+  if (!calOpen) { box.innerHTML = head; document.getElementById("calTog").onclick = toggleCal; return; }
+  if (!calArchive) loadCalArchive();
+  // uploads per day since release: site runs + archive, same Heroics filter as the list
+  // same filters as the list: Heroics and "Show only certain weapons"
+  const selW = state.newestW || [], wOk = r => !selW.length || selW.includes(r.weapon);
+  const all = state.runs.filter(r => r.game === g && heroOk(r) && wOk(r) && r.date)
+    .concat(Array.isArray(calArchive) ? calArchive.filter(r => r.game === g && heroOk(r) && wOk(r)) : []);
+  const per = {};
+  all.forEach(r => { if (r.date >= rel && r.date <= today) per[r.date] = (per[r.date] || 0) + 1; });
+  const wNote = selW.length ? `<p class="ch-wf"><span class="ch-wf-i">${selW.map(k => weaponIcon(k, "small")).join("")}</span>` +
+    `<span>${tr("Weapon filter active: only {list}", { list: selW.map(k => esc(wn(k))).join(LANG === "ja" ? "、" : ", ") })}</span></p>` : "";
+  const totalDays = dayDiff(rel, today) + 1;
+  // header numbers (like Steam Charts)
+  let last7 = 0; for (let k = 0; k < 7; k++) last7 += per[addDays(today, -k)] || 0;
+  const peak = Object.entries(per).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] || ["", 0];
+  const total = Object.values(per).reduce((a, b) => a + b, 0);
+  // visible range
+  if (state.chGame !== g) { state.chGame = g; state.chEnd = null; }
+  const spanKey = state.chSpan || "All";
+  const spanDays = Math.min(totalDays, (CH_SPANS.find(z => z[0] === spanKey) || CH_SPANS[5])[1] || totalDays);
+  const step = spanDays > 100 ? 7 : 1;
+  // the running day / week is still being collected: the line ends yesterday (per day) or last Sunday (per week),
+  // otherwise it would look like a sudden drop at the end
+  const endFor = st => st === 1 ? addDays(today, -1) : addDays(today, -(wdIdx(today) + 1));
+  const endCap = endFor(step);
+  let to = state.chEnd && state.chEnd < endCap ? state.chEnd : endCap;
+  let from = addDays(to, -(spanDays - 1));
+  if (from < rel) { from = rel; to = addDays(rel, spanDays - 1) > endCap ? endCap : addDays(rel, spanDays - 1); }
+  if (step === 7) from = addDays(from, -wdIdx(from));            // whole weeks, Monday to Sunday
+  const bk = to >= from ? chBuckets(per, from, to, step) : [{ d: rel, n: 0, end: rel }];
+  const vmax = Math.max(1, ...bk.map(b => b.n));
+  // axis just above the highest point (55 → 60, not 100), so the chart uses its full height
+  const nice = (() => { const e = Math.pow(10, Math.floor(Math.log10(vmax))), f = vmax / e;
+    return ([1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(x => x >= f - 1e-9) || 10) * e; })();
+  const X = i => bk.length > 1 ? i / (bk.length - 1) * 1000 : 500, Yp = n => 200 - n / nice * 190;
+  const pts = bk.map((b, i) => [X(i), Yp(b.n)]);
+  const line = smoothPath(pts);
+  const area = line ? `${line}L${X(bk.length - 1)},200L${X(0)},200Z` : "";
+  const grid = [0, .5, 1].map(f => `<line class="ch-grid" x1="0" x2="1000" y1="${Yp(nice * f)}" y2="${Yp(nice * f)}"/>`).join("");
+  const yl = [0, .5, 1].map(f => `<span class="ch-yl" style="top:${Yp(nice * f) / 2}%">${+(nice * f).toFixed(1)}</span>`).join("");
+  const xPos = d => bk.length > 1 ? Math.min(100, Math.max(0, dayDiff(from, d) / Math.max(1, dayDiff(from, bk[bk.length - 1].d)) * 100)) : 50;
+  // x labels: about 6
+  const nx = Math.min(6, bk.length), xl = [];
+  for (let k = 0; k < nx; k++) { const i = Math.round(k * (bk.length - 1) / Math.max(1, nx - 1)); const d = bk[i].d, [yy, mm] = d.split("-").map(Number);
+    xl.push(`<span class="ch-xl" style="left:${X(i) / 10}%">${step === 1 ? dayShort(d) : monShort(mm - 1, yy)}</span>`); }
+  // title updates (dashed lines) and quest releases (blue dots) inside the range
+  const tus = (state.titleUpdates || []).filter(t => t.game === g && t.date >= from && t.date <= to);
+  const tuLines = tus.map(t => { const x = xPos(t.date) * 10; return `<line class="ch-tu" x1="${x}" x2="${x}" y1="0" y2="200"/>`; }).join("");
+  // labels too close to the previous one are left out (the dashed line and the tooltip still show them)
+  let lastTu = -99;
+  const tuLabels = tus.map(t => { const x = xPos(t.date); if (x - lastTu < 6) return ""; lastTu = x;
+    return `<span class="ch-tul" style="left:${x}%">${esc(t.label)}</span>`; }).join("");
+  const qByDay = {}; state.quests.filter(q => q.game === g && q.release && q.release >= from && q.release <= to).forEach(q => { (qByDay[q.release] = qByDay[q.release] || []).push(qn(q)); });
+  const qDots = Object.entries(qByDay).map(([d, list]) => `<span class="ch-q" style="left:${xPos(d)}%" title="${esc(fmtDate(d) + " · " + tr("New quest: {q}", { q: list.join(", ") }))}"></span>`).join("");
+  // navigator: whole history per week
+  const nStep = totalDays > 100 ? 7 : 1, nTo = endFor(nStep), nFrom = nStep === 7 ? addDays(rel, -wdIdx(rel)) : rel;
+  const nb = nTo >= nFrom ? chBuckets(per, nFrom, nTo, nStep) : [{ d: rel, n: 0, end: rel }], nmax = Math.max(1, ...nb.map(b => b.n));
+  const nDays = Math.max(1, dayDiff(nFrom, nb[nb.length - 1].d));
+  const NX = i => nb.length > 1 ? i / (nb.length - 1) * 1000 : 500;
+  const nLine = smoothPath(nb.map((b, i) => [NX(i), 40 - b.n / nmax * 36]));
+  const nArea = nLine ? `${nLine}L1000,40L0,40Z` : "";
+  const nPos = d => Math.min(100, Math.max(0, dayDiff(nFrom, d) / nDays * 100));
+  let years = ""; for (let y = +rel.slice(0, 4) + 1; y <= +today.slice(0, 4); y++) years += `<span class="ch-yr" style="left:${nPos(y + "-01-01")}%">${y}</span>`;
+  // weekday share since release (unchanged)
+  const wdNames = LANG === "ja" ? CAL_WD_JA : CAL_WD_EN;
+  const wd = [0, 0, 0, 0, 0, 0, 0]; let tot = 0;
+  Object.entries(per).forEach(([d, n]) => { wd[wdIdx(d)] += n; tot += n; });
+  const wmax = Math.max(1, ...wd), top = wd.indexOf(Math.max(...wd));
+  const bars = wd.map((n, i) => { const pc = tot ? n / tot * 100 : 0;
+    return `<div class="wd-c${i === top && tot ? " top" : ""}" title="${esc(wdNames[i] + " · " + trn(n, "{n} run", "{n} runs"))}"><span class="wd-p">${pc.toFixed(0)}%</span>` +
+      `<span class="wd-b"><i style="height:${(n / wmax * 100).toFixed(1)}%"></i></span><span class="wd-n">${wdNames[i]}</span></div>`; }).join("");
+  const stat = (v, label) => `<div class="ch-stat"><b>${v}</b><span>${label}</span></div>`;
+  box.innerHTML = head + `<div class="cal-panel${selW.length ? " filtered" : ""}"><div class="ch-left">` + wNote +
+    `<div class="ch-stats">${stat(last7, esc(tr("runs in the last 7 days")))}${stat(peak[1], esc(peak[0] ? tr("busiest day · {d}", { d: fmtDate(peak[0]) }) : tr("busiest day")))}` +
+      `${stat(total, esc(tr("runs since release")) + (calArchive === "loading" ? " · " + esc(tr("loading archive…")) : ""))}</div>` +
+    `<div class="ch-box"><div class="ch-bar"><span>${tr("Zoom")}</span>` +
+      CH_SPANS.map(([k]) => `<button type="button" class="ch-zoom" data-span="${k}" aria-pressed="${k === spanKey}">${k === "All" ? tr("All") : k}</button>`).join("") +
+      `<span class="ch-range">${tr("From")} <span>${fmtDate(from < rel ? rel : from)}</span> ${tr("To")} <span>${fmtDate(to)}</span></span></div>` +
+    `<div class="ch-main" id="chMain"><svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">${grid}${tuLines}<path class="ch-area" d="${area}"/><path class="ch-line" d="${line}"/></svg>` +
+      `${yl}${xl.join("")}${tuLabels}${qDots}<span class="ch-x" id="chX" hidden></span><span class="ch-dot" id="chDot" hidden></span><div class="ch-tip" id="chTip" hidden></div></div>` +
+    `<div class="ch-nav" id="chNav" title="${esc(tr("Click to move the visible range"))}"><svg viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true"><path class="ch-area" d="${nArea}"/><path class="ch-line" d="${nLine}" style="stroke-width:1"/></svg>` +
+      `${years}<span class="ch-win" style="left:${nPos(from)}%;width:${Math.max(.6, nPos(to) - nPos(from))}%"></span></div></div>` +
+    `<div class="ch-leg"><span>${tr(step === 1 ? "Runs per day · up to yesterday" : "Runs per week · up to the last full week")}</span><span><i class="l-tu"></i>${tr("Title update")}</span><span><i class="l-q"></i>${tr("Quest release")}</span>` +
+      `<span class="ch-info" tabindex="0" title="${esc(tr("Upload date of the video. Includes runs that have since dropped out of the top 3."))}">ⓘ</span></div></div>` +
+    `<div class="cal-wd"><h4>${tr("Uploads per weekday · since release ({d})", { d: fmtDate(rel) })}</h4><div class="wd-row">${bars}</div></div></div>`;
+  document.getElementById("calTog").onclick = toggleCal;
+  box.querySelectorAll(".ch-zoom").forEach(b => b.onclick = () => { state.chSpan = b.dataset.span; state.chEnd = null; renderCal(); });
+  // hover / touch: crosshair + tooltip
+  const main = document.getElementById("chMain"), cx = document.getElementById("chX"), dot = document.getElementById("chDot"), tip = document.getElementById("chTip");
+  const show = ev => {
+    const r = main.getBoundingClientRect(), px = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const i = Math.max(0, Math.min(bk.length - 1, Math.round(px / r.width * (bk.length - 1)))), b = bk[i], lx = X(i) / 10;
+    cx.hidden = dot.hidden = tip.hidden = false;
+    cx.style.left = lx + "%"; dot.style.left = lx + "%"; dot.style.top = (Yp(b.n) / 2) + "%";
+    const extra = tus.filter(t => t.date >= b.d && t.date <= b.end).map(t => t.label)
+      .concat(Object.entries(qByDay).filter(([d]) => d >= b.d && d <= b.end).flatMap(([, l]) => l));
+    tip.innerHTML = `<b>${trn(b.n, "{n} run", "{n} runs")}</b><small>${step === 1 ? fmtDate(b.d) : fmtDate(b.d) + " – " + fmtDate(b.end)}</small>` +
+      (extra.length ? `<small>${esc(extra.join(" · "))}</small>` : "");
+    tip.style.left = lx > 60 ? "" : `calc(${lx}% + 10px)`; tip.style.right = lx > 60 ? `calc(${100 - lx}% + 10px)` : "";
+  };
+  const hide = () => { cx.hidden = dot.hidden = tip.hidden = true; };
+  main.addEventListener("mousemove", show); main.addEventListener("mouseleave", hide);
+  main.addEventListener("touchstart", show, { passive: true }); main.addEventListener("touchmove", show, { passive: true }); main.addEventListener("touchend", hide);
+  // navigator: click moves the window (same length), centred on the clicked day
+  document.getElementById("chNav").onclick = ev => {
+    const r = ev.currentTarget.getBoundingClientRect(), f = (ev.clientX - r.left) / r.width;
+    const mid = addDays(nFrom, Math.round(f * nDays));
+    let end = addDays(mid, Math.floor(spanDays / 2));
+    if (end > endCap) end = endCap;
+    if (dayDiff(rel, end) < spanDays - 1) end = addDays(rel, spanDays - 1);
+    state.chEnd = end >= endCap ? null : end; renderCal();
+  };
+}
+function toggleCal() {
+  calOpen = !calOpen;
+  try { localStorage.setItem("mhlb-cal", calOpen ? "1" : "0"); } catch (e) {}
+  if (calOpen) gcEvent("activity-open", "Upload activity opened");
+  renderCal();
 }
 
 /* Desktop: size the rows so the whole board fits the window without scrolling.
@@ -3564,6 +3839,22 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V130", when: "30.10.2026 12:50", items: [
+    "New version system: versions 1.0 / 2.0 / 3.x for bigger steps (major = milestone, minor = new feature, patch = fixes); every single change keeps its own build number. Shown as \"Version 3.7 · Build 130\" under the title, and the changelog is grouped by version." ] },
+  { v: "V129", when: "30.10.2026 12:35", items: [
+    "The current version number is shown under the site title – click it to open the changelog." ] },
+  { v: "V128", when: "30.10.2026 12:25", items: [
+    "Upload activity: the \"Show only certain weapons\" filter now also applies to the chart, the numbers and the weekday share – with a clear note in the chart while a weapon filter is active." ] },
+  { v: "V127", when: "30.10.2026 12:15", items: [
+    "Upload activity: more compact – the scale now ends just above the highest point and the whole box takes much less height." ] },
+  { v: "V126", when: "30.10.2026 12:00", items: [
+    "Upload activity: shows \"All\" by default (so all title updates are visible), and the line ends with the last complete day or week – the running day / week is still being collected and would look like a sudden drop." ] },
+  { v: "V125", when: "30.10.2026 12:20", items: [
+    "Newest Runs: the upload calendar is replaced by an \"Upload activity\" line chart in the style of Steam Charts – key numbers on top, zoom (7d to All), title updates and quest releases marked, and an overview below to move the visible range. The share per weekday stays." ] },
+  { v: "V124", when: "30.10.2026 11:45", items: [
+    "Upload calendar: traffic-light colours (few runs red → many runs green); the release days of the listed quests are marked with a blue dot." ] },
+  { v: "V123", when: "30.10.2026 11:55", items: [
+    "Newest Runs: new optional \"Upload calendar\" – a heatmap of the upload dates for the selected game (one tile per day, from release to today, title updates marked) plus the share of uploads per weekday. Includes runs that have since dropped out of the top 3." ] },
   { v: "V122", when: "27.10.2026 20:25", items: [
     "Newest Runs: the activity bar is bigger and spans the full width like the table; \"declined\" is plain italic text now." ] },
   { v: "V121", when: "27.10.2026 20:15", items: [
@@ -3871,12 +4162,47 @@ const CHANGELOG = [
     "First version: new consolidated Google Sheet and leaderboard page.",
     "Game tabs, quest list, 14 weapons, Best time / Top 3, Heroics filter (all / no / only)." ] },
 ];
+/* Versions (Major.Minor.Patch) group the builds above. Every change still gets its own build (V1, V2 … in CHANGELOG);
+   a version starts at the build in "from" and contains all builds up to the next version.
+   Major = milestone (new big area), Minor = new feature, Patch = fixes / small polish; same day = same version. */
+const RELEASES = [
+  { ver: "1.0", from: 1, title: "Leaderboards" },
+  { ver: "2.0", from: 26, title: "Weapon Strength" },
+  { ver: "3.0", from: 70, title: "Community: submit a run & vote" },
+  { ver: "3.1", from: 76, title: "Realistic Weapon Strength & image export" },
+  { ver: "3.1.1", from: 102, title: "Fixes" },
+  { ver: "3.2", from: 103, title: "Report an issue" },
+  { ver: "3.3", from: 105, title: "FAQ" },
+  { ver: "3.4", from: 107, title: "Search engines & game logo in images" },
+  { ver: "3.4.1", from: 110, title: "FAQ addition" },
+  { ver: "3.5", from: 111, title: "Submission numbers" },
+  { ver: "3.6", from: 112, title: "New top bar & Glossy style" },
+  { ver: "3.7", from: 123, title: "Upload activity" },
+];
+const buildNo = e => +String(e.v).replace(/\D/g, "");
+const releaseOf = n => RELEASES.filter(r => r.from <= n).pop() || RELEASES[0];
+function renderChangelog() {
+  const cur = CHANGELOG[0], rel = releaseOf(buildNo(cur));
+  document.getElementById("infoVer").textContent = `${rel.ver} · ${tr("Build {n}", { n: buildNo(cur) })} (${cur.when})`;
+  let html = "", lastRel = null;
+  for (const e of CHANGELOG) {
+    const r = releaseOf(buildNo(e));
+    if (r !== lastRel) {
+      const builds = CHANGELOG.filter(x => releaseOf(buildNo(x)) === r).map(buildNo);
+      const range = builds.length > 1 ? `${tr("Builds")} ${Math.min(...builds)}–${Math.max(...builds)}` : `${tr("Build {n}", { n: builds[0] })}`;
+      html += `<li class="rel${/\.0$/.test(r.ver) ? " major" : ""}"><span class="rv">${esc(r.ver)}</span><span class="rt">${esc(tr(r.title))}</span><span class="rb">${range}</span></li>`;
+      lastRel = r;
+    }
+    html += `<li><span class="v" title="${esc(tr("Build {n}", { n: buildNo(e) }))}">#${buildNo(e)}</span><div><span class="when">${esc(e.when)}</span><ul>${e.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div></li>`;
+  }
+  document.getElementById("changelog").innerHTML = html;
+}
 (function setupInfo() {
   const dlg = document.getElementById("infoDlg");
-  document.getElementById("infoVer").textContent = `${CHANGELOG[0].v} (${CHANGELOG[0].when})`;
-  document.getElementById("changelog").innerHTML = CHANGELOG.map(e =>
-    `<li><span class="v">${esc(e.v)}</span><div><span class="when">${esc(e.when)}</span><ul>${e.items.map(i => `<li>${esc(i)}</li>`).join("")}</ul></div></li>`).join("");
+  renderChangelog();
   document.getElementById("infoBtn").onclick = () => dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", "");
+  document.getElementById("siteVer").onclick = () => document.getElementById("infoBtn").click();
+  siteVerLabel();
   document.getElementById("infoClose").onclick = () => dlg.close();
   dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
 })();
