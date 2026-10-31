@@ -369,6 +369,14 @@
     max-width: 1180px; margin: 0 auto; padding: 8px 24px 40px; color: var(--muted); font-size: 13px;
     display: flex; gap: 16px; flex-wrap: wrap; justify-content: space-between;
   }
+  /* visitor numbers from GoatCounter: two small chips above the game logos (visible, but calm) */
+  .visits { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 12px 0 0; flex-basis: 100%; width: 100%; }   /* always its own line, above the game logos */
+  .visits[hidden] { display: none; }
+  .vis-c { display: inline-flex; align-items: center; gap: 6px; cursor: default; }   /* plain text with icon – no frame, so it does not look like a button */
+  .vis-c img { width: 18px; height: 18px; object-fit: contain; flex: none; }
+  .vis-c .vis-e { font-size: 14px; line-height: 1; }
+  .vis-c b { font: 700 16px/1.2 "Barlow Condensed", sans-serif; color: var(--paper); font-variant-numeric: tabular-nums; }
+  .vis-c small { font-size: 12px; color: var(--muted); }
   header { position: relative; }
   header .top-actions { position: absolute; top: 22px; right: 16px; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
   /* with Submit + Vote the buttons no longer fit beside the title: put them in their own row below it */
@@ -1365,6 +1373,7 @@
     <p class="tagline" id="tagline"></p>
     <a class="intro-link" id="introLink" href="https://youtu.be/axVBnouN450" target="_blank" rel="noopener"><img class="intro-yt" src="icons/watch/youtube.png" alt="" onerror="this.remove()"><span id="introText">Quick tour</span><small id="introLen">(1 min)</small></a>
   </div>
+  <div class="visits" id="visits" hidden></div>
   <div class="games-wrap" id="gamesWrap">
     <button class="gscroll gl" type="button" tabindex="-1" aria-hidden="true">‹</button>
     <nav class="games" role="tablist" aria-label="Game" id="games"></nav>
@@ -1661,6 +1670,7 @@ const JA = {
   "Changelog": "更新履歴", "Info & changelog": "情報と更新履歴",
   "Contact / Support the project": "連絡・プロジェクト支援",
   "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Build {n}": "ビルド {n}", "Builds": "ビルド",
+  "visitors": "訪問者", "last 7 days": "直近7日間", "Visitors since the site started": "サイト開設以来の訪問者数", "Visitors in the last 7 days": "直近7日間の訪問者数", "Visitor counter": "訪問者数の表示",
   "Community: submit a run & vote": "コミュニティ：記録投稿と投票", "Realistic Weapon Strength & image export": "現実的な武器の強さと画像保存",
   "Fixes": "修正", "Search engines & game logo in images": "検索エンジン対応と画像のタイトルロゴ",
   "FAQ addition": "FAQの追加", "Submission numbers": "投稿数の表示", "New top bar & Glossy style": "新しいトップバーとグロッシー表示",
@@ -2006,6 +2016,27 @@ function siteVerLabel() {
   try { renderChangelog(); } catch (e) {}
   el.title = tr("Changelog");
 }
+/* Visitor numbers (above the game logos): GoatCounter's public counter (setting "Allow adding visitor counts" is on).
+   Only the page path /mh-time-attack – NOT "TOTAL", which would add the other sites of the same GoatCounter account and
+   the tab events (view-strength …). Tab clicks are events, they never add to the page's visitors.
+   ?start=week = last 7 days. GoatCounter caches the numbers for up to 4 hours. Hidden if it fails. */
+const GC_COUNTER = "https://foxinvictus.goatcounter.com/counter/" + encodeURIComponent("/mh-time-attack") + ".json";
+let visitCounts = null;
+function renderVisits() {
+  const el = document.getElementById("visits");
+  if (!el || !visitCounts) return;
+  const ico = (f, e) => `<img src="icons/UI/${f}" alt="" onerror="this.outerHTML='<span class=&quot;vis-e&quot;>${e}</span>'">`;
+  el.innerHTML = `<span class="vis-c" title="${esc(tr("Visitors since the site started"))}">${ico("visitor-sum.png", "👥")}<b>${esc(visitCounts.t)}</b><small>${tr("visitors")}</small></span>` +
+    `<span class="vis-c" title="${esc(tr("Visitors in the last 7 days"))}">${ico("visitor-last7.png", "📅")}<b>${esc(visitCounts.w)}</b><small>${tr("last 7 days")}</small></span>`;
+  el.hidden = false;
+}
+async function loadVisits() {
+  try {
+    const get = async q => { const r = await fetch(GC_COUNTER + q); if (!r.ok) throw new Error(r.status); return String((await r.json()).count || "").trim(); };
+    const [t, w] = await Promise.all([get(""), get("?start=week")]);
+    if (t) { visitCounts = { t, w: w || "0" }; renderVisits(); }
+  } catch (e) { /* counter off or blocked: just leave it out */ }
+}
 function setLang(l, rerender = true) {
   LANG = l === "ja" ? "ja" : "en";
   try { localStorage.setItem("mhlb-lang", LANG); } catch (e) {}
@@ -2022,6 +2053,7 @@ function setLang(l, rerender = true) {
   translateStatic();
   if (typeof themeLabel === "function") themeLabel();
   siteVerLabel();
+  renderVisits();
   if (rerender && state.games && state.games.length) selectGame(state.game, state.quest);
 }
 
@@ -3853,6 +3885,16 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V136", when: "31.10.2026 23:20", items: [
+    "Fixed: the visitor numbers now count only this site (before, they included other sites of the same statistics account)." ] },
+  { v: "V135", when: "31.10.2026 23:10", items: [
+    "Visitor numbers: always in their own line above the game logos (also on wide screens), shown as plain text with icons instead of framed chips." ] },
+  { v: "V134", when: "31.10.2026 23:05", items: [
+    "Visitor numbers at the top are smaller and calmer." ] },
+  { v: "V133", when: "31.10.2026 23:00", items: [
+    "Visitor numbers moved to the top, above the game logos, with their own icons." ] },
+  { v: "V132", when: "31.10.2026 22:50", items: [
+    "Footer: number of visitors in total and in the last 7 days (from GoatCounter, updated every few hours)." ] },
   { v: "V131", when: "30.10.2026 18:10", items: [
     "Upload activity: the button is easier to spot, and a clear note in the chart explains that it only counts record-breaking runs (runs that beat an earlier top-3 time) – not the total number of speedrun videos uploaded." ] },
   { v: "V130", when: "30.10.2026 12:50", items: [
@@ -4194,6 +4236,7 @@ const RELEASES = [
   { ver: "3.5", from: 111, title: "Submission numbers" },
   { ver: "3.6", from: 112, title: "New top bar & Glossy style" },
   { ver: "3.7", from: 123, title: "Upload activity" },
+  { ver: "3.8", from: 132, title: "Visitor counter" },
 ];
 const buildNo = e => +String(e.v).replace(/\D/g, "");
 const releaseOf = n => RELEASES.filter(r => r.from <= n).pop() || RELEASES[0];
@@ -4213,6 +4256,7 @@ function renderChangelog() {
   }
   document.getElementById("changelog").innerHTML = html;
 }
+loadVisits();
 (function setupInfo() {
   const dlg = document.getElementById("infoDlg");
   renderChangelog();
