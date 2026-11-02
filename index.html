@@ -328,12 +328,18 @@
     background: var(--gold); color: var(--on-gold); box-shadow: 0 0 0 1px var(--ink);
     pointer-events: none; white-space: nowrap;
   }
-  /* quest form icon (e.g. capture) right above the title update badge */
-  .micons img.qform { position: absolute; right: -6px; z-index: 2; width: max(11px, calc(var(--s) * .42)); height: max(11px, calc(var(--s) * .42));
-    bottom: calc(max(8px, calc(var(--s) * .3)) - 1px); object-fit: contain; filter: drop-shadow(0 0 1px var(--ink)) drop-shadow(0 0 1px var(--ink)); }
-  .micons img.qform.solo { bottom: -4px; }
-  .qtile .micons img.qform { width: max(11px, 24cqw); height: max(11px, 24cqw); right: -4px; bottom: calc(max(8px, 14cqw) + 1px); }
-  .qtile .micons img.qform.solo { bottom: -2px; }
+  /* quest type (lv1, right above the title update badge) and target (lv2, above the type) */
+  .micons { --qf: max(14px, calc(var(--s) * .55)); --qb: calc(max(8px, calc(var(--s) * .3)) - 1px); }
+  .micons .qforms { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  .micons .qforms img.qform { pointer-events: auto; }
+  .micons img.qform { position: absolute; right: -7px; z-index: 2; width: var(--qf); height: var(--qf); object-fit: contain;
+    filter: drop-shadow(0 0 1px var(--ink)) drop-shadow(0 0 1px var(--ink)); }
+  .micons img.qform.lv1 { bottom: var(--qb); }
+  .micons img.qform.lv2 { bottom: calc(var(--qb) + var(--qf) - 2px); }
+  .micons img.qform.lv1.solo { bottom: -4px; }
+  .micons img.qform.lv2.solo { bottom: calc(var(--qf) - 6px); }
+  .qtile .micons { --qf: max(14px, 31cqw); --qb: calc(max(8px, 14cqw) + 1px); }
+  .qtile .micons img.qform { right: -5px; }
   .micons.side { --s: 24px; }
   .micons.wrow { --s: 28px; }
   .micons.title { --s: 40px; }
@@ -1675,7 +1681,9 @@ const JA = {
   "collected by": "収集：",
   "Changelog": "更新履歴", "Info & changelog": "情報と更新履歴",
   "Contact / Support the project": "連絡・プロジェクト支援",
-  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Capture quest": "捕獲クエスト", "Quest forms (experimental)": "クエスト形式（試験的）", "Build {n}": "ビルド {n}", "Builds": "ビルド",
+  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Quest forms (experimental)": "クエスト形式（試験的）", "Quest type & target": "クエスト種別と目標",
+  "Optional quest": "任意クエスト", "Event quest": "イベントクエスト", "Investigation": "調査クエスト", "Free challenge quest": "フリーチャレンジクエスト",
+  "Target: slay": "目標：討伐", "Target: capture": "目標：捕獲", "Build {n}": "ビルド {n}", "Builds": "ビルド",
   "visitors": "訪問者", "last 7 days": "直近7日間", "Visitors since the site started": "サイト開設以来の訪問者数", "Visitors in the last 7 days": "直近7日間の訪問者数", "Visitor counter": "訪問者数の表示",
   "Community: submit a run & vote": "コミュニティ：記録投稿と投票", "Realistic Weapon Strength & image export": "現実的な武器の強さと画像保存",
   "Fixes": "修正", "Search engines & game logo in images": "検索エンジン対応と画像のタイトルロゴ",
@@ -2334,7 +2342,9 @@ async function load() {
         order: Number(q["Reihenfolge"]) || 999, hint: q["Hinweis"],
         release: toISO(q["Release"]),
         upd: String(q["Update"] || "").trim(),
-        form: String(q["Questform"] || "").trim().toLowerCase(),   // quest form (experimental): "capture" …
+        // quest type (Optional / Event / Investigation / Free Challenge) and optional target (Slay / Capture)
+        qtype: String(q["Questtyp"] || "").trim().toLowerCase().replace(/\s+/g, "-"),
+        target: String(q["Ziel"] || "").trim().toLowerCase(),
         hp: toInt(q["Effektive HP"]) || toInt(q["HP"]),          // ΔHP: what the weapon has to remove
         hpTotal: toInt(q["HP"]) || toInt(q["Effektive HP"]),     // ΣHP: total monster HP
       };
@@ -2515,15 +2525,27 @@ function updBadge(q) {
   const t = /^bonus/i.test(q.updBadge) ? "BU" : q.updBadge;
   return `<span class="ubadge">${esc(t)}</span>`;
 }
-/* Quest form (experimental), sheet "Quests" column "Questform": small icon above the title update badge.
-   New forms: add a line here and put the icon into icons/UI/. */
-const QUEST_FORMS = {
-  capture: { icon: "capture.png", label: "Capture quest" },
+/* Quest type + target (experimental), sheet "Quests" columns "Questtyp" (L) and "Ziel" (M), one value each.
+   Icons in icons/quest/: the type sits right above the title update badge, the target (optional) above the type.
+   New values: add a line here and put the icon into icons/quest/. */
+const QUEST_TYPES = {
+  "optional": { icon: "type-optional.png", label: "Optional quest" },
+  "event": { icon: "type-event.png", label: "Event quest" },
+  "investigation": { icon: "type-investigation.png", label: "Investigation" },
+  "free-challenge": { icon: "free-challenge.png", label: "Free challenge quest" },
+};
+const QUEST_TARGETS = {
+  "slay": { icon: "target-slay.png", label: "Target: slay" },
+  "capture": { icon: "target-capture.png", label: "Target: capture" },
 };
 function formBadge(q) {
-  const f = q && QUEST_FORMS[q.form];
-  if (!f) return "";
-  return `<img class="qform${q.updBadge ? "" : " solo"}" src="icons/UI/${f.icon}" alt="${esc(tr(f.label))}" title="${esc(tr(f.label))}" onerror="this.remove()">`;
+  if (!q) return "";
+  const t = QUEST_TYPES[q.qtype], g = QUEST_TARGETS[q.target];
+  const img = (f, cls) => `<img class="qform ${cls}" src="icons/quest/${f.icon}" alt="${esc(tr(f.label))}" title="${esc(tr(f.label))}" onerror="this.remove()">`;
+  // positions: level 1 = right above the update badge (or bottom right without badge), level 2 = one icon higher
+  const base = q.updBadge ? "" : " solo";
+  // own wrapper: the icons must not count as monster images in the 2×2 / 3×3 grid (img:nth-of-type rules)
+  return t || g ? `<span class="qforms">` + (t ? img(t, "lv1" + base) : "") + (g ? img(g, (t ? "lv2" : "lv1") + base) : "") + `</span>` : "";
 }
 function monsterIcons(q, cls = "") {
   if (!q || !q.monsters || !q.monsters.length) return "";
@@ -3902,6 +3924,10 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V139", when: "02.11.2026 12:00", items: [
+    "Fixed: quests with several monsters (e.g. 10★ Proof of a Hero) – the quest type / target icons no longer push a monster icon out of the grid." ] },
+  { v: "V138", when: "02.11.2026 11:40", items: [
+    "Quest icons reworked: a quest type icon (optional, event, investigation, free challenge) sits above the title update badge, and an optional target icon (slay, capture) above it. Both are about 30 % bigger." ] },
   { v: "V137", when: "01.11.2026 13:20", items: [
     "Experimental: quest forms – a small icon above the title update badge shows the kind of quest. First form: capture quests (e.g. 10★ Freedom from Solitude)." ] },
   { v: "V136", when: "31.10.2026 23:20", items: [
@@ -4257,6 +4283,7 @@ const RELEASES = [
   { ver: "3.7", from: 123, title: "Upload activity" },
   { ver: "3.8", from: 132, title: "Visitor counter" },
   { ver: "3.9", from: 137, title: "Quest forms (experimental)" },
+  { ver: "3.10", from: 138, title: "Quest type & target" },
 ];
 const buildNo = e => +String(e.v).replace(/\D/g, "");
 const releaseOf = n => RELEASES.filter(r => r.from <= n).pop() || RELEASES[0];
