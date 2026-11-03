@@ -274,6 +274,15 @@
   .run.minor .bar { min-width: 52px; }
 
   .run.minor .bar-wrap { height: 20px; }
+  /* best No Heroics run in a Heroics bar ("All runs") */
+  /* Time: barely visible extension of the bar up to the No Heroics time */
+  .nhext { position: absolute; top: 0; bottom: 0; z-index: 1; border-radius: 0 3px 3px 0; cursor: help;
+    background: color-mix(in srgb, var(--paper) 13%, transparent); }
+  /* DPS / Ratio: red triangle, its top edge on the top edge of the bar, the tip reaching about a fifth into the bar */
+  .nhtri { position: absolute; top: 0; z-index: 3; width: 0; height: 0; margin-left: -6px; cursor: help;
+    border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: max(6px, calc(var(--bar-h1, 26px) * .28)) solid #e0312b;
+    opacity: .82; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1.5px rgba(255,255,255,.85)); }   /* thin white glow: visible on red bars too */
+  .run.minor .nhtri { border-left-width: 4px; border-right-width: 4px; margin-left: -4px; border-top-width: 5px; }
   @keyframes grow { from { transform: scaleX(0); } }
   @media (prefers-reduced-motion: reduce) { .bar { animation: none; } }
 
@@ -1684,7 +1693,7 @@ const JA = {
   "collected by": "収集：",
   "Changelog": "更新履歴", "Info & changelog": "情報と更新履歴",
   "Contact / Support the project": "連絡・プロジェクト支援",
-  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Quest forms (experimental)": "クエスト形式（試験的）", "Quest type & target": "クエスト種別と目標",
+  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Best without Heroics: {v}": "火事場なしの最速：{v}", "▼ = best without Heroics": "▼ = 火事場なし最速", "Faint part = best without Heroics": "薄い部分 = 火事場なし最速", "Quest forms (experimental)": "クエスト形式（試験的）", "Quest type & target": "クエスト種別と目標",
   "Optional quest": "任意クエスト", "Event quest": "イベントクエスト", "Investigation": "調査クエスト", "Free challenge quest": "フリーチャレンジクエスト",
   "Target: slay": "目標：討伐", "Target: capture": "目標：捕獲", "Build {n}": "ビルド {n}", "Builds": "ビルド",
   "visitors": "訪問者", "last 7 days": "直近7日間", "Visitors since the site started": "サイト開設以来の訪問者数", "Visitors in the last 7 days": "直近7日間の訪問者数", "Visitor counter": "訪問者数の表示",
@@ -2863,8 +2872,24 @@ function rowHtml({ rank, rankHtml, top, name, sub, subJp, list, q, avg, scale, d
       .map(k => u[k] && k !== active
         ? `<span class="alt u-${k}" title="${esc(u[k].title)}">${esc(k === "ratio" ? u.ratio.short + "×" : u[k].txt)}</span>`
         : `<span class="alt u-${k}"></span>`).join("");
+    // "All runs": if the best run is a Heroics run, a line in the bar marks the best No Heroics run of the same weapon
+    let nhMark = "";
+    if (!j && r.heroics && heroMode() === "all" && q) {
+      const nh = runsOf(q).filter(x => x.weapon === r.weapon && !x.heroics).sort(bySpeed)[0];
+      if (nh) {
+        const u2 = unitsOf(q, avg, nh), a2 = u2[state.metric] ? state.metric : "time";
+        const pos = Math.max(12, scale(nh, u2.dpsVal, u2.ratioVal) * 100);
+        const v2 = a2 === "ratio" ? tr("{x} ratio", { x: u2.ratio.short }) : u2[a2].txt;
+        const tip = esc(tr("Best without Heroics: {v}", { v: v2 }));
+        // Time: the No Heroics time is longer → the bar is extended by a barely visible ghost part.
+        // DPS / Ratio: the No Heroics value lies inside the bar → a small red triangle hangs from the top edge.
+        nhMark = a2 === "time"
+          ? (pos > pct ? `<span class="nhext" style="left:${pct.toFixed(2)}%;width:${(pos - pct).toFixed(2)}%" title="${tip}"></span>` : "")
+          : `<span class="nhtri" style="left:${pos.toFixed(2)}%" title="${tip}"></span>`;
+      }
+    }
     return `<div class="run${j ? " minor" : ""}">
-      <div class="bar-wrap" style="--fg:${t.fg}"><div class="bar" style="width:${pct}%;background:${t.bg};animation-delay:${delay}ms"></div>${videoLink(r, "time", onBar, what)}</div>
+      <div class="bar-wrap" style="--fg:${t.fg}"><div class="bar" style="width:${pct}%;background:${t.bg};animation-delay:${delay}ms"></div>${nhMark}${videoLink(r, "time", onBar, what)}</div>
       <div class="meta">${state.depth > 1 ? `<span class="p">#${j + 1}</span>` : ""}<span class="hb">${r.heroics ? `<span class="hbadge" title="${esc(tr("Heroics run"))}"><img class="hicon" src="${UI_DIR}heroics.png" alt="Heroics" onerror="this.parentNode.classList.add('badge');this.replaceWith(document.createTextNode('${tr("Heroics")}'))"></span>` : ""}</span><span class="wl">${watchLink(r, what)}</span>${beside}${channelTag(r) || `<span class="ch"></span>`}${dateTag(r.date)}</div>
     </div>`;
   }).join("");
@@ -2901,7 +2926,10 @@ function renderQuestView() {
   const hints = [];
   if (q.hint) hints.push(q.hint);
   if (runsOf(q, true).length && !board.total) hints.push(tr(state.hero === "only" ? "This quest has no Heroics runs." : "Every run on this quest uses Heroics."));
-  setNote(hints.concat(metricHints()));
+  // with a No Heroics marker the note shows only that one short line (no DPS / ratio explanation)
+  const nhNote = heroMode() === "all" && board.order.some(k => board.lists[k][0]?.heroics && board.lists[k].some(x => !x.heroics));
+  setNote(nhNote ? [tr(state.metric === "dps" || state.metric === "ratio" ? "▼ = best without Heroics" : "Faint part = best without Heroics")]
+    : hints.concat(metricHints()));
 
   if (state.depth === 3) {
     const rows = board.order.map(k => ({ k, q, avg: board.avg, list: board.lists[k].slice(0, 3),
@@ -3907,17 +3935,17 @@ function fitRows() {
   el.classList.add("fit");
   const top = el.getBoundingClientRect().top + window.scrollY;
   const avail = window.innerHeight - top - 10;
-  const minRow = state.depth > 1 ? 45 : 27;
+  const minRow = state.depth > 1 ? 45 : 36;   // taller than before, so the value inside the bar stays readable
   const maxRow = state.depth > 1 ? 84 : 56;
   const rowH = Math.max(minRow, Math.min(maxRow, Math.floor(avail / n)));
   const inner = rowH - 8;
   // top 3: two thin bars (#2, #3) under the main bar
   const barH2 = Math.min(16, Math.max(10, Math.round(inner * .24)));
-  const barH  = state.depth > 1 ? Math.max(14, Math.min(26, inner - 2 * barH2 - 6)) : Math.min(30, Math.round(inner * .7));
+  const barH  = state.depth > 1 ? Math.max(16, Math.min(26, inner - 2 * barH2 - 6)) : Math.max(22, Math.min(30, Math.round(inner * .9)));
   el.style.setProperty("--row-h", rowH + "px");
   el.style.setProperty("--bar-h", barH + "px");
   el.style.setProperty("--bar-h2", barH2 + "px");
-  el.style.setProperty("--bar-h1", Math.min(30, Math.round(inner * .7)) + "px");
+  el.style.setProperty("--bar-h1", Math.max(22, Math.min(30, Math.round(inner * .9))) + "px");
   el.classList.toggle("tight", rowH < 42);
 }
 let fitTimer;
@@ -3928,6 +3956,17 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V145", when: "03.11.2026 13:40", items: [
+    "By quest: when the No Heroics marker is shown, the note only says \"▼ = best without Heroics\"." ] },
+  { v: "V144", when: "03.11.2026 13:35", items: [
+    "The red ▼ has a thin white glow (visible on red bars too) and is slightly transparent; shorter hint text." ] },
+  { v: "V143", when: "03.11.2026 13:25", items: [
+    "Best run without Heroics in a Heroics bar: with Time the bar gets a faint extension up to the No Heroics time; with DPS / Ratio a small red triangle on the top edge of the bar marks the No Heroics value." ] },
+  { v: "V142", when: "03.11.2026 13:30", items: [
+    "By quest / By weapon with \"All runs\": when the best run is a Heroics run, a line inside the bar marks the best run without Heroics (hover for the value).",
+    "Bars are a little taller again." ] },
+  { v: "V141", when: "03.11.2026 13:15", items: [
+    "By quest: taller bars on smaller screens, so the time / DPS value inside the bar is easier to read." ] },
   { v: "V140", when: "03.11.2026 11:35", items: [
     "Fixed: on a quest page, \"Submit a missing run\" and \"Report an issue\" now sit exactly side by side (the second button was shifted down)." ] },
   { v: "V139", when: "02.11.2026 12:00", items: [
