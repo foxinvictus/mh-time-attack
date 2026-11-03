@@ -910,7 +910,10 @@
   .bicon-emoji { font-size: 15px; line-height: 1; }
   .sub-emoji { font-size: 30px; line-height: 1; flex: none; }
   #issueForm { display: grid; gap: 10px; }
-  .qissue { border-style: dashed; border-color: var(--muted); color: var(--muted); margin-left: 6px; }
+  .qissue { border-style: dashed; border-color: var(--muted); color: var(--muted); }
+  .qactions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+  .qactions .qsubmit { margin-top: 0; min-height: 30px; }
+  .qactions .qi-e { width: 18px; text-align: center; font-size: 14px; line-height: 1; }
   .vote-list { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 8px; }
   .vote-list li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; padding: 8px 10px;
     background: var(--ink); border: 1px solid var(--ink-3); border-radius: 8px; }
@@ -2886,8 +2889,9 @@ function renderQuestView() {
     ? `<p class="hpline">${hpPair(q)}<span class="hpx">${tr("ΣHP = total monster HP, ΔHP = HP removed by the weapon alone")}</span></p>`
     : `<p class="hpline"><span class="hpx">${tr("ΣHP / ΔHP not entered yet")}</span></p>`;
   title.innerHTML = `<h2 class="with-micons">${monsterIcons(q, "title")}<span>${esc(qn(q))}</span></h2>${sub ? `<p>${sub}</p>` : ""}${hp}` +
-    (SUBMIT_URL ? `<button type="button" class="qsubmit" id="qSubmit"><img src="icons/UI/submit-run.png" alt="" onerror="this.replaceWith('＋ ')">${tr("Submit a missing run")}</button>` : "") +
-    (SUBMIT_URL && issueGames().includes(q.game) ? `<button type="button" class="qsubmit qissue" id="qIssue">⚠️ ${tr("Report an issue")}</button>` : "");
+    // both buttons in one flex row: centred on each other (as inline buttons they sat on the text baseline and looked shifted)
+    (SUBMIT_URL ? `<div class="qactions"><button type="button" class="qsubmit" id="qSubmit"><img src="icons/UI/submit-run.png" alt="" onerror="this.replaceWith('＋ ')">${tr("Submit a missing run")}</button>` +
+      (issueGames().includes(q.game) ? `<button type="button" class="qsubmit qissue" id="qIssue"><span class="qi-e" aria-hidden="true">⚠️</span>${tr("Report an issue")}</button>` : "") + `</div>` : "");
   const qs = document.getElementById("qSubmit");
   if (qs) qs.onclick = () => openSubmit(q.game, q.quest);
   const qi = document.getElementById("qIssue");
@@ -3924,6 +3928,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V140", when: "03.11.2026 11:35", items: [
+    "Fixed: on a quest page, \"Submit a missing run\" and \"Report an issue\" now sit exactly side by side (the second button was shifted down)." ] },
   { v: "V139", when: "02.11.2026 12:00", items: [
     "Fixed: quests with several monsters (e.g. 10★ Proof of a Hero) – the quest type / target icons no longer push a monster icon out of the grid." ] },
   { v: "V138", when: "02.11.2026 11:40", items: [
@@ -4284,6 +4290,7 @@ const RELEASES = [
   { ver: "3.8", from: 132, title: "Visitor counter" },
   { ver: "3.9", from: 137, title: "Quest forms (experimental)" },
   { ver: "3.10", from: 138, title: "Quest type & target" },
+  { ver: "3.10.1", from: 140, title: "Fixes" },
 ];
 const buildNo = e => +String(e.v).replace(/\D/g, "");
 const releaseOf = n => RELEASES.filter(r => r.from <= n).pop() || RELEASES[0];
