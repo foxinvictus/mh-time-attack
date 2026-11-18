@@ -235,6 +235,9 @@
     padding: 6px 14px; font-size: 14px; font-weight: 500; color: var(--muted); white-space: nowrap;
   }
   .seg button[aria-pressed="true"] { background: var(--gold); color: var(--on-gold); }
+  /* "Top 3" (popular): stands out a little even when not selected */
+  .seg button.d3 { color: var(--gold); font-weight: 700; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 60%, transparent); background: color-mix(in srgb, var(--gold) 12%, transparent); }
+  .seg button.d3[aria-pressed="true"] { color: var(--on-gold); background: var(--gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 35%, transparent); }
   /* Weapon Strength mode: Realistic (green, stands out most) · Best · Extreme (red) */
   .wsr-wrap[hidden] { display: none; }
   .wsr-wrap { display: flex; flex-direction: column; gap: 4px; }
@@ -515,6 +518,13 @@
   }
   .quickbar button img { width: 20px; height: 20px; object-fit: contain; flex: none; }
   .qb-views { margin-left: auto; }
+  /* By quest + Top 3: monster icon and full quest name in the pinned bar */
+  .qb-quest { order: 3; flex: 1 0 100%; display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0;
+    font: 700 17px/1.15 "Barlow Condensed", "Noto Sans JP", sans-serif; color: var(--paper); text-align: center; }
+  .qb-quest[hidden] { display: none; }
+  .qb-quest .micons.qbq { --s: 30px; flex: none; }
+  .qb-quest .qbq .qforms, .qb-quest .qbq .ubadge { display: none; }
+  .qb-quest > span:last-child { min-width: 0; }
   .quickbar button:hover { border-color: var(--gold); }
   .quickbar button[aria-current="true"] { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
   @media (max-width: 760px) {
@@ -656,6 +666,7 @@
   .ws-warn { color: var(--hero); font-weight: 600; white-space: pre-line; }
   .ws-warn.ext { white-space: normal; color: var(--paper); font-weight: 400; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
     border: 1px solid #c9392f; border-left-width: 4px; border-radius: 8px; padding: 10px 14px; background: color-mix(in srgb, #c9392f 12%, transparent); }
+  .ws-warn[hidden] { display: none !important; }   /* the flex box must never override "hidden" */
   .ws-warn.ext p { margin: 0; flex: 1 1 320px; }
   .ws-warn.ext strong { color: #e2625a; }
   .ws-warn.ext .g { color: #2fa35a; }
@@ -731,6 +742,23 @@
   .shot-btn { padding: 5px 12px; border: 1px solid var(--gold); border-radius: 999px; background: none; color: var(--gold); cursor: pointer;
     font: 700 14px/1 "Barlow Condensed", sans-serif; }
   .shot-btn:hover:not(:disabled) { background: var(--gold); color: var(--on-gold); }
+  .t3-shotbar { display: flex; justify-content: flex-end; gap: 8px; margin: 0 0 8px; }
+  /* Top 3 image (By quest / By weapon) */
+  .t3-shot { position: fixed; left: -12000px; top: 0; padding: 20px 24px 14px; color: var(--paper); box-sizing: border-box; }
+  .t3-shot .shot-head { margin-bottom: 10px; }
+  .t3-shot .shot-head .shot-by { display: block; margin-top: 4px; font: 500 14px/1.2 "Barlow", sans-serif; color: var(--muted); }
+  .t3-shot .shot-subj { display: flex; align-items: center; gap: 12px; margin: 4px 0 8px; font: 700 26px/1.15 "Barlow Condensed", "Noto Sans JP", sans-serif; }
+  .t3-shot .shot-subj small { display: block; font: 500 15px/1.2 "Barlow", "Noto Sans JP", sans-serif; color: var(--muted); }
+  .t3-shot .shot-subj .micons { --s: 52px; flex: none; }
+  .t3-shot .shot-subj .wi { width: 52px; height: 52px; }
+  .t3-shot .shot-filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+  .t3-shot .shot-filters span { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--ink-3); background: var(--ink-2); font: 600 14px/1.2 "Barlow", "Noto Sans JP", sans-serif; }
+  .t3-shot .shot-filters span:first-child { border-color: var(--gold); color: var(--gold); }
+  .t3-shot .top3 thead th { position: static; }
+  .t3-shot .t3-quests th.t3-lab { width: 300px; }
+  .t3-shot .t3-weapons th.t3-lab { width: 90px; }
+  .t3-shot .t3-lab .qstar { margin-right: 6px; }
+  .t3-shot .t3-lab .qlabel, .t3-shot .t3-lab .qname { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; -webkit-line-clamp: unset !important; display: inline !important; }
   .ws-shot { position: fixed; left: -12000px; top: 0; width: 1040px; padding: 22px 26px 16px; color: var(--paper); }
   .ws-shot .ws-split { display: grid !important; grid-template-columns: 470px 1fr !important; gap: 24px; align-items: start; }
   .ws-shot .ws-side { display: block !important; }
@@ -1421,6 +1449,23 @@
     .controls.float .trim-ctl::before { content: "±"; font-size: 12px; color: var(--muted); }
     .controls.float .trim-ctl input { width: 64px; height: 14px; }
     .controls.float .trim-ctl output { font-size: 12px; min-width: 28px; }
+    /* simpler: only "By update / title / OBT" and the three modes stay pinned, in one short row each */
+    .controls.float #wsDispSeg, .controls.float .trim-ctl, .controls.float .wsr-desc { display: none !important; }
+    .controls.float .wsr button img, .controls.float .wsr button small { display: none; }
+    .controls.float .wsr button { padding: 3px 9px; }
+    .controls.float .wsr button b { font-size: 12px; }
+    /* pinned quick bar on phones: brand (logo, title, Fox Invictus, game logo) in one thin row, then the six view icons */
+    .quickbar .qb-brand { flex-wrap: nowrap; gap: 6px; padding-inline: 4px; }
+    .quickbar .qb-brand img { width: 22px; height: 22px; }
+    .quickbar .qb-title { font-size: 15px; white-space: nowrap; }
+    @media (max-width: 380px) { .quickbar .qb-title { font-size: 13px; } .quickbar .qb-brand { gap: 4px; } }
+    .quickbar .qb-by { font-size: 11px; white-space: nowrap; }
+    .quickbar .qb-by > span { display: none; }   /* "collected by" left out, "Fox Invictus" stays */
+    .quickbar .qb-game img { height: 18px; }
+    .quickbar { padding-top: calc(4px + env(safe-area-inset-top, 0px)); padding-bottom: 4px; }
+    .quickbar button { flex-direction: row; justify-content: center; gap: 0; padding: 5px 2px; }
+    .quickbar button img { width: 24px; height: 24px; }
+    .quickbar button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   }
 </style>
 </head>
@@ -1483,6 +1528,7 @@
 <!-- compact copy of the view tabs, pinned to the top once the big tabs have scrolled away -->
 <nav class="quickbar" id="quickbar" aria-label="Views" hidden>
   <a class="qb-brand" href="#" onclick="window.scrollTo({ top: 0 }); return false;"><img src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><span class="qb-title">MH Speedrun Leaderboards</span><span class="qb-by"><span>collected by</span> Fox Invictus</span><span class="qb-game" id="qbGame"></span></a>
+  <div class="qb-quest" id="qbQuest" hidden></div>
   <div class="qb-views">
   <button data-view="table"><img src="icons/UI/overview.png" alt="" onerror="this.remove()"><span>Overview</span></button>
   <button data-view="quest"><img src="icons/UI/quest.png" alt="" onerror="this.remove()"><span>By quest</span></button>
@@ -1517,7 +1563,7 @@
         </div>
         <div class="seg" role="group" aria-label="Ranking depth" id="depthSeg">
           <button data-depth="1" aria-pressed="true">Best time</button>
-          <button data-depth="3" aria-pressed="false">Top 3</button>
+          <button data-depth="3" class="d3" aria-pressed="false">Top 3</button>
         </div>
         <div class="seg" role="group" aria-label="Bar length" id="metricSeg">
           <span class="seg-label" id="metricLabel">Bars</span>
@@ -1908,7 +1954,7 @@ const JA = {
   "Normalised: the average of all weapons is always 1.00 – above 1.00 = stronger than average.": "正規化：全武器の平均は常に1.00です。1.00より上＝平均より強い。",
   "with automatic weapon tier lists": "武器ティア表を自動作成",
   "Quantity": "量", "Quality": "質",
-  "Save image": "画像を保存", "Weapon ranking": "武器ランキング", "Share": "共有", "Weapon tier list": "武器ティア表",
+  "Save image": "画像を保存", "Post on X": "Xでポスト", "Weapon ranking": "武器ランキング", "Share": "共有", "Weapon tier list": "武器ティア表",
   "The image could not be created. Please try again.": "画像を作成できませんでした。もう一度お試しください。", "Exclusive": "ここだけ",
   "No quests with at least {n} weapons yet – move the slider to the left.": "{n}武器以上に記録があるクエストはまだありません。スライダーを左に動かしてください。", "run": "記録", "runs": "記録", "Recommended: 10": "おすすめ：10", "min. {n} weapons per quest": "1クエストにつき最低{n}武器",
   "Left: every quest counts (more runs). Right: only quests where many weapons have a run (higher accuracy). The curve is highest where many runs and a high accuracy come together.": "左：すべてのクエストを集計（記録が多い）。右：多くの武器に記録があるクエストのみ（精度が高い）。曲線は記録数と精度のバランスが最も良い位置で最も高くなります。",
@@ -2827,7 +2873,7 @@ function syncControls() {
     if (b.dataset.wsruns === "hero") { b.disabled = extremeOff; b.title = extremeOff ? tr("No Heroics data for this game") : ""; }
   });
   document.getElementById("wsRunsDesc").textContent = tr(WS_RUNS_DESC[state.wsRuns]);
-  if (!ws) document.getElementById("wsWarn").hidden = true;
+  if (!ws) { const ww = document.getElementById("wsWarn"); ww.hidden = true; ww.classList.remove("ext"); ww.innerHTML = ""; }
   document.getElementById("trimCtl").hidden = !ws;
   const trimLock = state.wsRuns === "hero";   // Extreme: always 0 %, the slider is locked
   const tc = document.getElementById("trimCtl"), trg = document.getElementById("trimRange");
@@ -2908,6 +2954,14 @@ function render() {
   else renderTableView();
   fitRows();
   window.qbCheck?.();
+  // By quest: monster icon + full quest name in the pinned bar
+  const qq = document.getElementById("qbQuest");
+  if (qq) {
+    const q = state.view === "quest" && state.quests.find(x => x.game === state.game && x.quest === state.quest);
+    const key = q ? q.game + "|" + q.quest + "|" + LANG : "";
+    if (qq.dataset.k !== key) { qq.dataset.k = key; qq.innerHTML = q ? monsterIcons(q, "qbq") + `<span>${esc(qn(q))}</span>` : ""; }
+    qq.hidden = !q;
+  }
   // game logo in the pinned bar (only rebuilt when the game changes)
   const qg = document.getElementById("qbGame");
   if (qg && qg.dataset.g !== state.game) {
@@ -3123,7 +3177,10 @@ function renderTop3Table(rows, firstHead, cls) {
     }).join("");
     return `<tr><th scope="row" class="t3-lab">${lab}</th>${cells}</tr>`;
   }).join("");
-  tableEl.innerHTML = `<table class="top3 ${cls}">${head}<tbody>${body}</tbody></table>`;
+  const shot = `<div class="t3-shotbar"><button type="button" class="shot-btn" data-t3="save">⤓ ${tr("Save image")}</button>` +
+    `<button type="button" class="shot-btn" data-t3="x">${tr("Post on X")}</button></div>`;
+  tableEl.innerHTML = shot + `<table class="top3 ${cls}">${head}<tbody>${body}</tbody></table>`;
+  tableEl.querySelectorAll("[data-t3]").forEach(b => b.onclick = () => t3Shot(b.dataset.t3 === "x", b));
   tableEl.querySelectorAll(".qbtn").forEach(b => b.onclick = () => { state.view = "quest"; state.quest = b.dataset.q; state.depth = 3; render(); });
 }
 
@@ -3722,6 +3779,74 @@ function glossForShot(d) {
     el.style.background = `linear-gradient(to bottom, ${mixRgb(u, W, .12)}, ${mixRgb(u, W, .04)} 50%, ${mixRgb(u, B, .1)} 51%, ${mixRgb(u, W, .06)})`;
   });
 }
+/* By quest / By weapon with Top 3: the table as JPEG – header (site, Fox Invictus, game logo), quest or weapon,
+   active filters, then the table. "Post on X": phones get the share sheet with the image; desktop downloads the image
+   and opens an X post with text + link (the image is attached there by hand). */
+async function t3Shot(toX, btn) {
+  const table = document.querySelector("#table table.top3");
+  if (!table) return;
+  const pageUrl = location.href;
+  const q = state.view === "quest" ? state.quests.find(x => x.game === state.game && x.quest === state.quest) : null;
+  const w = state.view === "weapon" ? W[state.weapon] : null;
+  const subjTxt = q ? qn(q) : w ? wn(w.k) : "";
+  const postText = `${subjTxt} · Top 3 – MH Speedrun Leaderboards`;
+  const phoneShare = !!(toX && navigator.canShare && navigator.canShare({ files: [new File([""], "x.jpg", { type: "image/jpeg" })] }));
+  const xWin = toX && !phoneShare ? window.open("", "_blank") : null;   // opened right in the click, or the popup blocker stops it
+  const old = btn.textContent;
+  btn.disabled = true; btn.textContent = "…";
+  let box;
+  try {
+    await loadH2C();
+    const bg = getComputedStyle(document.body).backgroundColor;
+    const pressed = id => document.querySelector(`#${id} button[aria-pressed="true"]`)?.textContent.trim() || "";
+    const filters = [tr("Top 3"), pressed("metricSeg")];
+    if (heroUntracked(state.game) !== "beta") filters.push(pressed("heroSeg"));
+    const other = q ? (LANG === "ja" ? (q.jp ? q.quest : "") : q.jp) : w ? (LANG === "ja" ? w.en : w.jp) : "";
+    box = document.createElement("div");
+    box.className = "t3-shot";
+    box.style.background = bg;
+    box.style.width = (q ? 860 : 1040) + "px";
+    box.innerHTML = `<div class="shot-head"><img src="icons/UI/favicon.png?v=2" alt="" onerror="this.remove()"><div><strong>MH Speedrun Leaderboards</strong>` +
+      `<span class="shot-by">${esc(tr("collected by"))} Fox Invictus</span></div>${shotLogo({ game: state.game, tag: /β/.test(state.game) ? "OBT" : "" })}</div>` +
+      `<div class="shot-subj">${q ? monsterIcons(q, "shotq") : w ? weaponIcon(w.k, "big") : ""}<div>${esc(subjTxt)}${other ? `<small>${esc(other)}</small>` : ""}</div></div>` +
+      `<div class="shot-filters">${filters.filter(Boolean).map(f => `<span>${esc(f)}</span>`).join("")}</div>`;
+    const clone = table.cloneNode(true);
+    clone.querySelectorAll('img[loading="lazy"]').forEach(im => { im.loading = "eager"; const src = im.getAttribute("src"); im.removeAttribute("src"); im.setAttribute("src", src); });
+    box.querySelectorAll('img[loading="lazy"]').forEach(im => { im.loading = "eager"; });
+    box.appendChild(clone);
+    box.insertAdjacentHTML("beforeend", `<div class="shot-foot">foxinvictus.github.io/mh-time-attack</div>`);
+    document.body.appendChild(box);
+    await Promise.all([...box.querySelectorAll("img")].map(im => im.complete ? 0 : new Promise(r => {
+      im.addEventListener("load", r, { once: true }); im.addEventListener("error", () => setTimeout(r, 300), { once: true }); setTimeout(r, 4000);
+    })));
+    await new Promise(r => setTimeout(r, 150));
+    document.documentElement.classList.add("shot");
+    const canvas = await window.html2canvas(box, { backgroundColor: bg, scale: 2, useCORS: true, logging: false,
+      onclone: d => { d.documentElement.classList.add("shot"); glossForShot(d); } });
+    document.documentElement.classList.remove("shot");
+    const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.92));
+    const name = ("mh-top3-" + (state.game || "") + "-" + (q ? q.quest : w ? w.en : "")).replace(/[^\w.-]+/g, "-").toLowerCase() + ".jpg";
+    const file = new File([blob], name, { type: "image/jpeg" });
+    if (phoneShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text: postText + "\n" + pageUrl });
+    } else {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+      if (xWin) xWin.location.href = "https://x.com/intent/post?text=" + encodeURIComponent(postText) + "&url=" + encodeURIComponent(pageUrl);
+    }
+    gcEvent("top3-image-" + (toX ? "x" : "save"), "Top 3 image");
+  } catch (e) {
+    xWin?.close();
+    console.error(e);
+    if (e && e.name !== "AbortError") alert(tr("The image could not be created. Please try again."));
+  } finally {
+    document.documentElement.classList.remove("shot");
+    box?.remove();
+    btn.disabled = false; btn.textContent = old;
+  }
+}
 async function tierShot(share, btn, label, kind = "Weapon tier list", logo = null) {
   const split = document.querySelector("#wsChart .ws-split");
   if (!split) return;
@@ -4078,6 +4203,16 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V155", when: "18.11.2026 11:55", items: [
+    "By quest / By weapon with Top 3: \"Save image\" and \"Post on X\" – the table as a JPEG with site name, Fox Invictus, game logo, quest or weapon and the active filters; the X post gets the link to the page." ] },
+  { v: "V154", when: "18.11.2026 11:45", items: [
+    "By quest: the pinned bar shows the monster icon and quest name with \"Best time\" too." ] },
+  { v: "V153", when: "18.11.2026 11:40", items: [
+    "Fix: the Extreme warning appeared in other views too – now only in Weapon Strength with Extreme." ] },
+  { v: "V152", when: "18.11.2026 11:35", items: [
+    "By quest: the \"Top 3\" button stands out a little; with Top 3 the pinned bar also shows the monster icon and the full quest name." ] },
+  { v: "V151", when: "18.11.2026 11:25", items: [
+    "Phone: the pinned bar is much smaller – the title row is one thin line and the views are icons only; in Weapon Strength only \"By update / title / OBT\" and the three modes stay pinned (without icons and descriptions)." ] },
   { v: "V150", when: "18.11.2026 11:20", items: [
     "Weapon Strength, Extreme: warning that this mode is made for TA runners / speedrunners, with a button to switch to Realistic.",
     "The warning also explains the green ▼ (value without Heroics), so shared charts are not misread." ] },
