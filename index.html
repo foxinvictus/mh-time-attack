@@ -104,6 +104,16 @@
   .intro-yt { width: 20px; height: 20px; object-fit: contain; flex: none; }
   .intro-link small { color: var(--muted); font-size: 12px; }
   @media (prefers-reduced-motion: reduce) { .intro-link { transition: none; } }
+  /* announcement next to the quick tour: big changes, short, for a few weeks */
+  .news { display: inline-flex; align-items: center; gap: 2px; margin: 8px 0 0 6px; vertical-align: top;
+    border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent); border-radius: 999px;
+    background: color-mix(in srgb, var(--gold) 12%, var(--ink-2)); font-size: 13px; line-height: 1.2; }
+  .news[hidden] { display: none; }
+  .news a { display: inline-flex; align-items: center; gap: 7px; padding: 4px 4px 4px 5px; color: var(--paper); text-decoration: none; }
+  .news a:hover span { text-decoration: underline; }
+  .news b { background: var(--gold); color: #1b1b1b; border-radius: 999px; padding: 1px 7px; font-size: 11px; letter-spacing: .04em; }
+  .news button { border: 0; background: none; color: var(--muted); cursor: pointer; padding: 2px 9px 2px 4px; font-size: 14px; line-height: 1; }
+  .news button:hover { color: var(--paper); }
   /* Japanese interface: Japanese glyphs come from Noto Sans JP */
   html[lang="ja"] body, html[lang="ja"] button, html[lang="ja"] select { font-family: "Barlow", "Noto Sans JP", sans-serif; }
   html[lang="ja"] h1, html[lang="ja"] h2, html[lang="ja"] h3, html[lang="ja"] strong, html[lang="ja"] .w-en,
@@ -225,6 +235,23 @@
     padding: 6px 14px; font-size: 14px; font-weight: 500; color: var(--muted); white-space: nowrap;
   }
   .seg button[aria-pressed="true"] { background: var(--gold); color: var(--on-gold); }
+  /* Weapon Strength mode: Realistic (green, stands out most) · Best · Extreme (red) */
+  .wsr-wrap[hidden] { display: none; }
+  .wsr-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .seg.wsr button { display: inline-flex; align-items: center; gap: 6px; padding-top: 4px; padding-bottom: 4px; }
+  .seg.wsr button img { width: 20px; height: 20px; object-fit: contain; flex: none; }
+  .seg.wsr button span { display: flex; flex-direction: column; line-height: 1.05; text-align: left; }
+  .seg.wsr button b { font-weight: 700; }
+  .seg.wsr button small { font-size: 11px; opacity: .8; font-variant-numeric: tabular-nums; }
+  .seg.wsr button.wsr-real { background: color-mix(in srgb, #2fa35a 16%, transparent); color: #3cbf6c; font-size: 1.04em; }
+  :root[data-theme="light"] .seg.wsr button.wsr-real { color: #1f7a40; }
+  .seg.wsr button.wsr-real[aria-pressed="true"] { background: #2fa35a; color: #fff; box-shadow: 0 0 0 2px color-mix(in srgb, #2fa35a 35%, transparent); }
+  .seg.wsr button.wsr-ext { background: color-mix(in srgb, #d8433a 13%, transparent); color: #e2625a; }
+  :root[data-theme="light"] .seg.wsr button.wsr-ext { color: #b0302a; }
+  .seg.wsr button.wsr-ext[aria-pressed="true"] { background: #c9392f; color: #fff; }
+  :root .seg.wsr button.wsr-real[aria-pressed="true"], :root .seg.wsr button.wsr-ext[aria-pressed="true"] { color: #fff; }
+  .seg.wsr button:disabled { opacity: .4; cursor: not-allowed; }
+  .wsr-desc { margin: 0; font-size: 12px; color: var(--muted); }
   .seg[hidden] { display: none; }
   .hero-na { margin: 0; align-self: center; font-size: 13px; color: var(--muted); max-width: 46ch; }
   .hero-na.warn { color: var(--hero); font-weight: 600; max-width: 60ch; }
@@ -282,6 +309,8 @@
   .nhtri { position: absolute; top: 0; z-index: 3; width: 0; height: 0; margin-left: -6px; cursor: help;
     border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: max(6px, calc(var(--bar-h1, 26px) * .28)) solid #e0312b;
     opacity: .82; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 1.5px rgba(255,255,255,.85)); }   /* thin white glow: visible on red bars too */
+  .wsb .nhtri.wsg { border-top: 9px solid #2fa35a; border-left-width: 6px; border-right-width: 6px; opacity: .9; }   /* Extreme: Best (No Heroics) value */
+  .ws-tier-h small .g { color: #3cbf6c; }
   .run.minor .nhtri { border-left-width: 4px; border-right-width: 4px; margin-left: -4px; border-top-width: 5px; }
   @keyframes grow { from { transform: scaleX(0); } }
   @media (prefers-reduced-motion: reduce) { .bar { animation: none; } }
@@ -623,7 +652,15 @@
   body[data-view="strength"] .table-wrap { max-height: none; }
   .trim-ctl { display: flex; align-items: center; gap: 8px; padding: 2px 12px; border: 1px solid var(--ink-3); border-radius: 999px; font-size: 13px; color: var(--muted); }
   .trim-ctl[hidden] { display: none; }
+  .trim-ctl.locked { opacity: .45; cursor: not-allowed; }
   .ws-warn { color: var(--hero); font-weight: 600; white-space: pre-line; }
+  .ws-warn.ext { white-space: normal; color: var(--paper); font-weight: 400; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    border: 1px solid #c9392f; border-left-width: 4px; border-radius: 8px; padding: 10px 14px; background: color-mix(in srgb, #c9392f 12%, transparent); }
+  .ws-warn.ext p { margin: 0; flex: 1 1 320px; }
+  .ws-warn.ext strong { color: #e2625a; }
+  .ws-warn.ext .g { color: #2fa35a; }
+  :root[data-theme="light"] .ws-warn.ext strong { color: #b0302a; }
+  .ws-warn.ext button { flex: none; border: 1px solid #2fa35a; background: #2fa35a; color: #fff; border-radius: 999px; padding: 5px 14px; font: inherit; font-weight: 600; cursor: pointer; }
   .ws td.few { opacity: .55; }
   .ws td.few .v::after { content: "*"; }
   .trim-ctl input { width: 120px; accent-color: var(--gold); }
@@ -1396,6 +1433,7 @@
     <span class="by">collected by <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">Fox Invictus</a></span>
     <p class="tagline" id="tagline"></p>
     <a class="intro-link" id="introLink" href="https://youtu.be/axVBnouN450" target="_blank" rel="noopener"><img class="intro-yt" src="icons/watch/youtube.png" alt="" onerror="this.remove()"><span id="introText">Quick tour</span><small id="introLen">(1 min)</small></a>
+    <span class="news" id="news" hidden></span>
   </div>
   <div class="visits" id="visits" hidden></div>
   <div class="games-wrap" id="gamesWrap">
@@ -1492,9 +1530,13 @@
           <button data-wsmode="titles" aria-pressed="false" title="All full games side by side">By title</button>
           <button data-wsmode="obt" aria-pressed="false" title="All open beta tests side by side">By OBT</button>
         </div>
-        <div class="seg" role="group" aria-label="Runs per quest" id="wsRunsSeg" hidden>
-          <button data-wsruns="best" aria-pressed="false" title="Only the fastest run per quest and weapon">Maximum performance</button>
-          <button data-wsruns="top3" aria-pressed="true" title="Up to 3 runs per quest and weapon – recommended">Realistic</button>
+        <div class="wsr-wrap" id="wsRunsSeg" hidden>
+          <div class="seg wsr" role="group" aria-label="Runs per quest">
+            <button data-wsruns="top3" class="wsr-real" aria-pressed="true"><img src="icons/UI/no-heroics.png" alt="" onerror="this.remove()"><span><b>Realistic</b><small>#1–3</small></span></button>
+            <button data-wsruns="best" aria-pressed="false"><img src="icons/UI/no-heroics.png" alt="" onerror="this.remove()"><span><b>Best</b><small>#1</small></span></button>
+            <button data-wsruns="hero" class="wsr-ext" aria-pressed="false"><img src="icons/UI/1hp.png" alt="" onerror="this.replaceWith('🔥')"><span><b>Extreme</b><small>#1</small></span></button>
+          </div>
+          <p class="wsr-desc" id="wsRunsDesc"></p>
         </div>
         <label class="trim-ctl" id="trimCtl" hidden title="Share of runs ignored at the top and at the bottom of every weapon">
           Ignore extremes <input type="range" id="trimRange" min="0" max="25" step="1" value="15"> <output id="trimOut">15 %</output>
@@ -1507,8 +1549,8 @@
         <p class="hero-na" id="heroNa" hidden></p>
       </div></div>
     </div>
+    <div class="note ws-warn" id="wsWarn" hidden></div>
     <p class="note" id="note" hidden></p>
-    <p class="note ws-warn" id="wsWarn" hidden></p>
     <ol class="rows" id="rows"><li class="status">Loading runs…</li></ol>
     <div class="table-wrap" id="table" hidden></div>
     <div class="ws-chart" id="wsChart" hidden></div>
@@ -1693,7 +1735,10 @@ const JA = {
   "collected by": "収集：",
   "Changelog": "更新履歴", "Info & changelog": "情報と更新履歴",
   "Contact / Support the project": "連絡・プロジェクト支援",
-  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Best without Heroics: {v}": "火事場なしの最速：{v}", "▼ = best without Heroics": "▼ = 火事場なし最速", "Faint part = best without Heroics": "薄い部分 = 火事場なし最速", "Quest forms (experimental)": "クエスト形式（試験的）", "Quest type & target": "クエスト種別と目標",
+  "Light mode": "ライトモード", "Dark mode": "ダークモード", "Close": "閉じる", "Version {v}": "バージョン {v}", "Extreme is made for TA runners / speedrunners only.": "火事場モードはTA走者・スピードランナー向けです。",
+  "It shows how weapons compare when played to absolute perfection. Not a speedrunner or new to the game? Please use “Realistic” – Extreme needs near-perfect play and can give you a very wrong picture of the weapons.": "完璧に近いプレイをした場合の武器の比較です。スピードランをしない方や初心者の方は「安定」をご利用ください。極めて高い練度が前提のため、武器の印象を大きく誤る恐れがあります。",
+  "Switch to Realistic": "「安定」に切り替え",
+  "For safety, the green <b class=\"g\">▼</b> in every bar still shows the weapon's value without Heroics – so a shared chart is not misread.": "念のため、各バーの緑の<b class=\"g\">▼</b>で火事場なしの値も表示しています。画像を共有しても誤解されないようにするためです。", "NEW": "新機能", "Hide": "非表示", "Weapon Strength reworked – new Extreme mode": "武器の強さを刷新 – 新しい火事場モード", "Best without Heroics: {v}": "火事場なしの最速：{v}", "▼ = best without Heroics": "▼ = 火事場なし最速", "Faint part = best without Heroics": "薄い部分 = 火事場なし最速", "Quest forms (experimental)": "クエスト形式（試験的）", "Quest type & target": "クエスト種別と目標", "Weapon Strength: Extreme mode": "武器の強さ：火事場モード",
   "Optional quest": "任意クエスト", "Event quest": "イベントクエスト", "Investigation": "調査クエスト", "Free challenge quest": "フリーチャレンジクエスト",
   "Target: slay": "目標：討伐", "Target: capture": "目標：捕獲", "Build {n}": "ビルド {n}", "Builds": "ビルド",
   "visitors": "訪問者", "last 7 days": "直近7日間", "Visitors since the site started": "サイト開設以来の訪問者数", "Visitors in the last 7 days": "直近7日間の訪問者数", "Visitor counter": "訪問者数の表示",
@@ -1838,11 +1883,17 @@ const JA = {
   "without Heroics": "火事場なし", "Heroics runs only": "火事場のみ", "with and without Heroics": "火事場あり・なし両方",
   "top and bottom {p} % ignored": "上下{p}%を除外", "no values ignored": "除外なし",
   "Active filters: {x}.": "適用中のフィルター：{x}。",
-  "Maximum performance": "最大パフォーマンス", "Realistic": "実戦向け",
+  "Maximum performance": "最大パフォーマンス", "Realistic": "安定", "Extreme": "火事場",
+  "Top 3 No Heroics runs per weapon.": "火事場なし・上位3記録", "Fastest No Heroics run per weapon.": "火事場なし・最速記録のみ", "Fastest Heroics run per weapon.": "火事場あり・最速記録のみ",
+  "No Heroics data for this game": "このタイトルには火事場のデータがありません",
+  "<b>Best</b> – only the fastest run per quest and weapon": "<b>最速</b> – クエスト・武器ごとの最速記録のみ",
+  "<b>Extreme</b> – only the fastest Heroics run per quest and weapon": "<b>火事場</b> – クエスト・武器ごとの火事場ありの最速記録のみ",
+  "<b>Heroics only</b> – values are not comparable with Realistic / Best": "<b>火事場のみ</b> – 安定 / 最速とは比較できません",
+  "Extreme: only Heroics runs (+30 % damage at low HP) – a ranking of its own, not comparable with Realistic / Best.": "火事場：火事場ありの記録のみ（低体力時に攻撃力+30%）。安定 / 最速とは別のランキングで、比較はできません。",
   "Only the fastest run per quest and weapon": "クエスト・武器ごとの最速記録のみ",
   "Up to 3 runs per quest and weapon – recommended": "クエスト・武器ごとに最大3記録 – おすすめ",
-  "Recommended: “Realistic” + “No Heroics”.": "おすすめ設定：「実戦向け」＋「火事場なし」",
-  "Recommended: “Realistic”.": "おすすめ設定：「実戦向け」",
+  "Recommended: “Realistic” + “No Heroics”.": "おすすめ設定：「安定」＋「火事場なし」",
+  "Recommended: “Realistic”.": "おすすめ設定：「安定」",
   "Heroics runs are ignored here: the Heroics damage buff (+30 %) distorts the results too much and is not realistic for normal play.": "ここでは火事場の記録は除外しています：火事場（攻撃力+30%）は結果を大きくゆがめ、通常のプレイとはかけ離れているためです。",
   "<b>No Heroics</b> – Heroics runs are ignored (they distort the results and are not realistic)": "<b>火事場なし</b> – 火事場の記録は除外（結果をゆがめ、実戦的ではないため）",
   "Ratio = average best time of all weapons in the quest ÷ clear time (1.00 = average, higher = faster).": "レシオ＝クエスト内の全武器の最速タイム平均 ÷ クリアタイム（1.00＝平均、高いほど速い）。",
@@ -1876,7 +1927,7 @@ const JA = {
   "n<sub>q</sub> = weapons with a run in quest q · a<sub>1–3</sub> = 1st / 2nd / 3rd run exists (1 or 0)": "n<sub>q</sub>＝クエストqで記録のある武器の数 · a<sub>1–3</sub>＝1〜3件目の記録の有無（1または0）",
   "Quests count by how many weapons have a run there: fully covered quests count fully, quests with only a few weapons count very little.": "クエストは記録のある武器の数に応じて重み付けされます。全武器がそろったクエストは100%、少数の武器しか記録がないクエストはごくわずかしか影響しません。",
   "Active filters:": "適用中のフィルター：",
-  "<b>Realistic</b> – up to 3 runs per quest and weapon, so more runs are used": "<b>実戦向け</b> – クエスト・武器ごとに最大3記録を使用。より多くの記録で集計",
+  "<b>Realistic</b> – up to 3 runs per quest and weapon, so more runs are used": "<b>安定</b> – クエスト・武器ごとに最大3記録を使用。より多くの記録で集計",
   "<b>Maximum performance</b> – only the fastest run per quest and weapon": "<b>最大パフォーマンス</b> – クエスト・武器ごとの最速記録のみ",
   "<b>No Heroics</b> – runs without the Heroics damage buff": "<b>火事場なし</b> – 火事場（攻撃力アップ）なしの記録",
   "<b>Heroics only</b> – only runs with the Heroics damage buff": "<b>火事場のみ</b> – 火事場ありの記録だけ",
@@ -1885,6 +1936,9 @@ const JA = {
   "<b>Ignore extremes off</b> – every value counts": "<b>除外なし</b> – すべての値を集計",
   "run analysed": "記録を分析", "runs analysed": "記録を分析", "Accuracy": "精度", "High": "高", "Medium": "中", "Low": "低",
   "arrows: change vs. {p}": "矢印：{p}からの変化",
+  "arrows / <b class=\"g\">▼</b>: Best (No Heroics)": "矢印 / <b class=\"g\">▼</b>：最速（火事場なし）", "vs. Best (No Heroics)": "最速（火事場なし）との差",
+  "Extreme: fastest runs, nothing is ignored": "火事場：最速記録のため除外なし",
+  "<b>Ignore extremes off</b> – Extreme uses the fastest runs as they are": "<b>除外なし</b> – 火事場は最速記録をそのまま使用",
   "Submit a run": "記録を投稿", "Submit a missing run": "未掲載の記録を投稿", "Submit": "送信", "Game": "タイトル",
   "Clear time": "クリアタイム", "Video link": "動画リンク", "Note (optional)": "メモ（任意）",
   "New runs are found automatically by an API script that reads YouTube. A Python program then takes many snapshots of the HP bar in every video and decides on its own whether Heroics was active.": "新しい記録は、YouTubeを読み取るAPIスクリプトで自動的に集めています。さらにPythonプログラムが各動画のHPバーを何度も撮影し、火事場が発動していたかを自動で判定します。",
@@ -2035,6 +2089,28 @@ const TAGLINE_EN = "Mobile-friendly speedrun records for several Monster Hunter 
 const FLAG_JP = `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#fff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>`;
 const FLAG_GB = `<svg class="flag" viewBox="0 0 60 30" aria-hidden="true"><clipPath id="fgS"><path d="M0,0v30h60V0z"/></clipPath><clipPath id="fgT"><path d="M30,15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#fgS)"><path d="M0,0v30h60V0z" fill="#012169"/><path d="M0,0L60,30M60,0L0,30" stroke="#fff" stroke-width="6"/><path d="M0,0L60,30M60,0L0,30" clip-path="url(#fgT)" stroke="#C8102E" stroke-width="4"/><path d="M30,0v30M0,15h60" stroke="#fff" stroke-width="10"/><path d="M30,0v30M0,15h60" stroke="#C8102E" stroke-width="6"/></g></svg>`;
 /* "Version 129" under the subtitle: number of the newest CHANGELOG entry (updates itself with every new entry) */
+/* ---------- announcement (big changes only) ----------
+   One entry: id (new id = shown again to everyone), text (EN, JA in the dictionary), view to open, shown until "until".
+   ✕ hides it for this browser. */
+const NEWS = { id: "ws-extreme", text: "Weapon Strength reworked – new Extreme mode", view: "strength", hash: { wsRuns: "hero" }, until: "2026-12-09" };
+function renderNews() {
+  const el = document.getElementById("news");
+  if (!el) return;
+  let gone = false;
+  try { gone = localStorage.getItem("mhlb-news") === NEWS.id; } catch (e) {}
+  const today = new Date().toISOString().slice(0, 10);
+  el.hidden = !NEWS.text || gone || today > NEWS.until;
+  if (el.hidden) return;
+  el.innerHTML = `<a href="#" id="newsGo"><b>${tr("NEW")}</b><span>${esc(tr(NEWS.text))}</span></a><button type="button" id="newsX" title="${esc(tr("Hide"))}" aria-label="${esc(tr("Hide"))}">✕</button>`;
+  document.getElementById("newsGo").onclick = e => {
+    e.preventDefault();
+    state.view = NEWS.view;
+    if (NEWS.hash?.wsRuns) { state.wsRuns = NEWS.hash.wsRuns; state.wsHero = state.wsRuns === "hero" ? "only" : "no"; }
+    render();
+    requestAnimationFrame(() => document.querySelector("main")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+  document.getElementById("newsX").onclick = () => { try { localStorage.setItem("mhlb-news", NEWS.id); } catch (e) {} el.hidden = true; };
+}
 function siteVerLabel() {
   const el = document.getElementById("siteVer");
   let v = "", b = 0; try { b = buildNo(CHANGELOG[0]); v = releaseOf(b).ver; } catch (e) { return; }   // CHANGELOG not defined yet
@@ -2080,6 +2156,7 @@ function setLang(l, rerender = true) {
   if (typeof themeLabel === "function") themeLabel();
   siteVerLabel();
   renderVisits();
+  renderNews();
   if (rerender && state.games && state.games.length) selectGame(state.game, state.quest);
 }
 
@@ -2405,7 +2482,8 @@ function init() {
   state.wsMode = ["titles", "obt"].includes(h.wsMode) ? h.wsMode : "updates";
   state.trim = h.trim != null && !isNaN(+h.trim) ? Math.min(25, Math.max(0, Math.round(+h.trim))) : TRIM_DEFAULT;
   state.wsCol = h.wsCol || null;
-  state.wsRuns = h.wsRuns === "best" ? "best" : "top3";
+  state.wsRuns = ["best", "hero"].includes(h.wsRuns) ? h.wsRuns : "top3";
+  state.wsHero = state.wsRuns === "hero" ? "only" : "no";   // Extreme = Heroics runs only, the other two = No Heroics
   state.wsDisp = ["sheet", "tier"].includes(h.wsDisp) ? h.wsDisp : "bars";
   state.wsMinW = Math.min(14, Math.max(4, parseInt(h.wsMinW, 10) || 10));
   state.hofDays = HOF_PERIODS.some(x => String(x[0]) === h.hofDays) ? Number(h.hofDays) : 90;
@@ -2741,11 +2819,22 @@ function syncControls() {
   document.getElementById("wsRunsSeg").hidden = !ws;
   document.getElementById("wsDispSeg").hidden = !ws;
   document.querySelectorAll("#wsDispSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.wsdisp === state.wsDisp));
-  document.querySelectorAll("#wsRunsSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.wsruns === state.wsRuns));
+  // Extreme needs Heroics: not in open betas (no Heroics skill) and not for games without Heroics data
+  const extremeOff = state.wsMode === "obt" || (state.wsMode === "updates" && !!heroUntracked(state.game));
+  if (extremeOff && state.wsRuns === "hero") { state.wsRuns = "top3"; state.wsHero = "no"; }
+  document.querySelectorAll("#wsRunsSeg button").forEach(b => {
+    b.setAttribute("aria-pressed", b.dataset.wsruns === state.wsRuns);
+    if (b.dataset.wsruns === "hero") { b.disabled = extremeOff; b.title = extremeOff ? tr("No Heroics data for this game") : ""; }
+  });
+  document.getElementById("wsRunsDesc").textContent = tr(WS_RUNS_DESC[state.wsRuns]);
   if (!ws) document.getElementById("wsWarn").hidden = true;
   document.getElementById("trimCtl").hidden = !ws;
-  document.getElementById("trimRange").value = state.trim;
-  document.getElementById("trimOut").textContent = state.trim + " %";
+  const trimLock = state.wsRuns === "hero";   // Extreme: always 0 %, the slider is locked
+  const tc = document.getElementById("trimCtl"), trg = document.getElementById("trimRange");
+  trg.value = trimLock ? 0 : state.trim; trg.disabled = trimLock;
+  tc.classList.toggle("locked", trimLock);
+  tc.title = tr(trimLock ? "Extreme: fastest runs, nothing is ignored" : "Share of runs ignored at the top and at the bottom of every weapon");
+  document.getElementById("trimOut").textContent = (trimLock ? 0 : state.trim) + " %";
   const hof = state.view === "hof";
   document.getElementById("sortSeg").hidden = state.view === "newest" || ws || hof;
   document.getElementById("depthSeg").hidden = state.view === "table" || state.view === "newest" || ws || hof;
@@ -2794,7 +2883,7 @@ onSeg("heroSeg",   d => { if (state.view !== "strength") state.hero = d.hero; })
 onSeg("metricSeg", d => { state.metric = d.metric; });
 onSeg("sortSeg",   d => { state.sort = d.sort; });
 onSeg("wsModeSeg", d => { state.wsMode = d.wsmode; state.wsCol = null; });
-onSeg("wsRunsSeg", d => { state.wsRuns = d.wsruns; });
+onSeg("wsRunsSeg", d => { state.wsRuns = d.wsruns; state.wsHero = d.wsruns === "hero" ? "only" : "no"; });
 onSeg("wsDispSeg", d => { state.wsDisp = d.wsdisp; });
 document.getElementById("trimRange").addEventListener("input", e => { state.trim = Number(e.target.value); render(); });
 
@@ -3465,11 +3554,12 @@ const desktop = window.matchMedia("(min-width: 821px)");
    Per weapon and column the top and bottom X % of the runs are dropped (like TRIMMEAN in the sheet:
    floor(n·2X) runs are removed, rounded down to an even number, half at each end) – with few runs per weapon, single extreme times would distort the average.
    A run belongs to the newest counted title update (Updates tab, Zählt = Ja) released on or before its upload date. */
-let wsCache = null;
+let wsCache = null, wsCacheBy = {};
 const WS_FEW = 3;   // cells with fewer runs are faded
 function wsBase() {
   const hero = heroMode();
-  if (wsCache && wsCache.runs === state.runs && wsCache.updates === state.updates && wsCache.hero === hero) return wsCache;
+  wsCache = wsCacheBy[hero];
+  if (wsCache && wsCache.runs === state.runs && wsCache.updates === state.updates) return wsCache;
   const runs = state.runs.filter(heroOk);   // reference and runs from the same Heroics selection
   const best = new Map();
   for (const r of runs) {
@@ -3490,9 +3580,11 @@ function wsBase() {
     if (/^\d{4}-\d\d-\d\d$/.test(r.date || "")) for (const u of byGame[r.game] || []) if (u.date <= r.date) upd = u.label;
     return { r, ratio, upd };
   }).filter(x => x.ratio);
-  return (wsCache = { runs: state.runs, updates: state.updates, hero, items, byGame });
+  return (wsCache = wsCacheBy[hero] = { runs: state.runs, updates: state.updates, hero, items, byGame });
 }
-/* "Realistic" / "Maximum performance": per quest and weapon keep only the n fastest runs (several runs of the same runner allowed) */
+/* short description under the three mode buttons */
+const WS_RUNS_DESC = { top3: "Top 3 No Heroics runs per weapon.", best: "Fastest No Heroics run per weapon.", hero: "Fastest Heroics run per weapon." };
+/* "Realistic" / "Best" / "Extreme": per quest and weapon keep only the n fastest runs (several runs of the same runner allowed) */
 function limitRuns(list, n) {
   if (!n) return list;
   const groups = new Map();
@@ -3545,6 +3637,8 @@ function trimmedRange(vals, pct) {
   return { lo: v[k], hi: v[n - k - 1] };
 }
 /* runs and accuracy of one column for a given "min. weapons per quest" (quantity ↔ quality slider) */
+/* Extreme = fastest Heroics runs: nothing is trimmed there (the slider stays as it is for the other modes) */
+const wsTrim = () => state.wsRuns === "hero" ? 0 : state.trim;
 function wsStats(all, minW) {
   // quantity ↔ quality: only quests where at least minW weapons have a run
   const cover = {};
@@ -3739,7 +3833,6 @@ function renderStrengthView() {
   const tableEl = document.getElementById("table");
   const chartEl = document.getElementById("wsChart");
   const base = wsBase();
-  const items = base.items.filter(x => heroOk(x.r));
   const byUpdate = state.wsMode === "updates";
   const gname = gameName;
 
@@ -3761,7 +3854,9 @@ function renderStrengthView() {
     ? `<h2>${tr("Weapon Strength · open betas")} <em class="excl">${tr("Exclusive")}</em></h2><p>${tr("Average ratio of every weapon per open beta test (OBT). Click a column to see its ranking.")}</p>`
     : `<h2>${tr("Weapon Strength · all titles")} <em class="excl">${tr("Exclusive")}</em></h2><p>${tr("Average ratio of every weapon per game (without open betas). Click a column to see its ranking.")}</p>`;
 
-  // values
+  // values (as a function: Extreme also needs the "Best" values for its arrows)
+  const calc = () => {
+  const items = wsBase().items.filter(x => heroOk(x.r)), trim = wsTrim();
   const cell = {};   // cell[colKey][weapon] = { v, n }
   const colN = {}, colAcc = {}, wAcc = {}, colAll = {};
   for (const c of cols) {
@@ -3786,10 +3881,10 @@ function renderStrengthView() {
       });
       // the weapon's own average over all its quests (undamped) = target of the damping,
       // so missing runs never lift a weak weapon towards the overall average
-      const own = qv.length ? trimmedMeanW(qv.map(x => ({ v: x.m, w: x.w })), state.trim) : 1;
+      const own = qv.length ? trimmedMeanW(qv.map(x => ({ v: x.m, w: x.w })), trim) : 1;
       qv.forEach(x => x.v = (1 - x.d) * x.m + x.d * own);
       const vals = qv.map(x => x.v);
-      cell[c.key][k] = list.length ? { v: trimmedMeanW(qv, state.trim), n: list.length, ...trimmedRange(vals, state.trim) } : null;
+      cell[c.key][k] = list.length ? { v: trimmedMeanW(qv, trim), n: list.length, ...trimmedRange(vals, trim) } : null;
     }
     // normalise: divide by the average of all weapons in this column, so the weapon average is exactly 1.00
     const vs = WEAPONS.map(([k]) => cell[c.key][k]).filter(Boolean);
@@ -3799,13 +3894,25 @@ function renderStrengthView() {
     const order = WEAPONS.map(([k]) => k).filter(k => cell[c.key][k]).sort((a, b) => cell[c.key][b].v - cell[c.key][a].v);
     order.forEach((k, i) => cell[c.key][k].rank = i + 1);
   }
+  return { items, cell, colN, colAcc, wAcc, colAll };
+  };
+  const { items, cell, colN, colAcc, wAcc, colAll } = calc();
+  const extreme = state.wsRuns === "hero";
+  // Extreme: arrows compare with "Best" (fastest No Heroics run) of the same column
+  let bestCell = null;
+  if (extreme) {
+    const keep = [state.wsRuns, state.wsHero];
+    state.wsRuns = "best"; state.wsHero = "no";
+    try { bestCell = calc().cell; } finally { [state.wsRuns, state.wsHero] = keep; }
+  }
   // updates without any run yet get no column; they are listed in the note instead
   const empty = cols.filter(c => !colN[c.key]);
   if (cols.some(c => colN[c.key])) cols = cols.filter(c => colN[c.key]);
   const unassigned = byUpdate ? items.filter(x => x.r.game === state.game && !x.upd).length : 0;
-  const hints = [noHeroSkill ? "" : `<strong>${tr("Heroics runs are ignored here: the Heroics damage buff (+30 %) distorts the results too much and is not realistic for normal play.")}</strong>`, tr("Recommended: “Realistic”."),
+  const hints = [noHeroSkill ? "" : state.wsRuns === "hero" ? `<strong>${tr("Extreme: only Heroics runs (+30 % damage at low HP) – a ranking of its own, not comparable with Realistic / Best.")}</strong>`
+      : `<strong>${tr("Heroics runs are ignored here: the Heroics damage buff (+30 %) distorts the results too much and is not realistic for normal play.")}</strong>`, tr("Recommended: “Realistic”."),
     tr("Ratio = average time of the same place (1st, 2nd, 3rd) of all weapons in the quest ÷ clear time, normalised so that the weapon average is 1.00 (higher = faster)."),
-    tr("Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.", { p: state.trim }),
+    extreme ? "" : tr("Ignore extremes: removes the top and bottom {p} % of each weapon's values, so single outliers count less.", { p: state.trim }),
     tr("Accuracy = how well the ranking is backed by runs: per quest and weapon the 1st run counts 60 %, the 2nd 25 %, the 3rd 15 %. The dot after each bar shows the accuracy of that weapon (green = high, yellow = medium, red = low)."),
     tr("Quests count by how many weapons have a run there: fully covered quests count fully, quests with only a few weapons count very little."),
     tr("Few runs: if a weapon has only 1 or 2 runs in a quest, its value there is pulled 40 % or 15 % towards the weapon's own average – missing runs never make a weak weapon look better.")];
@@ -3820,8 +3927,17 @@ function renderStrengthView() {
   const warnings = [];
   // Heroics runs included ("All runs" or "Heroics only"): the skill distorts the comparison
 
-  warn.hidden = !warnings.length;
-  warn.textContent = warnings.join("\n\n");
+  if (extreme && !noHeroSkill) {
+    // Extreme: warning for everyone who is not a speedrunner
+    warn.hidden = false; warn.classList.add("ext");
+    warn.innerHTML = `<p><strong>⚠ ${tr("Extreme is made for TA runners / speedrunners only.")}</strong> ${tr("It shows how weapons compare when played to absolute perfection. Not a speedrunner or new to the game? Please use “Realistic” – Extreme needs near-perfect play and can give you a very wrong picture of the weapons.")} ${tr("For safety, the green <b class=\"g\">▼</b> in every bar still shows the weapon's value without Heroics – so a shared chart is not misread.")}</p>` +
+      `<button type="button" id="wsToReal">${tr("Switch to Realistic")}</button>`;
+    document.getElementById("wsToReal").onclick = () => { state.wsRuns = "top3"; state.wsHero = "no"; render(); };
+  } else {
+    warn.classList.remove("ext");
+    warn.hidden = !warnings.length;
+    warn.textContent = warnings.join("\n\n");
+  }
 
   if (!cols.length) {
     tableEl.innerHTML = byUpdate ? `<p class="status">${tr("No title updates for {g} in the “Updates” tab yet.", { g: esc(gname(state.game)) })}</p>`
@@ -3832,6 +3948,7 @@ function renderStrengthView() {
   const sel = cols.find(c => c.key === state.wsCol && colN[c.key]) || withData[withData.length - 1] || cols[cols.length - 1];
   const prevOf = c => { const i = withData.indexOf(c); return i > 0 ? withData[i - 1] : null; };
   const delta = (c, k) => {
+    if (bestCell) { const a = cell[c.key][k], b = bestCell[c.key]?.[k]; return a && b ? a.v - b.v : null; }
     const p = prevOf(c), a = cell[c.key][k], b = p && cell[p.key][k];
     return a && b ? a.v - b.v : null;
   };
@@ -3848,7 +3965,7 @@ function renderStrengthView() {
       if (!x) return `<td class="none${c === sel ? " sel" : ""}">–</td>`;
       const t = tint(k, strength(x.v));
       const d = delta(c, k);
-      return `<td class="${c === sel ? "sel" : ""}${x.n < WS_FEW ? " few" : ""}" style="background:${t.bg};color:${t.fg}" title="${esc(`${en} · ${c.label}: ${fmtRatio(x.v)} (${tr("rank {r}, {runs}", { r: x.rank, runs: trn(x.n, "{n} run", "{n} runs") })})` + (d != null ? ` · ${d >= 0 ? "+" : ""}${d.toFixed(2)} ${tr("vs. {p}", { p: prevOf(c).label })}` : ""))}">` +
+      return `<td class="${c === sel ? "sel" : ""}${x.n < WS_FEW ? " few" : ""}" style="background:${t.bg};color:${t.fg}" title="${esc(`${en} · ${c.label}: ${fmtRatio(x.v)} (${tr("rank {r}, {runs}", { r: x.rank, runs: trn(x.n, "{n} run", "{n} runs") })})` + (d != null ? ` · ${d >= 0 ? "+" : ""}${d.toFixed(2)} ${bestCell ? tr("vs. Best (No Heroics)") : tr("vs. {p}", { p: prevOf(c).label })}` : ""))}">` +
         `<span class="vr"><span class="wsrk">${MEDALS[x.rank] ? medalImg(x.rank) : "#" + x.rank}</span><span class="v">${fmtRatio(x.v)}${accDot(wAcc[c.key][k], en)}</span></span>` +
         (d != null && Math.abs(d) >= 0.005 ? `<span class="sub">${arrow(d)}</span>` : "") + `</td>`;
     }).join("");
@@ -3870,17 +3987,20 @@ function renderStrengthView() {
   // ranking of the selected column
   const rows = WEAPONS.map(([k]) => ({ k, en: wnShort(k), x: cell[sel.key][k] })).filter(o => o.x).sort((a, b) => b.x.v - a.x.v);
   const top3 = state.wsRuns === "top3";
-  const max = Math.max(...rows.map(o => top3 ? Math.max(o.x.v, o.x.hi) : o.x.v), 0.01);
+  const bestV = k => bestCell?.[sel.key]?.[k]?.v;   // Extreme: green ▼ = Best value (fastest No Heroics run)
+  const max = Math.max(...rows.map(o => top3 ? Math.max(o.x.v, o.x.hi) : Math.max(o.x.v, bestV(o.k) || 0)), 0.01);
   const p = prevOf(sel);
   const pc = x => (x / max * 100).toFixed(1);
   // the filters behind this ranking, each with a short explanation
   const scope = byUpdate ? tr("{g}, title update {u}", { g: esc(gname(state.game)), u: esc(sel.label) }) : esc(gname(sel.key));
   const fl = [scope, top3
     ? tr("<b>Realistic</b> – up to 3 runs per quest and weapon, so more runs are used")
-    : tr("<b>Maximum performance</b> – only the fastest run per quest and weapon")];
-  if (!noHeroSkill) fl.push(tr("<b>No Heroics</b> – Heroics runs are ignored (they distort the results and are not realistic)"));
+    : extreme ? tr("<b>Extreme</b> – only the fastest Heroics run per quest and weapon")
+    : tr("<b>Best</b> – only the fastest run per quest and weapon")];
+  if (!noHeroSkill) fl.push(extreme ? tr("<b>Heroics only</b> – values are not comparable with Realistic / Best")
+    : tr("<b>No Heroics</b> – Heroics runs are ignored (they distort the results and are not realistic)"));
   if (state.wsMinW > 1) fl.push(tr("<b>Quality {n}/14</b> – only quests where at least {n} weapons have a run", { n: state.wsMinW }));
-  fl.push(state.trim ? tr("<b>Ignore extremes {p} %</b> – outliers at the top and bottom are left out", { p: state.trim }) : tr("<b>Ignore extremes off</b> – every value counts"));
+  fl.push(extreme ? tr("<b>Ignore extremes off</b> – Extreme uses the fastest runs as they are") : state.trim ? tr("<b>Ignore extremes {p} %</b> – outliers at the top and bottom are left out", { p: state.trim }) : tr("<b>Ignore extremes off</b> – every value counts"));
   const filterLine = `<div class="ws-filters"><p>${tr("Active filters:")}</p><ul>${fl.map(x => `<li>${x}</li>`).join("")}</ul>` +
     (top3 && disp === "bars" ? `<p>${tr("The line in each bar spans the lowest to the highest ratio that still counts.")}</p>` : "") +
     (disp === "tier" ? `<p>${tr("Tiers are set automatically by ratio (1.00 = quest average).")}</p>` : "") + `</div>` + wsFormula();
@@ -3906,18 +4026,20 @@ function renderStrengthView() {
       : stats + `<p class="status">${tr(state.wsMinW > 4 ? "No quests with at least {n} weapons yet – move the slider to the left." : "No runs in {x} yet.", { x: esc(sel.label), n: state.wsMinW })}</p>`);
   } else
   chartEl.innerHTML = colPick + (rows.length
-    ? `<h3 class="ws-tier-h">${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}${p ? `<small>${tr("arrows: change vs. {p}", { p: esc(p.label) })}</small>` : ""}` + shotBtns + `</h3>` +
+    ? `<h3 class="ws-tier-h">${tr("Ranking · {x}", { x: esc(sel.label) })}${byUpdate ? "" : " – " + esc(gname(sel.key))}${extreme ? `<small>${tr("arrows / <b class=\"g\">▼</b>: Best (No Heroics)")}</small>` : p ? `<small>${tr("arrows: change vs. {p}", { p: esc(p.label) })}</small>` : ""}` + shotBtns + `</h3>` +
       `<div class="ws-split ws-split-bars"><div class="ws-main">` + rows.map((o, i) => {
         const t = tint(o.k, Math.min(1, 0.3 + strength(o.x.v)));   // ranking bars: stronger colours than the table
         return `<div class="wsb"><span class="pos">${MEDALS[i + 1] ? medalImg(i + 1) : "#" + (i + 1)}</span><span class="nm">${weaponIcon(o.k, "small")}<span class="wn">${o.en}</span></span>` +
           `<span class="track"><span class="fill" style="display:block;width:${pc(o.x.v)}%;background:${t.bg}"></span>` +
+          (bestV(o.k) ? `<span class="nhtri wsg" style="left:${pc(bestV(o.k))}%" title="${esc(tr("Best without Heroics: {v}", { v: fmtRatio(bestV(o.k)) }))}"></span>` : "") +
           (top3 && o.x.hi > o.x.lo ? `<span class="rng" style="left:${pc(o.x.lo)}%;width:${(pc(o.x.hi) - pc(o.x.lo)).toFixed(1)}%" title="${esc(tr("Counted runs: ratio {a} to {b}", { a: fmtRatio(o.x.lo), b: fmtRatio(o.x.hi) }))}"></span>` : "") + `</span>` +
           `<span class="val">${fmtRatio(o.x.v)}${accDot(wAcc[sel.key][o.k], o.en)}</span><span class="dl">${arrow(delta(sel, o.k))}</span></div>`;
       }).join("") + `</div><div class="ws-side">${stats}${filterLine}</div></div>`
     : stats + `<p class="status">${tr(state.wsMinW > 4 ? "No quests with at least {n} weapons yet – move the slider to the left." : "No runs in {x} yet.", { x: esc(sel.label), n: state.wsMinW })}</p>`);
   chartEl.querySelectorAll(".ws-cols button").forEach(b => b.onclick = () => { state.wsCol = b.dataset.col; render(); });
   chartEl.querySelectorAll(".shot-btn").forEach(b => b.onclick = () => tierShot(b.dataset.shot === "share", b,
-    (byUpdate ? gname(state.game) + " · " + sel.label : gname(sel.key)), disp === "tier" ? "Weapon tier list" : "Weapon ranking",
+    (byUpdate ? gname(state.game) + " · " + sel.label : gname(sel.key)) + " · " + tr({ top3: "Realistic", best: "Best", hero: "Extreme" }[state.wsRuns]),
+    disp === "tier" ? "Weapon tier list" : "Weapon ranking",
     // logo in the image: game of the column + its label (title update / "All versions" / "OBT")
     byUpdate ? { game: state.game, tag: /β/.test(state.game) ? "OBT" : sel.label }
       : { game: sel.key, tag: state.wsMode === "obt" ? "OBT" : tr("All versions") }));
@@ -3956,6 +4078,17 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V150", when: "18.11.2026 11:20", items: [
+    "Weapon Strength, Extreme: warning that this mode is made for TA runners / speedrunners, with a button to switch to Realistic.",
+    "The warning also explains the green ▼ (value without Heroics), so shared charts are not misread." ] },
+  { v: "V149", when: "18.11.2026 11:15", items: [
+    "Short announcement next to \"Quick tour\" for big changes (click opens the feature, ✕ hides it): \"Weapon Strength reworked – new Extreme mode\"." ] },
+  { v: "V148", when: "18.11.2026 11:05", items: [
+    "Weapon Strength, Extreme: a small green ▼ in each bar marks the weapon's Best value (fastest No Heroics run, hover for the ratio)." ] },
+  { v: "V147", when: "18.11.2026 10:55", items: [
+    "Weapon Strength, Extreme: \"Ignore extremes\" is always off (fastest runs count as they are); the arrows compare each weapon with its Best value (fastest No Heroics run)." ] },
+  { v: "V146", when: "18.11.2026 10:45", items: [
+    "Weapon Strength: three modes – Realistic (top 3 No Heroics runs, recommended), Best (fastest No Heroics run) and the new Extreme (fastest Heroics run per weapon), each with a short description."  ] },
   { v: "V145", when: "03.11.2026 13:40", items: [
     "By quest: when the No Heroics marker is shown, the note only says \"▼ = best without Heroics\"." ] },
   { v: "V144", when: "03.11.2026 13:35", items: [
@@ -4330,6 +4463,7 @@ const RELEASES = [
   { ver: "3.9", from: 137, title: "Quest forms (experimental)" },
   { ver: "3.10", from: 138, title: "Quest type & target" },
   { ver: "3.10.1", from: 140, title: "Fixes" },
+  { ver: "3.11", from: 146, title: "Weapon Strength: Extreme mode" },
 ];
 const buildNo = e => +String(e.v).replace(/\D/g, "");
 const releaseOf = n => RELEASES.filter(r => r.from <= n).pop() || RELEASES[0];
