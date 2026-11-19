@@ -1632,8 +1632,8 @@
   </div>
   <div class="sub-stats" id="sStats" hidden></div>
   <div class="sub-how">
-    <p>New runs are found automatically by an API script that reads YouTube. A Python program then takes many snapshots of the HP bar in every video and decides on its own whether Heroics was active.</p>
-    <p>In very rare cases Heroics is not detected – an extra ratio check catches these suspiciously fast runs. If a run is still listed wrongly, please tell me on X: <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">@fox_invictus</a></p>
+    <p>New runs are found automatically by an API script that reads YouTube. Heroics is checked by hand.</p>
+    <p>If Heroics is missed, an extra ratio check catches these suspiciously fast runs. If a run is still listed wrongly, please tell me on X: <a href="https://x.com/fox_invictus" target="_blank" rel="noopener">@fox_invictus</a></p>
     <p><b>Every run is checked by hand – in this order of priority:</b></p>
     <ol>
       <li>Weapons with no run yet in the quest</li>
@@ -1681,7 +1681,7 @@
   </div>
   <p class="issue-faq">📖 <span>Please read the FAQ first before reporting a run – many questions are already answered there.</span> <button type="button" id="issueFaq">Open FAQ</button></p>
   <div class="sub-how">
-    <p>Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.</p>
+    <p>Runs are collected semi-automatically: an API script reads the videos from YouTube, Heroics and everything else is checked by hand.</p>
     <p>If something still doesn't add up with an existing run – wrong time, wrong quest, NPC hunters or additional players in the quest – I'm very grateful for every report!</p>
   </div>
   <form id="issueForm" novalidate>
@@ -1997,8 +1997,8 @@ const JA = {
   "<b>Ignore extremes off</b> – Extreme uses the fastest runs as they are": "<b>除外なし</b> – 火事場は最速記録をそのまま使用",
   "Submit a run": "記録を投稿", "Submit a missing run": "未掲載の記録を投稿", "Submit": "送信", "Game": "タイトル",
   "Clear time": "クリアタイム", "Video link": "動画リンク", "Note (optional)": "メモ（任意）",
-  "New runs are found automatically by an API script that reads YouTube. A Python program then takes many snapshots of the HP bar in every video and decides on its own whether Heroics was active.": "新しい記録は、YouTubeを読み取るAPIスクリプトで自動的に集めています。さらにPythonプログラムが各動画のHPバーを何度も撮影し、火事場が発動していたかを自動で判定します。",
-  "In very rare cases Heroics is not detected – an extra ratio check catches these suspiciously fast runs. If a run is still listed wrongly, please tell me on X:": "ごくまれに火事場を検出できないことがありますが、不自然に速い記録は追加の「レシオチェック」で見つけています。それでも誤った記録があれば、Xで教えてください：",
+  "New runs are found automatically by an API script that reads YouTube. Heroics is checked by hand.": "新しい記録は、YouTubeを読み取るAPIスクリプトで自動的に集めています。火事場は手動で確認しています。",
+  "If Heroics is missed, an extra ratio check catches these suspiciously fast runs. If a run is still listed wrongly, please tell me on X:": "火事場の見落としがあっても、不自然に速い記録は追加の「レシオチェック」で見つけています。それでも誤った記録があれば、Xで教えてください：",
   "Every run is checked by hand – in this order of priority:": "すべての記録は手動で確認しています。優先順位は次のとおりです：",
   "Weapons with no run yet in the quest": "そのクエストでまだ記録がない武器",
   "New best times": "新しい最速タイム",
@@ -2027,7 +2027,7 @@ const JA = {
   "This is nothing unusual: in athletics, the all-time lists of the best performances show the same athlete several times – Usain Bolt holds several of the fastest 100 m times ever. And in Japanese game centers, the in-store ranking of an arcade game often shows the same regular player in several spots.": "これは珍しいことではありません。陸上競技の歴代記録（パフォーマンス）リストでは同じ選手が何度も登場し、100m走の歴代最速タイムのうち複数をウサイン・ボルトが持っています。また、日本のゲームセンターのアーケードゲームの店内ランキングでも、同じ常連プレイヤーが複数の枠を占めていることがよくあります。",
   "All versions": "全バージョン",
   "Report an issue": "問題を報告", "Run": "記録", "Problem": "問題", "Send report": "報告を送信",
-  "Runs are collected semi-automatically: an API script reads the videos from YouTube, a Python program detects Heroics from the HP bar, and everything is spot-checked by hand.": "記録は半自動で集めています。APIスクリプトがYouTubeの動画を読み取り、PythonプログラムがHPバーから火事場を判定し、さらに手動で抜き取り確認をしています。",
+  "Runs are collected semi-automatically: an API script reads the videos from YouTube, Heroics and everything else is checked by hand.": "記録は半自動で集めています。APIスクリプトがYouTubeの動画を読み取り、火事場などは手動で確認しています。",
   "If something still doesn't add up with an existing run – wrong time, wrong quest, NPC hunters or additional players in the quest – I'm very grateful for every report!": "それでも掲載中の記録におかしな点があれば（タイムの違い、クエストの違い、クエストにNPCハンターや他のプレイヤーが参加しているなど）、ぜひ教えてください！",
   "Please read the FAQ first before reporting a run – many questions are already answered there.": "記録を報告する前に、まずFAQをお読みください。多くの質問にはすでに回答しています。",
   "Open FAQ": "FAQを開く",
@@ -4214,6 +4214,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V159", when: "19.11.2026 22:10", items: [
+    "Submit / report texts: Heroics is now checked by hand (the automatic HP bar check was removed)." ] },
   { v: "V158", when: "19.11.2026 22:00", items: [
     "Submit a run: blocked videos (e.g. several weapons used) are declined right away, with the reason." ] },
   { v: "V157", when: "18.11.2026 12:05", items: [
