@@ -2058,6 +2058,7 @@ const JA = {
   "The top 3 for {w} ({c}) is not full yet – every time counts.": "{w}（{c}）のトップ3はまだ埋まっていません。どのタイムでも投稿できます。", "Please select a weapon.": "武器を選択してください。",
   "Please enter a YouTube or Niconico link to the run.": "記録のYouTubeまたはニコニコ動画のリンクを入力してください。",
   "This run is already on the leaderboard.": "この記録はすでにランキングに掲載されています。",
+  "This run can't be submitted.": "この記録は申請できません。", "Reason: {r}": "理由：{r}",
   "This run has already been submitted – thank you!": "この記録はすでに投稿されています。ありがとうございます！",
   "Too many submissions right now. Please try again later.": "現在投稿が集中しています。しばらくしてからもう一度お試しください。",
   "Something went wrong. Please try again later.": "エラーが発生しました。しばらくしてからもう一度お試しください。",
@@ -4213,6 +4214,8 @@ document.fonts?.ready.then(fitRows);
 /* ---------- info + changelog ----------
    New version = new entry at the TOP of this list. Times are Europe/Berlin. */
 const CHANGELOG = [
+  { v: "V158", when: "19.11.2026 22:00", items: [
+    "Submit a run: blocked videos (e.g. several weapons used) are declined right away, with the reason." ] },
   { v: "V157", when: "18.11.2026 12:05", items: [
     "By quest / By weapon: \"Top 3\" is now the default and comes first, \"Best time\" second." ] },
   { v: "V156", when: "18.11.2026 12:00", items: [
@@ -4768,6 +4771,9 @@ function fillSubmitQuests(sel) {
         say(tr("Thank you! Your run was submitted and will be checked soon."), "ok");
         document.getElementById("sTime").value = ""; document.getElementById("sLink").value = ""; document.getElementById("sNote").value = "";
         gcEvent("submit-run", "Run submitted");
+      } else if (out.code === "blocked") {
+        // video was blocked by the site (e.g. several weapons used) – show the reason
+        say(tr("This run can't be submitted.") + (out.reason ? " " + tr("Reason: {r}", { r: out.reason }) : ""), "err");
       } else say(tr(MSG[out.code] || "Something went wrong. Please try again later."), "err");
     } catch (err) { say(tr("Something went wrong. Please try again later."), "err"); }
     send.disabled = false;
